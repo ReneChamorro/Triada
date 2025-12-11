@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  /* Triada Color Palette */
+  --triada-green-dark: #1a5744;
+  --triada-green: #2d7a5f;
+  --triada-green-light: #a4c639;
+  --triada-beige: #e8e4d0;
+  --triada-black: #1a1a1a;
+  
+  --background: #ffffff;
+  --foreground: var(--triada-green-dark);
+}
+
+@theme inline {
+  /* Triada Brand Colors */
+  --color-triada-dark: #1a5744;
+  --color-triada: #2d7a5f;
+  --color-triada-light: #a4c639;
+  --color-triada-beige: #e8e4d0;
+  
+  /* Primary colors mapped to Triada green */
+  --color-primary: var(--triada-green);
+  --color-primary-dark: var(--triada-green-dark);
+  --color-primary-light: var(--triada-green-light);
+  
+  /* Accent color - lime green from logo */
+  --color-accent: var(--triada-green-light);
+  
+  /* Neutral colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
