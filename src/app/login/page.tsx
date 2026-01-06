@@ -21,19 +21,49 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const supabase = createClient()
+    try {
+      const supabase = createClient()
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (error) {
-      setError(error.message)
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+
+      if (!authData.user) {
+        setError('Error al iniciar sesión')
+        setLoading(false)
+        return
+      }
+
+      // Check user role for redirect
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single()
+
+      console.log('Login - User role:', profile?.role)
+
+      // Redirect based on role - using window.location to force navigation
+      if (profile?.role === 'admin' || profile?.role === 'teacher') {
+        console.log('Redirecting to /admin')
+        window.location.href = '/admin'
+        return
+      } else {
+        console.log('Redirecting to', redirect)
+        window.location.href = redirect
+        return
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Error al iniciar sesión')
       setLoading(false)
-    } else {
-      router.push(redirect)
-      router.refresh()
     }
   }
 
@@ -103,7 +133,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#2d7a5f] text-white py-3 rounded-lg font-semibold hover:bg-[#1a5744] focus:outline-none focus:ring-2 focus:ring-[#2d7a5f] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#a4c639] text-white py-3 rounded-lg font-semibold hover:bg-[#2d7a5f] focus:outline-none focus:ring-2 focus:ring-[#a4c639] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Ingresando...' : 'Iniciar Sesión'}
             </button>

@@ -128,7 +128,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
         <div className="bg-gray-50 p-6 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="w-full bg-[#2d7a5f] text-white hover:bg-[#1a5744] px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-semibold transition-colors"
           >
             Cerrar
           </button>

@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { GraduationCap, BookOpen, Settings, LogOut } from 'lucide-react'
+import { BookOpen, Mail, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import StatsCard from '@/components/StatsCard'
+import Footer from '@/components/Footer'
+import DashboardHeader from '@/components/DashboardHeader'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,139 +28,83 @@ export default async function DashboardPage() {
     .limit(3)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#e8e4d0]">
       {/* Navigation */}
-      <nav className="border-b bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">Triada</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/courses" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Explorar Cursos
-              </Link>
-              <Link 
-                href="/my-courses" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Mis Cursos
-              </Link>
-              {profile?.is_admin && (
-                <Link 
-                  href="/admin" 
-                  className="bg-purple-600 text-white hover:bg-purple-700 px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Admin
-                </Link>
-              )}
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Salir
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <DashboardHeader profile={profile} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Hola, {profile?.name || 'Estudiante'}! 👋
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#1a5744] mb-4">
+            ¡Bienvenido, {profile?.full_name || 'Estudiante'}!
           </h1>
-          <p className="text-gray-600">
-            Bienvenido a tu panel de aprendizaje
+          <p className="text-lg text-[#1a5744]/70 mb-8">
+            Continúa tu aprendizaje y alcanza tus metas profesionales
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Mis Cursos</p>
-                <p className="text-3xl font-bold text-gray-900">{coursesCount || 0}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Email</p>
-                <p className="text-sm font-medium text-gray-900">{user.email}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <Settings className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Miembro desde</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {new Date(profile?.created_at || '').toLocaleDateString('es-ES', {
-                    month: 'short',
-                    year: 'numeric'
-                  })}
-                </p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <GraduationCap className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
+        {/* Stats Cards - Similar a landing */}
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
+          <StatsCard
+            icon={BookOpen}
+            title="Mis Cursos"
+            value={coursesCount || 0}
+            subtitle="Cursos inscritos"
+            bgColor="bg-[#a4c639]"
+          />
+          <StatsCard
+            icon={Mail}
+            title="Email"
+            value={user.email?.split('@')[0] || 'Usuario'}
+            subtitle={user.email || ''}
+            bgColor="bg-[#2d7a5f]"
+          />
+          <StatsCard
+            icon={Calendar}
+            title="Miembro desde"
+            value={new Date(profile?.created_at).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}
+            subtitle="Fecha de registro"
+            bgColor="bg-[#1a5744]"
+          />
         </div>
 
-        {/* Recent Courses */}
-        <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Cursos Recientes</h2>
+        {/* Cursos Section */}
+        <div>
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-[#1a5744]">Tus Cursos</h2>
             <Link 
-              href="/my-courses" 
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+              href="/courses" 
+              className="bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-medium transition-colors"
             >
-              Ver todos →
+              Explorar más cursos
             </Link>
           </div>
 
           {userCourses && userCourses.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-8">
               {userCourses.map((uc: any) => (
                 <Link
                   key={uc.id}
                   href={`/courses/${uc.courses.id}/learn`}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                  className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
                 >
-                  <div className="h-40 bg-gradient-to-br from-blue-400 to-purple-500" />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">
+                  <div className="h-48 bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
+                    <BookOpen className="h-16 w-16 text-white opacity-50" />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-[#1a5744] mb-3 group-hover:text-[#2d7a5f] transition-colors">
                       {uc.courses.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {uc.courses.short_description}
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {uc.courses.short_description || 'Continúa aprendiendo'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-blue-600 font-medium">
+                      <span className="text-sm text-[#a4c639] font-semibold">
                         Continuar →
                       </span>
-                      <span className="text-xs text-gray-500">
-                        {uc.progress_percentage}% completado
+                      <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                        {uc.progress_percentage || 0}%
                       </span>
                     </div>
                   </div>
@@ -165,17 +112,17 @@ export default async function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-              <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            <div className="bg-white rounded-2xl shadow-lg p-16 text-center">
+              <BookOpen className="h-20 w-20 text-[#a4c639] mx-auto mb-6" />
+              <h3 className="text-2xl font-bold text-[#1a5744] mb-3">
                 Aún no tienes cursos
               </h3>
-              <p className="text-gray-600 mb-6">
-                Explora nuestro catálogo y comienza tu viaje de aprendizaje
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Explora nuestro catálogo y comienza tu viaje de aprendizaje con los mejores instructores
               </p>
               <Link
                 href="/courses"
-                className="inline-block bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold"
+                className="inline-block bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
               >
                 Explorar Cursos
               </Link>
@@ -183,6 +130,9 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

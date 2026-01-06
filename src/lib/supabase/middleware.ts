@@ -53,11 +53,13 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/admin') && user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('is_admin')
+      .select('role')
       .eq('id', user.id)
       .single()
 
-    if (!profile?.is_admin) {
+    // Only admin and teacher can access admin routes
+    const allowedRoles = ['admin', 'teacher']
+    if (!profile || !allowedRoles.includes(profile.role)) {
       // Redirect non-admins away from admin routes
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'

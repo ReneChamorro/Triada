@@ -188,7 +188,7 @@ export default async function CourseDetailPage({
                 <div className="space-y-3">
                   <Link
                     href={`/register?redirect=/courses/${course.id}`}
-                    className="w-full bg-[#2d7a5f] text-white hover:bg-[#1a5744] px-6 py-3 rounded-lg font-semibold text-center block"
+                    className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-semibold text-center block"
                   >
                     Registrarse para Comprar
                   </Link>

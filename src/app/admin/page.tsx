@@ -1,178 +1,284 @@
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { GraduationCap, BookOpen, Users, DollarSign, Settings } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+'use client';
 
-export default async function AdminPage() {
-  const supabase = await createClient()
+import { useEffect, useState } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+import { useRouter } from 'next/navigation';
+import { 
+  BookOpen, 
+  Users, 
+  DollarSign, 
+  TrendingUp,
+  Clock,
+  CheckCircle
+} from 'lucide-react';
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
+interface DashboardStats {
+  totalCourses: number;
+  totalStudents: number;
+  totalRevenue: number;
+  pendingEnrollments: number;
+}
+
+interface RecentCourse {
+  id: string;
+  title: string;
+  enrolled_count: number;
+  created_at: string;
+}
+
+export default function AdminDashboard() {
+  const router = useRouter();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalCourses: 0,
+    totalStudents: 0,
+    totalRevenue: 0,
+    pendingEnrollments: 0,
+  });
+  const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([]);
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  async function checkUser() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      // Check if user is admin or teacher
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      console.log('Admin check - Profile:', profile);
+      console.log('Admin check - Role:', profile?.role);
+      console.log('Admin check - Is admin?', profile?.role === 'admin');
+      console.log('Admin check - Is teacher?', profile?.role === 'teacher');
+
+      // Only allow admin and teacher roles
+      const allowedRoles = ['admin', 'teacher'];
+      if (!profile || !allowedRoles.includes(profile.role)) {
+        console.log('Access denied - redirecting to home');
+        router.push('/');
+        return;
+      }
+
+      console.log('Access granted - loading dashboard');
+      // Load dashboard data
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error checking user:', error);
+      router.push('/login');
+    }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  async function loadDashboardData() {
+    try {
+      // Get total courses
+      const { count: coursesCount } = await supabase
+        .from('courses')
+        .select('*', { count: 'exact', head: true });
 
-  if (!profile?.is_admin) {
-    redirect('/dashboard')
+      // Get total students (unique users enrolled)
+      const { count: studentsCount } = await supabase
+        .from('enrollments')
+        .select('user_id', { count: 'exact', head: true });
+
+      // Get total revenue
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('courses(price)')
+        .eq('payment_status', 'completed');
+
+      const totalRevenue = enrollments?.reduce((sum: number, enrollment: any) => {
+        return sum + (enrollment.courses?.price || 0);
+      }, 0) || 0;
+
+      // Get pending enrollments
+      const { count: pendingCount } = await supabase
+        .from('enrollments')
+        .select('*', { count: 'exact', head: true })
+        .eq('payment_status', 'pending');
+
+      // Get recent courses
+      const { data: courses } = await supabase
+        .from('courses')
+        .select('id, title, enrolled_count, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      setStats({
+        totalCourses: coursesCount || 0,
+        totalStudents: studentsCount || 0,
+        totalRevenue: totalRevenue,
+        pendingEnrollments: pendingCount || 0,
+      });
+
+      setRecentCourses(courses || []);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // Fetch stats
-  const { count: coursesCount } = await supabase
-    .from('courses')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: usersCount } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: purchasesCount } = await supabase
-    .from('purchases')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'completed')
-
-  const { count: pendingZelleCount } = await supabase
-    .from('purchases')
-    .select('*', { count: 'exact', head: true })
-    .eq('payment_method', 'zelle')
-    .eq('status', 'pending')
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#a4c639]"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="border-b bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-purple-600" />
-              <span className="text-2xl font-bold text-gray-900">Triada Admin</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/dashboard" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#1a5744]">Dashboard</h1>
+        <p className="text-gray-600 mt-2">Bienvenido al panel de administración</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Total Courses */}
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#a4c639]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm">Total Cursos</p>
+              <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.totalCourses}</p>
+            </div>
+            <div className="bg-[#a4c639]/10 p-3 rounded-lg">
+              <BookOpen className="w-8 h-8 text-[#a4c639]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Total Students */}
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#2d7a5f]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm">Total Estudiantes</p>
+              <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.totalStudents}</p>
+            </div>
+            <div className="bg-[#2d7a5f]/10 p-3 rounded-lg">
+              <Users className="w-8 h-8 text-[#2d7a5f]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Total Revenue */}
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm">Ingresos Totales</p>
+              <p className="text-3xl font-bold text-[#1a5744] mt-2">
+                ${stats.totalRevenue.toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-green-50 p-3 rounded-lg">
+              <DollarSign className="w-8 h-8 text-green-500" />
+            </div>
+          </div>
+        </div>
+
+        {/* Pending Enrollments */}
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm">Pagos Pendientes</p>
+              <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.pendingEnrollments}</p>
+            </div>
+            <div className="bg-orange-50 p-3 rounded-lg">
+              <Clock className="w-8 h-8 text-orange-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Courses */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-[#1a5744]">Cursos Recientes</h2>
+        </div>
+        <div className="p-6">
+          {recentCourses.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 mb-4">No hay cursos creados aún</p>
+              <button
+                onClick={() => router.push('/admin/courses/new')}
+                className="bg-[#a4c639] text-white px-6 py-2 rounded-lg hover:bg-[#2d7a5f] transition-colors"
               >
-                Mi Dashboard
-              </Link>
-              <Link 
-                href="/my-courses" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Mis Cursos
-              </Link>
+                Crear Primer Curso
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              {recentCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#a4c639] transition-colors cursor-pointer"
+                  onClick={() => router.push(`/admin/courses/${course.id}`)}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-[#a4c639]/10 p-2 rounded-lg">
+                      <BookOpen className="w-5 h-5 text-[#a4c639]" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[#1a5744]">{course.title}</h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(course.created_at).toLocaleDateString('es-MX')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Estudiantes</p>
+                      <p className="font-semibold text-[#1a5744]">{course.enrolled_count}</p>
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-[#a4c639]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </nav>
+      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Panel de Administración
-          </h1>
-          <p className="text-gray-600">
-            Gestiona cursos, usuarios y pagos
-          </p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Cursos</p>
-                <p className="text-3xl font-bold text-gray-900">{coursesCount || 0}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Usuarios</p>
-                <p className="text-3xl font-bold text-gray-900">{usersCount || 0}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <Users className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Ventas Totales</p>
-                <p className="text-3xl font-bold text-gray-900">{purchasesCount || 0}</p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <DollarSign className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Zelle Pendientes</p>
-                <p className="text-3xl font-bold text-red-600">{pendingZelleCount || 0}</p>
-              </div>
-              <div className="bg-red-100 p-3 rounded-full">
-                <Settings className="h-6 w-6 text-red-600" />
-              </div>
-            </div>
-          </div>
+      {/* Quick Actions */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] rounded-lg shadow p-6 text-white">
+          <h3 className="text-xl font-bold mb-2">Crear Nuevo Curso</h3>
+          <p className="mb-4 opacity-90">Agrega un nuevo curso a la plataforma</p>
+          <button
+            onClick={() => router.push('/admin/courses/new')}
+            className="bg-white text-[#1a5744] px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Crear Curso
+          </button>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6">
-          <Link
-            href="/admin/courses"
-            className="bg-white rounded-lg shadow-sm p-8 hover:shadow-md transition-shadow text-center"
+        <div className="bg-gradient-to-br from-[#2d7a5f] to-[#1a5744] rounded-lg shadow p-6 text-white">
+          <h3 className="text-xl font-bold mb-2">Gestionar Usuarios</h3>
+          <p className="mb-4 opacity-90">Ver y administrar estudiantes</p>
+          <button
+            onClick={() => router.push('/admin/usuarios')}
+            className="bg-white text-[#1a5744] px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
           >
-            <BookOpen className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Gestionar Cursos
-            </h3>
-            <p className="text-sm text-gray-600">
-              Crear, editar y eliminar cursos
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/users"
-            className="bg-white rounded-lg shadow-sm p-8 hover:shadow-md transition-shadow text-center"
-          >
-            <Users className="h-12 w-12 text-green-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Gestionar Usuarios
-            </h3>
-            <p className="text-sm text-gray-600">
-              Ver y administrar usuarios
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/payments"
-            className="bg-white rounded-lg shadow-sm p-8 hover:shadow-md transition-shadow text-center"
-          >
-            <DollarSign className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Gestionar Pagos
-            </h3>
-            <p className="text-sm text-gray-600">
-              Ver pagos y aprobar Zelle
-            </p>
-          </Link>
+            Ver Usuarios
+          </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

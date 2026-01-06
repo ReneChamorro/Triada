@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, Filter, BookOpen, GraduationCap, ArrowRight } from 'lucide-react'
+import { Search, Filter, BookOpen, ArrowRight } from 'lucide-react'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import CourseCard from '@/components/CourseCard'
 import { createClient } from '@/lib/supabase/client'
 
 export default function CoursesPage() {
@@ -75,6 +78,8 @@ export default function CoursesPage() {
   useEffect(() => {
     async function fetchCourses() {
       const supabase = createClient()
+      
+      // Fetch courses
       const { data } = await supabase
         .from('courses')
         .select('*')
@@ -115,53 +120,15 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <Link href="/" className="flex items-center space-x-3">
-              <GraduationCap className="h-10 w-10 text-[#2d7a5f]" />
-              <div>
-                <span className="text-2xl font-bold text-[#1a5744] block">TRIADA</span>
-                <span className="text-xs text-gray-600">Global, Docencia e Investigación</span>
-              </div>
-            </Link>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link 
-                href="/" 
-                className="text-gray-700 hover:text-[#2d7a5f] font-medium transition-colors"
-              >
-                Inicio
-              </Link>
-              <Link 
-                href="/courses" 
-                className="text-[#2d7a5f] font-medium"
-              >
-                Cursos
-              </Link>
-              <Link 
-                href="/login" 
-                className="text-gray-700 hover:text-[#2d7a5f] font-medium transition-colors"
-              >
-                Iniciar Sesión
-              </Link>
-              <Link 
-                href="/register" 
-                className="bg-[#2d7a5f] text-white hover:bg-[#1a5744] px-6 py-2.5 rounded-md font-medium transition-colors"
-              >
-                Comenzar
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header currentPage="courses" />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#1a5744] to-[#2d7a5f] py-16">
+      <section className="bg-[#e8e4d0] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#1a5744] mb-4">
             Catálogo de Cursos
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+          <p className="text-xl text-[#1a5744]/80 max-w-2xl mx-auto">
             Encuentra el curso perfecto para tu desarrollo profesional
           </p>
         </div>
@@ -271,48 +238,7 @@ export default function CoursesPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1a5744] text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <GraduationCap className="h-8 w-8 text-[#a4c639]" />
-                <span className="text-xl font-bold">TRIADA</span>
-              </div>
-              <p className="text-[#e8e4d0] text-sm">
-                Global, Docencia e Investigación. Transformando profesionales a través de la educación.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4 text-[#a4c639]">Cursos</h4>
-              <ul className="space-y-2 text-sm text-[#e8e4d0]">
-                <li><Link href="/courses" className="hover:text-white transition-colors">Ver Todos</Link></li>
-                <li><Link href="/courses" className="hover:text-white transition-colors">Programas</Link></li>
-                <li><Link href="/courses" className="hover:text-white transition-colors">Certificaciones</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4 text-[#a4c639]">Empresa</h4>
-              <ul className="space-y-2 text-sm text-[#e8e4d0]">
-                <li><Link href="/" className="hover:text-white transition-colors">Inicio</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Contacto</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4 text-[#a4c639]">Legal</h4>
-              <ul className="space-y-2 text-sm text-[#e8e4d0]">
-                <li><Link href="#" className="hover:text-white transition-colors">Términos</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Privacidad</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Cookies</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-[#2d7a5f] pt-8 text-center text-sm text-[#e8e4d0]">
-            <p>&copy; 2025 Triada Global. Todos los derechos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
