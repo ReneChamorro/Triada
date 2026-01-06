@@ -10,7 +10,8 @@ const MAX_REQUESTS = 60 // 60 requests por minuto por IP
 
 function getRateLimitKey(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : request.ip || 'unknown'
+  const realIp = request.headers.get('x-real-ip')
+  const ip = forwarded ? forwarded.split(',')[0].trim() : realIp || 'unknown'
   return `rate_limit:${ip}`
 }
 
