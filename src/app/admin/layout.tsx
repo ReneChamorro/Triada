@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, BookOpen, Users, Settings, LogOut } from 'lucide-react'
 
@@ -25,12 +26,14 @@ export default function AdminLayout({
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-white/10">
-            <Link href="/admin" className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8" />
-              <div>
-                <h1 className="text-xl font-bold">TRIADA Admin</h1>
-                <p className="text-xs text-white/70">Panel de Control</p>
-              </div>
+            <Link href="/admin" className="flex items-center justify-center">
+              <Image 
+                src="/logos/Triada-logo-dark-mode.png" 
+                alt="Triada Admin" 
+                width={160} 
+                height={60}
+                className="h-12 w-auto"
+              />
             </Link>
           </div>
 

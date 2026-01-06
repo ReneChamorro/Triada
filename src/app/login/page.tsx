@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -68,18 +68,42 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2">
-            <GraduationCap className="h-12 w-12 text-[#2d7a5f]" />
-            <span className="text-3xl font-bold text-[#1a5744]">Triada</span>
-          </Link>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Fondo con ola beige y verde */}
+      <div className="absolute inset-0 bg-[#F5E6D3]">
+        <svg 
+          className="absolute bottom-0 w-full h-[35%]" 
+          viewBox="0 0 1440 320" 
+          preserveAspectRatio="none"
+          style={{ minHeight: '200px' }}
+        >
+          <path 
+            fill="#a4c639" 
+            fillOpacity="1" 
+            d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,101.3C1248,85,1344,75,1392,69.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
+      </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+      {/* Contenido */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center justify-center">
+              <Image 
+                src="/logos/Triada-logo-mono-green.png" 
+                alt="Triada Logo" 
+                width={240} 
+                height={80}
+                priority
+                className="h-20 w-auto drop-shadow-md"
+              />
+            </Link>
+          </div>
+
+          {/* Card */}
+          <div className="bg-white rounded-2xl shadow-2xl p-8 backdrop-blur-sm border border-gray-100">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Bienvenido de nuevo
@@ -133,7 +157,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#a4c639] text-white py-3 rounded-lg font-semibold hover:bg-[#2d7a5f] focus:outline-none focus:ring-2 focus:ring-[#a4c639] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#a4c639] text-white py-3 rounded-lg font-semibold hover:bg-[#8ba832] focus:outline-none focus:ring-2 focus:ring-[#a4c639] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Ingresando...' : 'Iniciar Sesión'}
             </button>
@@ -144,7 +168,7 @@ export default function LoginPage() {
               ¿No tienes cuenta?{' '}
               <Link 
                 href={`/register${redirect !== '/dashboard' ? `?redirect=${redirect}` : ''}`}
-                className="text-[#2d7a5f] hover:text-[#1a5744] font-semibold"
+                className="text-[#a4c639] hover:text-[#8ba832] font-semibold transition-colors"
               >
                 Regístrate
               </Link>
@@ -153,10 +177,11 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/" className="text-gray-600 hover:text-gray-900">
+          <Link href="/" className="text-gray-700 hover:text-[#a4c639] transition-colors font-medium">
             ← Volver al inicio
           </Link>
         </div>
+      </div>
       </div>
     </div>
   )

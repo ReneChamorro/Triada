@@ -5,18 +5,12 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { 
   BookOpen, 
-  Users, 
-  DollarSign, 
-  TrendingUp,
-  Clock,
-  CheckCircle
+  DollarSign
 } from 'lucide-react';
 
 interface DashboardStats {
   totalCourses: number;
-  totalStudents: number;
   totalRevenue: number;
-  pendingEnrollments: number;
 }
 
 interface RecentCourse {
@@ -35,9 +29,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalCourses: 0,
-    totalStudents: 0,
     totalRevenue: 0,
-    pendingEnrollments: 0,
   });
   const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([]);
 
@@ -90,11 +82,6 @@ export default function AdminDashboard() {
         .from('courses')
         .select('*', { count: 'exact', head: true });
 
-      // Get total students (unique users enrolled)
-      const { count: studentsCount } = await supabase
-        .from('enrollments')
-        .select('user_id', { count: 'exact', head: true });
-
       // Get total revenue
       const { data: enrollments } = await supabase
         .from('enrollments')
@@ -105,12 +92,6 @@ export default function AdminDashboard() {
         return sum + (enrollment.courses?.price || 0);
       }, 0) || 0;
 
-      // Get pending enrollments
-      const { count: pendingCount } = await supabase
-        .from('enrollments')
-        .select('*', { count: 'exact', head: true })
-        .eq('payment_status', 'pending');
-
       // Get recent courses
       const { data: courses } = await supabase
         .from('courses')
@@ -120,9 +101,7 @@ export default function AdminDashboard() {
 
       setStats({
         totalCourses: coursesCount || 0,
-        totalStudents: studentsCount || 0,
         totalRevenue: totalRevenue,
-        pendingEnrollments: pendingCount || 0,
       });
 
       setRecentCourses(courses || []);
@@ -149,59 +128,58 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Total Courses */}
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#a4c639]">
+        <div className="bg-white rounded-3xl shadow-lg p-6 border-l-4 border-[#a4c639] hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-sm">Total Cursos</p>
+              <p className="text-gray-500 text-sm font-medium">Total Cursos</p>
               <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.totalCourses}</p>
             </div>
-            <div className="bg-[#a4c639]/10 p-3 rounded-lg">
+            <div className="bg-[#a4c639]/10 p-3 rounded-full">
               <BookOpen className="w-8 h-8 text-[#a4c639]" />
             </div>
           </div>
         </div>
 
-        {/* Total Students */}
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#2d7a5f]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Estudiantes</p>
-              <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.totalStudents}</p>
-            </div>
-            <div className="bg-[#2d7a5f]/10 p-3 rounded-lg">
-              <Users className="w-8 h-8 text-[#2d7a5f]" />
-            </div>
-          </div>
-        </div>
-
         {/* Total Revenue */}
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-3xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-sm">Ingresos Totales</p>
+              <p className="text-gray-500 text-sm font-medium">Ingresos Totales</p>
               <p className="text-3xl font-bold text-[#1a5744] mt-2">
                 ${stats.totalRevenue.toLocaleString()}
               </p>
             </div>
-            <div className="bg-green-50 p-3 rounded-lg">
+            <div className="bg-green-50 p-3 rounded-full">
               <DollarSign className="w-8 h-8 text-green-500" />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Pending Enrollments */}
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Pagos Pendientes</p>
-              <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.pendingEnrollments}</p>
-            </div>
-            <div className="bg-orange-50 p-3 rounded-lg">
-              <Clock className="w-8 h-8 text-orange-500" />
-            </div>
-          </div>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-[#a4c639] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h3 className="text-xl font-bold mb-2 text-gray-900">Crear Nuevo Curso</h3>
+          <p className="mb-4 text-gray-800">Agrega un nuevo curso a la plataforma</p>
+          <button
+            onClick={() => router.push('/admin/courses/new')}
+            className="bg-[#F5E6D3] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#e8d4bb] transition-colors"
+          >
+            Crear Curso
+          </button>
+        </div>
+
+        <div className="bg-[#F5E6D3] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h3 className="text-xl font-bold mb-2 text-gray-900">Gestionar Usuarios</h3>
+          <p className="mb-4 text-gray-800">Ver y administrar estudiantes</p>
+          <button
+            onClick={() => router.push('/admin/usuarios')}
+            className="bg-[#a4c639] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#8ba832] transition-colors"
+          >
+            Ver Usuarios
+          </button>
         </div>
       </div>
 
@@ -246,37 +224,11 @@ export default function AdminDashboard() {
                       <p className="text-sm text-gray-500">Estudiantes</p>
                       <p className="font-semibold text-[#1a5744]">{course.enrolled_count}</p>
                     </div>
-                    <TrendingUp className="w-5 h-5 text-[#a4c639]" />
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] rounded-lg shadow p-6 text-white">
-          <h3 className="text-xl font-bold mb-2">Crear Nuevo Curso</h3>
-          <p className="mb-4 opacity-90">Agrega un nuevo curso a la plataforma</p>
-          <button
-            onClick={() => router.push('/admin/courses/new')}
-            className="bg-white text-[#1a5744] px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Crear Curso
-          </button>
-        </div>
-
-        <div className="bg-gradient-to-br from-[#2d7a5f] to-[#1a5744] rounded-lg shadow p-6 text-white">
-          <h3 className="text-xl font-bold mb-2">Gestionar Usuarios</h3>
-          <p className="mb-4 opacity-90">Ver y administrar estudiantes</p>
-          <button
-            onClick={() => router.push('/admin/usuarios')}
-            className="bg-white text-[#1a5744] px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Ver Usuarios
-          </button>
         </div>
       </div>
     </div>

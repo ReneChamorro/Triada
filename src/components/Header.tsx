@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface HeaderProps {
@@ -76,12 +76,15 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <Link href="/" className="flex items-center space-x-3">
-            <GraduationCap className="h-10 w-10 text-[#2d7a5f]" />
-            <div>
-              <span className="text-2xl font-bold text-[#1a5744] block">TRIADA</span>
-              <span className="text-xs text-gray-600">Global, Docencia e Investigación</span>
-            </div>
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/logos/Triada-logo-mono-green.png" 
+              alt="Triada Logo" 
+              width={180} 
+              height={60}
+              priority
+              className="h-12 w-auto"
+            />
           </Link>
 
           <div className="hidden md:flex items-center space-x-4">
