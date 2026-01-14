@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { BookOpen, GraduationCap, Users, Award, ArrowRight, PlayCircle, CheckCircle2, Shield, Star } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import AboutModal from '@/components/AboutModal'
@@ -9,22 +10,42 @@ import Footer from '@/components/Footer'
 import CourseCard from '@/components/CourseCard'
 import { createClient } from '@/lib/supabase/client'
 
+interface LandingFeature {
+  id: string
+  title: string
+  description: string
+  icon_url: string | null
+  position: number
+  is_highlighted: boolean
+}
+
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [courses, setCourses] = useState<any[]>([])
+  const [features, setFeatures] = useState<LandingFeature[]>([])
 
   useEffect(() => {
-    async function fetchCourses() {
+    async function fetchData() {
       const supabase = createClient()
-      const { data } = await supabase
+      
+      // Fetch courses
+      const { data: coursesData } = await supabase
         .from('courses')
         .select('*')
         .eq('is_published', true)
         .limit(6)
       
-      if (data) setCourses(data)
+      if (coursesData) setCourses(coursesData)
+
+      // Fetch landing features
+      const { data: featuresData } = await supabase
+        .from('landing_features')
+        .select('*')
+        .order('position')
+      
+      if (featuresData) setFeatures(featuresData)
     }
-    fetchCourses()
+    fetchData()
   }, [])
 
   return (
@@ -59,44 +80,44 @@ export default function HomePage() {
 
           {/* Feature Cards */}
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Card 1 */}
-            <div className="bg-[#e8e4d0] rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-full h-40 bg-white rounded-xl mb-6 flex items-center justify-center">
-                <Award className="h-20 w-20 text-[#2d7a5f]" />
+            {features.map((feature, index) => (
+              <div
+                key={feature.id}
+                className={`${
+                  feature.is_highlighted
+                    ? 'bg-[#a4c639] transform md:-translate-y-4'
+                    : 'bg-[#e8e4d0]'
+                } rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all`}
+              >
+                <div className="w-full h-40 bg-white rounded-xl mb-6 flex items-center justify-center overflow-hidden">
+                  {feature.icon_url ? (
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={feature.icon_url}
+                        alt={feature.title}
+                        fill
+                        className="object-contain p-4"
+                      />
+                    </div>
+                  ) : (
+                    // Fallback icons
+                    index === 0 ? <Award className="h-20 w-20 text-[#2d7a5f]" /> :
+                    index === 1 ? <Users className="h-20 w-20 text-[#2d7a5f]" /> :
+                    <BookOpen className="h-20 w-20 text-[#2d7a5f]" />
+                  )}
+                </div>
+                <h3 className={`text-xl font-bold mb-3 ${
+                  feature.is_highlighted ? 'text-[#1a5744]' : 'text-[#1a5744]'
+                }`}>
+                  {feature.title}
+                </h3>
+                <p className={`text-sm leading-relaxed ${
+                  feature.is_highlighted ? 'text-[#1a5744]' : 'text-gray-700'
+                }`}>
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-[#1a5744] mb-3">
-                Certificación Internacional
-              </h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                Obtén certificados reconocidos que impulsan tu carrera profesional en cualquier parte del mundo
-              </p>
-            </div>
-
-            {/* Card 2 - Highlighted */}
-            <div className="bg-[#a4c639] rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow transform md:-translate-y-4">
-              <div className="w-full h-40 bg-white rounded-xl mb-6 flex items-center justify-center">
-                <Users className="h-20 w-20 text-[#2d7a5f]" />
-              </div>
-              <h3 className="text-xl font-bold text-[#1a5744] mb-3">
-                Instructores Expertos
-              </h3>
-              <p className="text-[#1a5744] text-sm leading-relaxed">
-                Aprende de profesionales con años de experiencia en el campo y metodologías probadas
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-[#e8e4d0] rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-full h-40 bg-white rounded-xl mb-6 flex items-center justify-center">
-                <BookOpen className="h-20 w-20 text-[#2d7a5f]" />
-              </div>
-              <h3 className="text-xl font-bold text-[#1a5744] mb-3">
-                Aprende a tu Ritmo
-              </h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                Acceso 24/7 a todo el contenido desde cualquier dispositivo, donde quieras y cuando quieras
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>

@@ -159,7 +159,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-[#a4c639] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <h3 className="text-xl font-bold mb-2 text-gray-900">Crear Nuevo Curso</h3>
           <p className="mb-4 text-gray-800">Agrega un nuevo curso a la plataforma</p>
@@ -179,6 +179,17 @@ export default function AdminDashboard() {
             className="bg-[#a4c639] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#8ba832] transition-colors"
           >
             Ver Usuarios
+          </button>
+        </div>
+
+        <div className="bg-[#1a5744] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h3 className="text-xl font-bold mb-2 text-white">Landing Page</h3>
+          <p className="mb-4 text-white/90">Editar página principal</p>
+          <button
+            onClick={() => router.push('/admin/landing')}
+            className="bg-[#a4c639] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#8ba832] transition-colors"
+          >
+            Configurar
           </button>
         </div>
       </div>
