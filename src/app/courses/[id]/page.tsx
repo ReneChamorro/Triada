@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { GraduationCap, Clock, CheckCircle } from 'lucide-react'
+import { GraduationCap, Clock, BookOpen } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 
@@ -133,35 +133,25 @@ export default async function CourseDetailPage({
                   y avanzar en tu carrera profesional.
                 </p>
               )}
-
-              <div className="mt-8 pt-8 border-t">
-                <h3 className="text-xl font-bold mb-4">Lo que aprenderás</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Conceptos fundamentales y avanzados del tema</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Ejercicios prácticos y proyectos reales</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Técnicas y mejores prácticas de la industria</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Acceso de por vida al contenido del curso</span>
-                  </li>
-                </ul>
-              </div>
             </div>
           </div>
 
           {/* Sidebar - Purchase Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-6">
-              <div className="aspect-video bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4" />
+              <div className="aspect-video bg-white rounded-lg mb-4 overflow-hidden border border-gray-200">
+                {course.image_url ? (
+                  <img
+                    src={course.image_url}
+                    alt={course.title}
+                    className="w-full h-full object-contain p-4"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
+                    <BookOpen className="h-16 w-16 text-white" />
+                  </div>
+                )}
+              </div>
               
               <div className="mb-6">
                 <div className="text-3xl font-bold text-gray-900 mb-2">
