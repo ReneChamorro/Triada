@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { GraduationCap, Clock, BookOpen } from 'lucide-react'
+import { GraduationCap, Clock, BookOpen, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 
