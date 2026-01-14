@@ -1,276 +1,526 @@
-'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { GraduationCap, Loader2, AlertCircle } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+'use client';
 
-export default function CourseLearningPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const router = useRouter()
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [courseId, setCourseId] = useState('')
-  const [course, setCourse] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [hasAccess, setHasAccess] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [watermarkText, setWatermarkText] = useState('')
+import { useState, useEffect } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+import { useRouter, useParams } from 'next/navigation';
+import { 
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  Circle,
+  Menu,
+  X,
+  PlayCircle,
+  FileText,
+  Download,
+  ArrowLeft
+} from 'lucide-react';
+import Link from 'next/link';
+
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+  position: number;
+  lessons: Lesson[];
+}
+
+interface Lesson {
+  id: string;
+  module_id: string;
+  title: string;
+  description: string;
+  content_type: 'video' | 'pdf' | 'text';
+  video_url: string | null;
+  pdf_url: string | null;
+  text_content: string | null;
+  duration_minutes: number;
+  position: number;
+  is_completed?: boolean;
+}
+
+export default function LearnCoursePage() {
+  const router = useRouter();
+  const params = useParams();
+  const courseId = params.id as string;
+  
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const [course, setCourse] = useState<any>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const resolvedParams = await params
-      setCourseId(resolvedParams.id)
+    checkAccessAndLoadData();
+  }, [courseId]);
 
-      const supabase = createClient()
-
+  async function checkAccessAndLoadData() {
+    try {
       // Check authentication
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push(`/login?redirect=/courses/${resolvedParams.id}/learn`)
-        return
-      }
-      setUser(user)
-
-      // Fetch user profile for watermark
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email, name, lastname')
-        .eq('id', user.id)
-        .single()
-
-      if (profile) {
-        setWatermarkText(`${profile.email} • ${profile.name || ''} ${profile.lastname || ''}`.trim())
+      const { data: { user: userData } } = await supabase.auth.getUser();
+      
+      if (!userData) {
+        router.push(`/login?redirect=/courses/${courseId}/learn`);
+        return;
       }
 
-      // Check if user has access to this course
+      setUser(userData);
+
+      // Check if user has access to the course
       const { data: userCourse } = await supabase
         .from('user_courses')
-        .select('id, last_accessed_at')
-        .eq('user_id', user.id)
-        .eq('course_id', resolvedParams.id)
-        .single()
+        .select('*')
+        .eq('user_id', userData.id)
+        .eq('course_id', courseId)
+        .single();
 
       if (!userCourse) {
-        router.push(`/courses/${resolvedParams.id}`)
-        return
+        router.push(`/courses/${courseId}`);
+        return;
       }
 
-      setHasAccess(true)
+      setHasAccess(true);
 
-      // Update last accessed timestamp
-      await supabase
-        .from('user_courses')
-        .update({ last_accessed_at: new Date().toISOString() })
-        .eq('id', userCourse.id)
-
-      // Fetch course details
+      // Load course data
       const { data: courseData } = await supabase
         .from('courses')
         .select('*')
-        .eq('id', resolvedParams.id)
-        .single()
+        .eq('id', courseId)
+        .single();
+      
+      if (courseData) setCourse(courseData);
 
-      setCourse(courseData)
-      setLoading(false)
+      // Load modules with lessons
+      const { data: modulesData } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', courseId)
+        .eq('is_published', true)
+        .order('position');
+
+      if (modulesData) {
+        const modulesWithLessons = await Promise.all(
+          modulesData.map(async (module) => {
+            const { data: lessons } = await supabase
+              .from('course_lessons')
+              .select('*')
+              .eq('module_id', module.id)
+              .eq('is_published', true)
+              .order('position');
+            
+            return {
+              ...module,
+              lessons: lessons || []
+            };
+          })
+        );
+        
+        setModules(modulesWithLessons);
+
+        // Set first lesson as current if available
+        if (modulesWithLessons.length > 0 && modulesWithLessons[0].lessons.length > 0) {
+          setCurrentLesson(modulesWithLessons[0].lessons[0]);
+        }
+      }
+
+      // Load completed lessons (for progress tracking - simplified for now)
+      // In Phase 3 we'll implement proper lesson_progress table
+      const completed = new Set<string>();
+      setCompletedLessons(completed);
+
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    fetchData()
-  }, [params, router])
-
-  useEffect(() => {
-    // Disable right-click context menu
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault()
-      return false
+  const selectLesson = (lesson: Lesson) => {
+    setCurrentLesson(lesson);
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
     }
+  };
 
-    // Disable common keyboard shortcuts for screenshots/recording
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Print Screen, F12, Ctrl+Shift+I, Ctrl+S, etc.
-      if (
-        e.key === 'PrintScreen' ||
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-        (e.ctrlKey && e.key === 's') ||
-        (e.metaKey && e.shiftKey && e.key === '3') || // Mac screenshot
-        (e.metaKey && e.shiftKey && e.key === '4') || // Mac screenshot
-        (e.metaKey && e.shiftKey && e.key === '5')  // Mac screenshot
-      ) {
-        e.preventDefault()
-        return false
+  const markAsCompleted = () => {
+    if (!currentLesson) return;
+    
+    const newCompleted = new Set(completedLessons);
+    newCompleted.add(currentLesson.id);
+    setCompletedLessons(newCompleted);
+    
+    // TODO: Save to database in Phase 3 (lesson_progress table)
+  };
+
+  const goToNextLesson = () => {
+    if (!currentLesson) return;
+
+    // Find current lesson index
+    let found = false;
+    for (const module of modules) {
+      const lessonIndex = module.lessons.findIndex(l => l.id === currentLesson.id);
+      
+      if (lessonIndex !== -1) {
+        // Check if there's a next lesson in this module
+        if (lessonIndex < module.lessons.length - 1) {
+          setCurrentLesson(module.lessons[lessonIndex + 1]);
+          found = true;
+          break;
+        } else {
+          // Check next module
+          const moduleIndex = modules.findIndex(m => m.id === module.id);
+          if (moduleIndex < modules.length - 1) {
+            const nextModule = modules[moduleIndex + 1];
+            if (nextModule.lessons.length > 0) {
+              setCurrentLesson(nextModule.lessons[0]);
+              found = true;
+              break;
+            }
+          }
+        }
       }
     }
 
-    // Detect DevTools
-    const detectDevTools = () => {
-      const threshold = 160
-      if (
-        window.outerWidth - window.innerWidth > threshold ||
-        window.outerHeight - window.innerHeight > threshold
-      ) {
-        // DevTools detected - could blur content or show warning
-        document.body.style.filter = 'blur(5px)'
-      } else {
-        document.body.style.filter = 'none'
+    if (found && !completedLessons.has(currentLesson.id)) {
+      markAsCompleted();
+    }
+  };
+
+  const goToPreviousLesson = () => {
+    if (!currentLesson) return;
+
+    for (const module of modules) {
+      const lessonIndex = module.lessons.findIndex(l => l.id === currentLesson.id);
+      
+      if (lessonIndex !== -1) {
+        // Check if there's a previous lesson in this module
+        if (lessonIndex > 0) {
+          setCurrentLesson(module.lessons[lessonIndex - 1]);
+          break;
+        } else {
+          // Check previous module
+          const moduleIndex = modules.findIndex(m => m.id === module.id);
+          if (moduleIndex > 0) {
+            const prevModule = modules[moduleIndex - 1];
+            if (prevModule.lessons.length > 0) {
+              setCurrentLesson(prevModule.lessons[prevModule.lessons.length - 1]);
+              break;
+            }
+          }
+        }
       }
     }
+  };
 
-    document.addEventListener('contextmenu', handleContextMenu)
-    document.addEventListener('keydown', handleKeyDown)
-    const devToolsInterval = setInterval(detectDevTools, 1000)
-
-    return () => {
-      document.removeEventListener('contextmenu', handleContextMenu)
-      document.removeEventListener('keydown', handleKeyDown)
-      clearInterval(devToolsInterval)
-      document.body.style.filter = 'none'
+  const canGoNext = () => {
+    if (!currentLesson) return false;
+    
+    for (let i = 0; i < modules.length; i++) {
+      const lessonIndex = modules[i].lessons.findIndex(l => l.id === currentLesson.id);
+      if (lessonIndex !== -1) {
+        return lessonIndex < modules[i].lessons.length - 1 || i < modules.length - 1;
+      }
     }
-  }, [])
+    return false;
+  };
+
+  const canGoPrevious = () => {
+    if (!currentLesson) return false;
+    
+    for (let i = 0; i < modules.length; i++) {
+      const lessonIndex = modules[i].lessons.findIndex(l => l.id === currentLesson.id);
+      if (lessonIndex !== -1) {
+        return lessonIndex > 0 || i > 0;
+      }
+    }
+    return false;
+  };
+
+  const calculateProgress = () => {
+    const totalLessons = modules.reduce((acc, module) => acc + module.lessons.length, 0);
+    if (totalLessons === 0) return 0;
+    return Math.round((completedLessons.size / totalLessons) * 100);
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#a4c639]"></div>
       </div>
-    )
+    );
   }
 
-  if (!hasAccess || !course) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600 mb-4">No tienes acceso a este curso</p>
-          <Link href="/courses" className="text-blue-600 hover:underline">
-            Ver cursos disponibles
-          </Link>
-        </div>
-      </div>
-    )
+  if (!hasAccess) {
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Navigation */}
-      <nav className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            <Link href="/my-courses" className="flex items-center space-x-2 text-white">
-              <GraduationCap className="h-6 w-6" />
-              <span className="font-bold">Triada</span>
+    <div className="flex h-screen bg-gray-900">
+      {/* Sidebar */}
+      <aside
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } fixed lg:relative lg:translate-x-0 z-30 w-80 h-full bg-gray-800 transition-transform duration-300 ease-in-out flex flex-col`}
+      >
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <Link
+              href={`/courses/${courseId}`}
+              className="flex items-center space-x-2 text-gray-400 hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm">Volver al curso</span>
             </Link>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-300 text-sm">{course.title}</span>
-              <Link 
-                href="/my-courses" 
-                className="text-gray-300 hover:text-white text-sm"
-              >
-                Mis Cursos
-              </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden text-gray-400 hover:text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <h2 className="text-white font-bold text-lg line-clamp-2">
+            {course?.title}
+          </h2>
+          <div className="mt-3">
+            <div className="flex justify-between text-sm text-gray-400 mb-1">
+              <span>Progreso del curso</span>
+              <span>{calculateProgress()}%</span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-[#a4c639] h-2 rounded-full transition-all duration-300"
+                style={{ width: `${calculateProgress()}%` }}
+              />
             </div>
           </div>
         </div>
-      </nav>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
-          {course.description && (
-            <p className="text-gray-300">{course.description}</p>
+        {/* Module List */}
+        <div className="flex-1 overflow-y-auto">
+          {modules.map((module, moduleIndex) => (
+            <div key={module.id} className="border-b border-gray-700">
+              <div className="p-4 bg-gray-750">
+                <h3 className="text-white font-semibold text-sm">
+                  Módulo {moduleIndex + 1}: {module.title}
+                </h3>
+              </div>
+              <div>
+                {module.lessons.map((lesson, lessonIndex) => {
+                  const isActive = currentLesson?.id === lesson.id;
+                  const isCompleted = completedLessons.has(lesson.id);
+                  
+                  return (
+                    <button
+                      key={lesson.id}
+                      onClick={() => selectLesson(lesson)}
+                      className={`w-full text-left p-4 flex items-start space-x-3 transition-colors ${
+                        isActive
+                          ? 'bg-[#a4c639] text-white'
+                          : 'text-gray-300 hover:bg-gray-700'
+                      }`}
+                    >
+                      <div className="flex-shrink-0 mt-0.5">
+                        {isCompleted ? (
+                          <CheckCircle className="w-5 h-5 text-green-400" />
+                        ) : (
+                          <Circle className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium ${isActive ? 'text-white' : ''}`}>
+                          {lessonIndex + 1}. {lesson.title}
+                        </p>
+                        {lesson.duration_minutes > 0 && (
+                          <p className={`text-xs mt-1 ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                            {lesson.duration_minutes} min
+                          </p>
+                        )}
+                      </div>
+                      {lesson.content_type === 'video' && (
+                        <PlayCircle className="w-4 h-4 flex-shrink-0" />
+                      )}
+                      {lesson.content_type === 'pdf' && (
+                        <FileText className="w-4 h-4 flex-shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {modules.length === 0 && (
+            <div className="p-8 text-center text-gray-400">
+              <p>Este curso aún no tiene contenido disponible.</p>
+            </div>
           )}
         </div>
+      </aside>
 
-        {/* Video Player with Protection */}
-        <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ userSelect: 'none' }}>
-          {course.video_url ? (
-            <div className="relative aspect-video">
-              <video
-                ref={videoRef}
-                className="w-full h-full"
-                controls
-                controlsList="nodownload noplaybackrate"
-                disablePictureInPicture
-                onContextMenu={(e) => e.preventDefault()}
-                style={{ userSelect: 'none', pointerEvents: 'auto' }}
-              >
-                <source src={course.video_url} type="video/mp4" />
-                Tu navegador no soporta la reproducción de video.
-              </video>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col">
+        {/* Top Bar */}
+        <header className="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden text-white"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <div className="flex-1 lg:ml-0 ml-4">
+            <h1 className="text-white font-semibold text-lg line-clamp-1">
+              {currentLesson?.title || 'Selecciona una lección'}
+            </h1>
+          </div>
+        </header>
 
-              {/* Watermark Overlay */}
-              {watermarkText && (
-                <>
-                  <div 
-                    className="absolute top-4 right-4 text-white/40 text-xs font-mono pointer-events-none"
-                    style={{ userSelect: 'none' }}
-                  >
-                    {watermarkText}
+        {/* Lesson Content */}
+        <div className="flex-1 overflow-y-auto bg-black">
+          {currentLesson ? (
+            <div className="max-w-6xl mx-auto">
+              {/* Video Content */}
+              {currentLesson.content_type === 'video' && currentLesson.video_url && (
+                <div className="relative bg-black">
+                  <video
+                    key={currentLesson.id}
+                    src={currentLesson.video_url}
+                    controls
+                    className="w-full aspect-video"
+                    autoPlay
+                  />
+                </div>
+              )}
+
+              {/* PDF Content */}
+              {currentLesson.content_type === 'pdf' && currentLesson.pdf_url && (
+                <div className="bg-gray-900 p-8">
+                  <div className="bg-white rounded-lg p-8 max-w-4xl mx-auto">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {currentLesson.title}
+                      </h2>
+                      <a
+                        href={currentLesson.pdf_url}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 px-4 py-2 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] transition-colors"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Descargar PDF</span>
+                      </a>
+                    </div>
+                    <iframe
+                      src={currentLesson.pdf_url}
+                      className="w-full h-[800px] border-2 border-gray-200 rounded"
+                      title={currentLesson.title}
+                    />
                   </div>
-                  <div 
-                    className="absolute bottom-4 left-4 text-white/30 text-xs font-mono pointer-events-none"
-                    style={{ userSelect: 'none' }}
-                  >
-                    {watermarkText}
+                </div>
+              )}
+
+              {/* Text Content */}
+              {currentLesson.content_type === 'text' && (
+                <div className="bg-gray-900 p-8">
+                  <div className="bg-white rounded-lg p-8 max-w-4xl mx-auto">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                      {currentLesson.title}
+                    </h2>
+                    {currentLesson.description && (
+                      <p className="text-gray-600 mb-6">{currentLesson.description}</p>
+                    )}
+                    <div className="prose max-w-none">
+                      <pre className="whitespace-pre-wrap font-sans text-gray-800">
+                        {currentLesson.text_content}
+                      </pre>
+                    </div>
                   </div>
-                  {/* Center watermark - more subtle */}
-                  <div 
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-sm font-mono pointer-events-none rotate-[-15deg]"
-                    style={{ userSelect: 'none' }}
-                  >
-                    {watermarkText}
+                </div>
+              )}
+
+              {/* Lesson Description */}
+              {currentLesson.description && currentLesson.content_type !== 'text' && (
+                <div className="bg-gray-900 p-8">
+                  <div className="max-w-4xl mx-auto">
+                    <h3 className="text-white text-xl font-semibold mb-3">
+                      Sobre esta lección
+                    </h3>
+                    <p className="text-gray-300">{currentLesson.description}</p>
                   </div>
-                </>
+                </div>
               )}
             </div>
           ) : (
-            <div className="aspect-video flex items-center justify-center bg-gray-800">
+            <div className="flex items-center justify-center h-full">
               <div className="text-center text-gray-400">
-                <p className="mb-2">No hay video disponible para este curso</p>
-                <p className="text-sm">Contacta al administrador para más información</p>
+                <p className="text-xl mb-2">Selecciona una lección para comenzar</p>
+                <p className="text-sm">Usa el menú lateral para navegar por el contenido</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Content Info */}
-        <div className="mt-8 bg-gray-900 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">Información del Curso</h2>
-            {course.duration_minutes && (
-              <span className="text-gray-400 text-sm">
-                Duración: {course.duration_minutes} minutos
-              </span>
-            )}
-          </div>
-          
-          <div className="prose prose-invert max-w-none">
-            {course.description ? (
-              <p className="text-gray-300">{course.description}</p>
-            ) : (
-              <p className="text-gray-400">Disfruta de este contenido exclusivo</p>
-            )}
-          </div>
+        {/* Bottom Navigation */}
+        {currentLesson && (
+          <footer className="bg-gray-800 border-t border-gray-700 p-4">
+            <div className="max-w-6xl mx-auto flex items-center justify-between">
+              <button
+                onClick={goToPreviousLesson}
+                disabled={!canGoPrevious()}
+                className="flex items-center space-x-2 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span>Anterior</span>
+              </button>
 
-          <div className="mt-6 pt-6 border-t border-gray-800">
-            <div className="flex items-start space-x-2 text-sm text-gray-400">
-              <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-gray-300 mb-1">Contenido Protegido</p>
-                <p>
-                  Este contenido está protegido contra captura de pantalla y grabación.
-                  El uso no autorizado está prohibido y puede resultar en la suspensión de tu cuenta.
-                </p>
-              </div>
+              <button
+                onClick={markAsCompleted}
+                className={`px-6 py-3 rounded-lg transition-colors ${
+                  completedLessons.has(currentLesson.id)
+                    ? 'bg-green-600 text-white'
+                    : 'bg-[#a4c639] text-white hover:bg-[#2d7a5f]'
+                }`}
+              >
+                {completedLessons.has(currentLesson.id) ? (
+                  <span className="flex items-center space-x-2">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Completada</span>
+                  </span>
+                ) : (
+                  'Marcar como completada'
+                )}
+              </button>
+
+              <button
+                onClick={goToNextLesson}
+                disabled={!canGoNext()}
+                className="flex items-center space-x-2 px-6 py-3 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>Siguiente</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
+          </footer>
+        )}
+      </main>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
-  )
+  );
 }
