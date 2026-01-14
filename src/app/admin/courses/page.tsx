@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
-import { BookOpen, Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, Plus, Edit2, Trash2, Eye, EyeOff, FileText } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -257,6 +257,14 @@ export default function CoursesPage() {
                     >
                       <Edit2 className="w-4 h-4" />
                       <span>Editar</span>
+                    </button>
+
+                    <button
+                      onClick={() => router.push(`/admin/courses/${course.id}/content`)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-[#1a5744] text-white rounded-lg hover:bg-[#2d7a5f] transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Contenido</span>
                     </button>
                     
                     <button
