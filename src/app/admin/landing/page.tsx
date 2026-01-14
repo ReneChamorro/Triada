@@ -15,25 +15,47 @@ interface Feature {
   is_highlighted: boolean
 }
 
+interface AboutSection {
+  id: string
+  title: string
+  subtitle: string | null
+  description: string
+  description_secondary: string | null
+  image_url: string | null
+  button_text: string
+}
+
 export default function LandingSettingsPage() {
   const router = useRouter()
   const [features, setFeatures] = useState<Feature[]>([])
+  const [aboutSection, setAboutSection] = useState<AboutSection | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingId, setUploadingId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchFeatures()
+    fetchData()
   }, [])
 
-  const fetchFeatures = async () => {
+  const fetchData = async () => {
     const supabase = createClient()
-    const { data } = await supabase
+    
+    // Fetch features
+    const { data: featuresData } = await supabase
       .from('landing_features')
       .select('*')
       .order('position')
     
-    if (data) setFeatures(data)
+    if (featuresData) setFeatures(featuresData)
+
+    // Fetch about section
+    const { data: aboutData } = await supabase
+      .from('landing_about')
+      .select('*')
+      .single()
+    
+    if (aboutData) setAboutSection(aboutData)
+    
     setLoading(false)
   }
 
@@ -164,6 +186,54 @@ export default function LandingSettingsPage() {
     }
   }
 
+  const updateAboutSection = async (updates: Partial<AboutSection>) => {
+    if (!aboutSection) return
+
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('landing_about')
+      .update(updates)
+      .eq('id', aboutSection.id)
+
+    if (error) {
+      alert('Error al actualizar')
+      return
+    }
+
+    setAboutSection(prev => prev ? { ...prev, ...updates } : null)
+  }
+
+  const handleAboutImageUpload = async (file: File) => {
+    if (!aboutSection) return
+    
+    setUploadingId('about-image')
+    const supabase = createClient()
+
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `about-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('landing-images')
+        .upload(fileName, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('landing-images')
+        .getPublicUrl(fileName)
+
+      await updateAboutSection({ image_url: publicUrl })
+
+      alert('Imagen subida correctamente')
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error al subir la imagen')
+    } finally {
+      setUploadingId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5E6D3]">
@@ -202,6 +272,141 @@ export default function LandingSettingsPage() {
             Agregar Característica
           </button>
         </div>
+
+        {/* About Section */}
+        {aboutSection && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-[#1a5744] mb-4">Sección "Sobre Nosotros"</h2>
+            
+            <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-200">
+              <div className="grid md:grid-cols-[300px_1fr] gap-6">
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                    Imagen Principal
+                  </label>
+                  <div className="aspect-square bg-[#F5E6D3] rounded-2xl flex items-center justify-center overflow-hidden relative group">
+                    {aboutSection.image_url ? (
+                      <>
+                        <Image
+                          src={aboutSection.image_url}
+                          alt="Sobre Nosotros"
+                          fill
+                          className="object-cover"
+                        />
+                        <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center">
+                          <Upload className="h-8 w-8 text-white" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleAboutImageUpload(file)
+                            }}
+                          />
+                        </label>
+                      </>
+                    ) : (
+                      <label className="cursor-pointer flex flex-col items-center gap-2 text-gray-500">
+                        {uploadingId === 'about-image' ? (
+                          <Loader2 className="h-8 w-8 animate-spin" />
+                        ) : (
+                          <>
+                            <Upload className="h-8 w-8" />
+                            <span className="text-xs">Subir imagen</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleAboutImageUpload(file)
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2 text-center">
+                    Recomendado: 600x600px JPG o PNG
+                  </p>
+                </div>
+
+                {/* Form Fields */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                      Título Principal
+                    </label>
+                    <input
+                      type="text"
+                      value={aboutSection.title}
+                      onChange={(e) => updateAboutSection({ title: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      placeholder="Ej: Sobre Nosotros"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                      Subtítulo (Nombre destacado)
+                    </label>
+                    <input
+                      type="text"
+                      value={aboutSection.subtitle || ''}
+                      onChange={(e) => updateAboutSection({ subtitle: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      placeholder="Ej: Triada Global"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                      Descripción Principal
+                    </label>
+                    <textarea
+                      value={aboutSection.description}
+                      onChange={(e) => updateAboutSection({ description: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                      placeholder="Primera descripción..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                      Descripción Secundaria (Misión/Visión)
+                    </label>
+                    <textarea
+                      value={aboutSection.description_secondary || ''}
+                      onChange={(e) => updateAboutSection({ description_secondary: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                      placeholder="Segunda descripción..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                      Texto del Botón
+                    </label>
+                    <input
+                      type="text"
+                      value={aboutSection.button_text}
+                      onChange={(e) => updateAboutSection({ button_text: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      placeholder="Ej: Ver Más"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <h2 className="text-2xl font-bold text-[#1a5744] mb-4">Características de la Landing</h2>
 
         {/* Features List */}
         <div className="space-y-6">

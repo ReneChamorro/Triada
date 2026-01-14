@@ -19,10 +19,20 @@ interface LandingFeature {
   is_highlighted: boolean
 }
 
+interface AboutSection {
+  title: string
+  subtitle: string | null
+  description: string
+  description_secondary: string | null
+  image_url: string | null
+  button_text: string
+}
+
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [courses, setCourses] = useState<any[]>([])
   const [features, setFeatures] = useState<LandingFeature[]>([])
+  const [aboutSection, setAboutSection] = useState<AboutSection | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -44,6 +54,14 @@ export default function HomePage() {
         .order('position')
       
       if (featuresData) setFeatures(featuresData)
+
+      // Fetch about section
+      const { data: aboutData } = await supabase
+        .from('landing_about')
+        .select('*')
+        .single()
+      
+      if (aboutData) setAboutSection(aboutData)
     }
     fetchData()
   }, [])
@@ -140,30 +158,44 @@ export default function HomePage() {
             {/* Image/Placeholder */}
             <div className="order-2 md:order-1">
               <div className="bg-[#e8e4d0] rounded-3xl border-8 border-[#e8e4d0] shadow-2xl overflow-hidden aspect-square flex items-center justify-center">
-                <div className="w-full h-full bg-white flex items-center justify-center">
-                  <GraduationCap className="h-32 w-32 text-[#2d7a5f]" />
-                </div>
+                {aboutSection?.image_url ? (
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={aboutSection.image_url}
+                      alt={aboutSection.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-white flex items-center justify-center">
+                    <GraduationCap className="h-32 w-32 text-[#2d7a5f]" />
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Content */}
             <div className="order-1 md:order-2">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Sobre Nosotros
+                {aboutSection?.title || 'Sobre Nosotros'}
               </h2>
               <div className="space-y-4 text-white/90 text-lg leading-relaxed mb-8">
                 <p>
-                  <span className="font-bold text-[#1a5744]">Triada Global</span> es una plataforma educativa dedicada a la excelencia académica. Ofrecemos programas de capacitación profesional diseñados por expertos en diversas áreas del conocimiento.
+                  {aboutSection?.subtitle && (
+                    <span className="font-bold text-[#1a5744]">{aboutSection.subtitle} </span>
+                  )}
+                  {aboutSection?.description || 'es una plataforma educativa dedicada a la excelencia académica.'}
                 </p>
-                <p>
-                  Nuestra misión es transformar la educación mediante metodologías innovadoras que permiten a profesionales de todo el mundo acceder a contenido de alta calidad, desarrollar nuevas habilidades y alcanzar sus metas profesionales.
-                </p>
+                {aboutSection?.description_secondary && (
+                  <p>{aboutSection.description_secondary}</p>
+                )}
               </div>
               <button 
                 onClick={() => setIsModalOpen(true)}
                 className="inline-block bg-[#e8e4d0] text-[#1a5744] hover:bg-white px-8 py-3 rounded-full text-lg font-bold transition-colors shadow-lg cursor-pointer"
               >
-                Ver Más
+                {aboutSection?.button_text || 'Ver Más'}
               </button>
             </div>
           </div>
