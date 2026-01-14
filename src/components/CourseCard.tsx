@@ -23,12 +23,12 @@ export default function CourseCard({
   return (
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
       {/* Icon or Image Header */}
-      <div className="h-48 bg-gradient-to-br from-[#2d7a5f] to-[#1a5744] flex items-center justify-center relative overflow-hidden">
+      <div className="h-48 bg-white flex items-center justify-center relative overflow-hidden">
         {thumbnail_url ? (
           <img 
             src={thumbnail_url} 
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-4"
           />
         ) : Icon ? (
           <Icon className="h-16 w-16 text-white" />

@@ -134,11 +134,11 @@ export default function CoursesPage() {
                   className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
                 >
                   {course.image_url ? (
-                    <div className="aspect-video relative overflow-hidden">
+                    <div className="aspect-video relative overflow-hidden bg-white">
                       <img 
                         src={course.image_url} 
                         alt={course.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain p-4"
                       />
                     </div>
                   ) : (
