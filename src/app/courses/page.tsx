@@ -23,58 +23,6 @@ export default function CoursesPage() {
     { id: 'research', name: 'Investigación' },
   ]
 
-  // Mock courses for demonstration
-  const mockCourses = [
-    {
-      id: 1,
-      title: 'Introducción a la Psicología Clínica',
-      description: 'Aprende los fundamentos de la psicología clínica con expertos reconocidos internacionalmente',
-      price: 99,
-      category: 'psychology',
-      thumbnail_url: null,
-    },
-    {
-      id: 2,
-      title: 'Terapia Cognitivo Conductual Avanzada',
-      description: 'Domina las técnicas más efectivas de TCC para casos complejos',
-      price: 149,
-      category: 'therapy',
-      thumbnail_url: null,
-    },
-    {
-      id: 3,
-      title: 'Intervención en Crisis y Emergencias',
-      description: 'Desarrolla habilidades para actuar efectivamente en situaciones de crisis',
-      price: 129,
-      category: 'intervention',
-      thumbnail_url: null,
-    },
-    {
-      id: 4,
-      title: 'Metodología de Investigación en Psicología',
-      description: 'Aprende a diseñar y ejecutar investigaciones de calidad en el campo de la psicología',
-      price: 119,
-      category: 'research',
-      thumbnail_url: null,
-    },
-    {
-      id: 5,
-      title: 'Psicología Infantil y del Adolescente',
-      description: 'Especialízate en el desarrollo y tratamiento de niños y adolescentes',
-      price: 139,
-      category: 'psychology',
-      thumbnail_url: null,
-    },
-    {
-      id: 6,
-      title: 'Terapia Familiar Sistémica',
-      description: 'Aprende a trabajar con sistemas familiares desde un enfoque sistémico',
-      price: 159,
-      category: 'therapy',
-      thumbnail_url: null,
-    },
-  ]
-
   useEffect(() => {
     async function fetchCourses() {
       const supabase = createClient()
@@ -83,16 +31,11 @@ export default function CoursesPage() {
       const { data } = await supabase
         .from('courses')
         .select('*')
-        .eq('is_published', true)
+        .eq('status', 'published')
         .order('created_at', { ascending: false })
       
-      if (data && data.length > 0) {
-        setCourses(data)
-        setFilteredCourses(data)
-      } else {
-        setCourses(mockCourses)
-        setFilteredCourses(mockCourses)
-      }
+      setCourses(data || [])
+      setFilteredCourses(data || [])
       setLoading(false)
     }
     fetchCourses()
@@ -190,10 +133,10 @@ export default function CoursesPage() {
                   href={`/courses/${course.id}`}
                   className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
                 >
-                  {course.thumbnail_url ? (
+                  {course.image_url ? (
                     <div className="aspect-video relative overflow-hidden">
                       <img 
-                        src={course.thumbnail_url} 
+                        src={course.image_url} 
                         alt={course.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

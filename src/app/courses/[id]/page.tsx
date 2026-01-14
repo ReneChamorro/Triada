@@ -17,7 +17,7 @@ export default async function CourseDetailPage({
     .from('courses')
     .select('*')
     .eq('id', id)
-    .eq('is_published', true)
+    .eq('status', 'published')
     .single()
 
   if (!course) {

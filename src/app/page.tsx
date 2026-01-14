@@ -211,7 +211,7 @@ export default function HomePage() {
               Explora nuestra selección de cursos más recientes
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className={`grid gap-8 ${courses.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : courses.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-3'}`}>
             {courses && courses.length > 0 ? (
               courses.slice(0, 3).map((course) => (
                 <CourseCard
@@ -220,39 +220,16 @@ export default function HomePage() {
                   title={course.title}
                   description={course.description || course.short_description || ''}
                   price={course.price}
-                  thumbnail_url={course.thumbnail_url}
+                  thumbnail_url={course.image_url}
                   Icon={BookOpen}
                   category={course.category}
                 />
               ))
             ) : (
-              // Mock courses for demonstration
-              <>
-                <CourseCard
-                  id="mock-1"
-                  title="Introducción a la Psicología Clínica"
-                  description="Aprende los fundamentos de la psicología clínica con expertos reconocidos internacionalmente"
-                  price={99}
-                  Icon={BookOpen}
-                  category="psychology"
-                />
-                <CourseCard
-                  id="mock-2"
-                  title="Terapia Cognitivo Conductual Avanzada"
-                  description="Domina las técnicas más efectivas de TCC para casos complejos"
-                  price={149}
-                  Icon={GraduationCap}
-                  category="therapy"
-                />
-                <CourseCard
-                  id="mock-3"
-                  title="Intervención en Crisis y Emergencias"
-                  description="Desarrolla habilidades para actuar efectivamente en situaciones de crisis"
-                  price={129}
-                  Icon={Users}
-                  category="intervention"
-                />
-              </>
+              <div className="col-span-full text-center py-12">
+                <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-600">No hay cursos destacados disponibles</p>
+              </div>
             )}
           </div>
           <div className="text-center mt-12">
