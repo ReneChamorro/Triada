@@ -1,0 +1,14 @@
+# Robots.txt para Triada
+# https://triadave.com
+
+# Permitir todo a todos los bots
+User-agent: *
+Allow: /
+
+# Bloquear rutas privadas
+Disallow: /admin
+Disallow: /api/
+Disallow: /dashboard/settings
+
+# Sitemap
+Sitemap: https://triadave.com/sitemap.xml
