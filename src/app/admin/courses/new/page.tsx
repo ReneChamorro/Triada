@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { Upload, X, Save } from 'lucide-react';
+
+interface Instructor {
+  id: string;
+  full_name: string;
+  role: string;
+}
 
 export default function NewCoursePage() {
   const router = useRouter();
@@ -14,6 +20,8 @@ export default function NewCoursePage() {
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [defaultInstructorId, setDefaultInstructorId] = useState<string>('');
   
   const [formData, setFormData] = useState({
     title: '',
@@ -24,7 +32,30 @@ export default function NewCoursePage() {
     status: 'draft',
     course_type: 'course',
     tags: '',
+    instructor_id: '',
   });
+
+  useEffect(() => {
+    async function loadInstructors() {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, role')
+        .in('role', ['admin', 'teacher'])
+        .order('full_name');
+      
+      if (data) {
+        setInstructors(data);
+        
+        // Buscar a Sophia Behrens como default
+        const sophiaDefault = data.find(p => p.full_name === 'Sophia Behrens');
+        const defaultId = sophiaDefault?.id || data[0]?.id || '';
+        
+        setDefaultInstructorId(defaultId);
+        setFormData(prev => ({ ...prev, instructor_id: defaultId }));
+      }
+    }
+    loadInstructors();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -103,6 +134,7 @@ export default function NewCoursePage() {
       const { data: course, error: courseError } = await supabase
         .from('courses')
         .insert({
+          instructor_id: formData.instructor_id,
           title: formData.title,
           slug: formData.slug,
           description: formData.description,
@@ -174,6 +206,30 @@ export default function NewCoursePage() {
 
         {/* Basic Info */}
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-[#1a5744] mb-2">
+              Instructor *
+            </label>
+            <select
+              required
+              value={formData.instructor_id}
+              onChange={(e) => setFormData({ ...formData, instructor_id: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
+            >
+              <option value="">Seleccionar instructor...</option>
+              {instructors.map((instructor) => (
+                <option key={instructor.id} value={instructor.id}>
+                  {instructor.full_name} ({instructor.role})
+                </option>
+              ))}
+            </select>
+            {defaultInstructorId && (
+              <p className="text-sm text-gray-500 mt-1">
+                Default: Sophia Behrens
+              </p>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-[#1a5744] mb-2">
               Título del Curso *
