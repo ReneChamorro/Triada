@@ -33,17 +33,22 @@ export default function CheckoutPage() {
       }
       setUser(user)
 
-      // Check if user already has access
-      const { data: userCourse } = await supabase
-        .from('user_courses')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('course_id', courseId)
-        .single()
+      // Check if user already has access (optional - don't block if error)
+      try {
+        const { data: userCourse } = await supabase
+          .from('user_courses')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('course_id', courseId)
+          .maybeSingle()
 
-      if (userCourse) {
-        router.push(`/courses/${courseId}/learn`)
-        return
+        if (userCourse) {
+          // Already has access, redirect to learn
+          router.push(`/courses/${courseId}/learn`)
+          return
+        }
+      } catch (error) {
+        console.log('Error checking access (continuing anyway):', error)
       }
 
       // Fetch course details
@@ -56,11 +61,23 @@ export default function CheckoutPage() {
 
       if (error || !courseData) {
         console.error('Error loading course:', error)
-        router.push('/courses')
-        return
+        // Try without status filter if published check fails
+        const { data: courseDataAlt } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('id', courseId)
+          .single()
+        
+        if (courseDataAlt) {
+          setCourse(courseDataAlt)
+        } else {
+          router.push('/courses')
+          return
+        }
+      } else {
+        setCourse(courseData)
       }
 
-      setCourse(courseData)
       setLoading(false)
     }
 
