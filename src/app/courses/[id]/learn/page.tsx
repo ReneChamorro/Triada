@@ -126,16 +126,48 @@ export default function LearnCoursePage() {
         
         setModules(modulesWithLessons);
 
-        // Set first lesson as current if available
-        if (modulesWithLessons.length > 0 && modulesWithLessons[0].lessons.length > 0) {
-          setCurrentLesson(modulesWithLessons[0].lessons[0]);
+        // Load completed lessons from database
+        const { data: progressData } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', userData.id)
+          .eq('course_id', courseId);
+
+        const completed = new Set<string>();
+        if (progressData) {
+          progressData.forEach(p => completed.add(p.lesson_id));
+        }
+        setCompletedLessons(completed);
+
+        // Resume functionality: try to load last accessed lesson
+        const { data: lastLessonId } = await supabase
+          .rpc('get_last_accessed_lesson', {
+            p_user_id: userData.id,
+            p_course_id: courseId
+          });
+
+        let lessonToSelect = null;
+
+        if (lastLessonId) {
+          // Find the last accessed lesson
+          for (const module of modulesWithLessons) {
+            const foundLesson = module.lessons.find(l => l.id === lastLessonId);
+            if (foundLesson) {
+              lessonToSelect = foundLesson;
+              break;
+            }
+          }
+        }
+
+        // If no last accessed lesson, start with first lesson
+        if (!lessonToSelect && modulesWithLessons.length > 0 && modulesWithLessons[0].lessons.length > 0) {
+          lessonToSelect = modulesWithLessons[0].lessons[0];
+        }
+
+        if (lessonToSelect) {
+          setCurrentLesson(lessonToSelect);
         }
       }
-
-      // Load completed lessons (for progress tracking - simplified for now)
-      // In Phase 3 we'll implement proper lesson_progress table
-      const completed = new Set<string>();
-      setCompletedLessons(completed);
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -144,21 +176,48 @@ export default function LearnCoursePage() {
     }
   }
 
-  const selectLesson = (lesson: Lesson) => {
+  const selectLesson = async (lesson: Lesson) => {
     setCurrentLesson(lesson);
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
+
+    // Track last accessed lesson
+    if (user) {
+      await supabase
+        .from('lesson_progress')
+        .upsert({
+          user_id: user.id,
+          course_id: courseId,
+          lesson_id: lesson.id,
+          last_accessed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,lesson_id'
+        });
+    }
   };
 
-  const markAsCompleted = () => {
-    if (!currentLesson) return;
+  const markAsCompleted = async () => {
+    if (!currentLesson || !user) return;
     
     const newCompleted = new Set(completedLessons);
     newCompleted.add(currentLesson.id);
     setCompletedLessons(newCompleted);
     
-    // TODO: Save to database in Phase 3 (lesson_progress table)
+    // Save to database
+    await supabase
+      .from('lesson_progress')
+      .upsert({
+        user_id: user.id,
+        course_id: courseId,
+        lesson_id: currentLesson.id,
+        completed_at: new Date().toISOString(),
+        last_accessed_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,lesson_id'
+      });
+    
+    // The trigger will automatically update user_courses.progress_percentage
   };
 
   const goToNextLesson = () => {

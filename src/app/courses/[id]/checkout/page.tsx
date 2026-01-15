@@ -3,36 +3,32 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
-export default function CheckoutPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default function CheckoutPage() {
   const router = useRouter()
-  const [courseId, setCourseId] = useState('')
+  const params = useParams()
+  const courseId = params.id as string
   const [course, setCourse] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'zelle'>('paypal')
+  const [paymentMethod, setPaymentMethod] = useState<'trial' | 'paypal' | 'zelle'>('trial')
 
   useEffect(() => {
     const fetchData = async () => {
-      const resolvedParams = await params
-      setCourseId(resolvedParams.id)
+      if (!courseId) return
 
       const supabase = createClient()
 
       // Check authentication
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push(`/login?redirect=/courses/${resolvedParams.id}/checkout`)
+        router.push(`/login?redirect=/courses/${courseId}/checkout`)
         return
       }
       setUser(user)
@@ -42,23 +38,24 @@ export default function CheckoutPage({
         .from('user_courses')
         .select('id')
         .eq('user_id', user.id)
-        .eq('course_id', resolvedParams.id)
+        .eq('course_id', courseId)
         .single()
 
       if (userCourse) {
-        router.push(`/courses/${resolvedParams.id}/learn`)
+        router.push(`/courses/${courseId}/learn`)
         return
       }
 
       // Fetch course details
-      const { data: courseData } = await supabase
+      const { data: courseData, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('id', resolvedParams.id)
-        .eq('is_published', true)
+        .eq('id', courseId)
+        .eq('status', 'published')
         .single()
 
-      if (!courseData) {
+      if (error || !courseData) {
+        console.error('Error loading course:', error)
         router.push('/courses')
         return
       }
@@ -68,10 +65,42 @@ export default function CheckoutPage({
     }
 
     fetchData()
-  }, [params, router])
+  }, [courseId, router])
 
   const handleZelleCheckout = () => {
     router.push(`/courses/${courseId}/checkout/zelle`)
+  }
+
+  const handleTrialAccess = async () => {
+    if (!user || !course || processing) return
+
+    setProcessing(true)
+    try {
+      const supabase = createClient()
+      
+      // Insert into user_courses to grant access
+      const { error } = await supabase
+        .from('user_courses')
+        .insert({
+          user_id: user.id,
+          course_id: courseId,
+          payment_method: 'trial',
+          amount_paid: 0,
+          payment_id: `trial_${Date.now()}`,
+          progress_percentage: 0,
+          is_completed: false
+        })
+
+      if (error) throw error
+
+      // Redirect to course
+      router.push(`/courses/${courseId}/learn`)
+    } catch (error: any) {
+      console.error('Error granting trial access:', error)
+      alert('Error al obtener acceso de prueba. Intenta nuevamente.')
+    } finally {
+      setProcessing(false)
+    }
   }
 
   const handlePayPalSuccess = async (orderId: string) => {
@@ -194,6 +223,56 @@ export default function CheckoutPage({
 
           {/* Payment Methods */}
           <div className="md:col-span-2 space-y-4 md:space-y-6 order-1 md:order-2">
+            {/* Trial Access - NEW */}
+            <div
+              className={`bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] rounded-3xl shadow-xl p-6 border-2 cursor-pointer transition-all ${
+                paymentMethod === 'trial' 
+                  ? 'border-white ring-4 ring-white/30' 
+                  : 'border-[#a4c639]/50 hover:border-white/50'
+              }`}
+              onClick={() => setPaymentMethod('trial')}
+            >
+              <div className="flex items-start gap-4">
+                <input
+                  type="radio"
+                  checked={paymentMethod === 'trial'}
+                  onChange={() => setPaymentMethod('trial')}
+                  className="mt-1 w-5 h-5 text-white focus:ring-white"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                      🎁 Acceso de Prueba
+                    </h3>
+                    <span className="text-3xl font-bold text-white">$0</span>
+                  </div>
+                  <p className="text-white/90 mb-4">
+                    Obtén acceso inmediato y gratuito al curso para probar el sistema. 
+                    Ideal para testing y demostración.
+                  </p>
+                  {paymentMethod === 'trial' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleTrialAccess()
+                      }}
+                      disabled={processing}
+                      className="w-full bg-white text-[#2d7a5f] hover:bg-gray-100 px-6 py-3 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                    >
+                      {processing ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>Procesando...</span>
+                        </>
+                      ) : (
+                        <span>Adquirir Acceso Gratis Ahora</span>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* PayPal Payment */}
             <div
               className={`bg-white rounded-3xl shadow-xl p-6 border-2 cursor-pointer transition-all ${
