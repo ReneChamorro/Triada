@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Clock, Play } from 'lucide-react'
+import { Clock, Play, GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatDate } from '@/lib/utils'
 import Header from '@/components/Header'

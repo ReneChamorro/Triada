@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Loader2, Copy, Check, AlertCircle } from 'lucide-react'
+import { Loader2, Copy, Check, AlertCircle, CheckCircle, Upload } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import Header from '@/components/Header'
