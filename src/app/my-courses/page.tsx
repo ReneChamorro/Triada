@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { GraduationCap, Clock, Play } from 'lucide-react'
+import { Clock, Play } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatDate } from '@/lib/utils'
+import Header from '@/components/Header'
 
 export default async function MyCoursesPage() {
   const supabase = await createClient()
@@ -26,39 +27,7 @@ export default async function MyCoursesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="border-b bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">Triada</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/dashboard" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link 
-                href="/courses" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Explorar Cursos
-              </Link>
-              {profile?.is_admin && (
-                <Link 
-                  href="/admin" 
-                  className="bg-purple-600 text-white hover:bg-purple-700 px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Admin
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

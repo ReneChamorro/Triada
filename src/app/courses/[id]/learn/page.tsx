@@ -312,7 +312,7 @@ export default function LearnCoursePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <div className="flex items-center justify-center min-h-screen bg-[#F5E6D3]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#a4c639]"></div>
       </div>
     );
@@ -323,39 +323,39 @@ export default function LearnCoursePage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-[#F5E6D3]">
       {/* Sidebar */}
       <aside
         className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed lg:relative lg:translate-x-0 z-30 w-80 h-full bg-gray-800 transition-transform duration-300 ease-in-out flex flex-col`}
+        } fixed lg:relative lg:translate-x-0 z-30 w-80 h-full bg-white shadow-xl transition-transform duration-300 ease-in-out flex flex-col border-r border-gray-200`}
       >
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-3">
             <Link
               href={`/courses/${courseId}`}
-              className="flex items-center space-x-2 text-gray-400 hover:text-white"
+              className="flex items-center space-x-2 text-gray-600 hover:text-[#2d7a5f]"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-sm">Volver al curso</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-400 hover:text-white"
+              className="lg:hidden text-gray-600 hover:text-[#2d7a5f]"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
-          <h2 className="text-white font-bold text-lg line-clamp-2">
+          <h2 className="text-[#1a5744] font-bold text-lg line-clamp-2">
             {course?.title}
           </h2>
           <div className="mt-3">
-            <div className="flex justify-between text-sm text-gray-400 mb-1">
+            <div className="flex justify-between text-sm text-gray-700 mb-1">
               <span>Progreso del curso</span>
-              <span>{calculateProgress()}%</span>
+              <span className="font-semibold text-[#2d7a5f]">{calculateProgress()}%</span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-[#a4c639] h-2 rounded-full transition-all duration-300"
                 style={{ width: `${calculateProgress()}%` }}
@@ -367,9 +367,9 @@ export default function LearnCoursePage() {
         {/* Module List */}
         <div className="flex-1 overflow-y-auto">
           {modules.map((module, moduleIndex) => (
-            <div key={module.id} className="border-b border-gray-700">
-              <div className="p-4 bg-gray-750">
-                <h3 className="text-white font-semibold text-sm">
+            <div key={module.id} className="border-b border-gray-200">
+              <div className="p-4 bg-gradient-to-r from-[#a4c639]/10 to-[#2d7a5f]/10">
+                <h3 className="text-[#1a5744] font-semibold text-sm">
                   Módulo {moduleIndex + 1}: {module.title}
                 </h3>
               </div>
@@ -384,8 +384,8 @@ export default function LearnCoursePage() {
                       onClick={() => selectLesson(lesson)}
                       className={`w-full text-left p-4 flex items-start space-x-3 transition-colors ${
                         isActive
-                          ? 'bg-[#a4c639] text-white'
-                          : 'text-gray-300 hover:bg-gray-700'
+                          ? 'bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <div className="flex-shrink-0 mt-0.5">
@@ -419,7 +419,7 @@ export default function LearnCoursePage() {
           ))}
 
           {modules.length === 0 && (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-gray-600">
               <p>Este curso aún no tiene contenido disponible.</p>
             </div>
           )}
@@ -429,27 +429,27 @@ export default function LearnCoursePage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         {/* Top Bar */}
-        <header className="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
+        <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-white"
+            className="lg:hidden text-[#2d7a5f]"
           >
             <Menu className="w-6 h-6" />
           </button>
           <div className="flex-1 lg:ml-0 ml-4">
-            <h1 className="text-white font-semibold text-lg line-clamp-1">
+            <h1 className="text-[#1a5744] font-semibold text-lg line-clamp-1">
               {currentLesson?.title || 'Selecciona una lección'}
             </h1>
           </div>
         </header>
 
         {/* Lesson Content */}
-        <div className="flex-1 overflow-y-auto bg-black">
+        <div className="flex-1 overflow-y-auto bg-[#F5E6D3]">
           {currentLesson ? (
             <div className="max-w-6xl mx-auto">
               {/* Video Content */}
               {currentLesson.content_type === 'video' && currentLesson.video_url && (
-                <div className="relative bg-black">
+                <div className="relative bg-black rounded-xl overflow-hidden m-6 shadow-2xl">
                   <video
                     key={currentLesson.id}
                     src={currentLesson.video_url}
@@ -462,8 +462,8 @@ export default function LearnCoursePage() {
 
               {/* PDF Content */}
               {currentLesson.content_type === 'pdf' && currentLesson.pdf_url && (
-                <div className="bg-gray-900 p-8">
-                  <div className="bg-white rounded-lg p-8 max-w-4xl mx-auto">
+                <div className="p-8">
+                  <div className="bg-white rounded-xl p-8 max-w-4xl mx-auto shadow-2xl">
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-2xl font-bold text-gray-900">
                         {currentLesson.title}
@@ -473,7 +473,7 @@ export default function LearnCoursePage() {
                         download
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center space-x-2 px-4 py-2 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white rounded-lg hover:shadow-lg transition-all"
                       >
                         <Download className="w-4 h-4" />
                         <span>Descargar PDF</span>
@@ -490,8 +490,8 @@ export default function LearnCoursePage() {
 
               {/* Text Content */}
               {currentLesson.content_type === 'text' && (
-                <div className="bg-gray-900 p-8">
-                  <div className="bg-white rounded-lg p-8 max-w-4xl mx-auto">
+                <div className="p-8">
+                  <div className="bg-white rounded-xl p-8 max-w-4xl mx-auto shadow-2xl">
                     <h2 className="text-3xl font-bold text-gray-900 mb-4">
                       {currentLesson.title}
                     </h2>
@@ -509,20 +509,20 @@ export default function LearnCoursePage() {
 
               {/* Lesson Description */}
               {currentLesson.description && currentLesson.content_type !== 'text' && (
-                <div className="bg-gray-900 p-8">
-                  <div className="max-w-4xl mx-auto">
-                    <h3 className="text-white text-xl font-semibold mb-3">
+                <div className="p-8">
+                  <div className="max-w-4xl mx-auto bg-white rounded-xl p-6 shadow-lg">
+                    <h3 className="text-[#1a5744] text-xl font-semibold mb-3">
                       Sobre esta lección
                     </h3>
-                    <p className="text-gray-300">{currentLesson.description}</p>
+                    <p className="text-gray-700">{currentLesson.description}</p>
                   </div>
                 </div>
               )}
             </div>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center text-gray-400">
-                <p className="text-xl mb-2">Selecciona una lección para comenzar</p>
+              <div className="text-center text-gray-600">
+                <p className="text-xl mb-2 font-semibold text-[#1a5744]">Selecciona una lección para comenzar</p>
                 <p className="text-sm">Usa el menú lateral para navegar por el contenido</p>
               </div>
             </div>
@@ -531,12 +531,12 @@ export default function LearnCoursePage() {
 
         {/* Bottom Navigation */}
         {currentLesson && (
-          <footer className="bg-gray-800 border-t border-gray-700 p-4">
+          <footer className="bg-white border-t border-gray-200 p-4 shadow-lg">
             <div className="max-w-6xl mx-auto flex items-center justify-between">
               <button
                 onClick={goToPreviousLesson}
                 disabled={!canGoPrevious()}
-                className="flex items-center space-x-2 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-6 py-3 bg-gray-100 text-[#2d7a5f] border-2 border-gray-200 rounded-lg hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
               >
                 <ChevronLeft className="w-5 h-5" />
                 <span>Anterior</span>
@@ -544,10 +544,10 @@ export default function LearnCoursePage() {
 
               <button
                 onClick={markAsCompleted}
-                className={`px-6 py-3 rounded-lg transition-colors ${
+                className={`px-6 py-3 rounded-lg transition-all font-semibold ${
                   completedLessons.has(currentLesson.id)
-                    ? 'bg-green-600 text-white'
-                    : 'bg-[#a4c639] text-white hover:bg-[#2d7a5f]'
+                    ? 'bg-green-500 text-white shadow-lg'
+                    : 'bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white hover:shadow-lg'
                 }`}
               >
                 {completedLessons.has(currentLesson.id) ? (
@@ -563,7 +563,7 @@ export default function LearnCoursePage() {
               <button
                 onClick={goToNextLesson}
                 disabled={!canGoNext()}
-                className="flex items-center space-x-2 px-6 py-3 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
               >
                 <span>Siguiente</span>
                 <ChevronRight className="w-5 h-5" />

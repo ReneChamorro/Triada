@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { GraduationCap, Clock, BookOpen, CheckCircle } from 'lucide-react'
+import { Clock, BookOpen, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
+import Header from '@/components/Header'
 
 export default async function CourseDetailPage({
   params,
@@ -41,56 +42,7 @@ export default async function CourseDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="border-b bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <GraduationCap className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">Triada</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/courses" 
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Cursos
-              </Link>
-              {user ? (
-                <>
-                  <Link 
-                    href="/dashboard" 
-                    className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    href="/my-courses" 
-                    className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium"
-                  >
-                    Mis Cursos
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    href="/login" 
-                    className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Iniciar Sesión
-                  </Link>
-                  <Link 
-                    href="/register" 
-                    className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium"
-                  >
-                    Registrarse
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header currentPage="courses" />
 
       {/* Course Header */}
       <div className="bg-gradient-to-r from-[#2d7a5f] to-[#a4c639] text-white">
