@@ -151,7 +151,7 @@ export default function LearnCoursePage() {
         if (lastLessonId) {
           // Find the last accessed lesson
           for (const module of modulesWithLessons) {
-            const foundLesson = module.lessons.find(l => l.id === lastLessonId);
+            const foundLesson = module.lessons.find((l: Lesson) => l.id === lastLessonId);
             if (foundLesson) {
               lessonToSelect = foundLesson;
               break;
