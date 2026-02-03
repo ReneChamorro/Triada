@@ -52,6 +52,7 @@ export default function EditCoursePage() {
     status: 'draft',
     course_type: 'course',
     tags: '',
+    is_featured: false,
   });
 
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function EditCoursePage() {
         status: course.status,
         course_type: course.course_type || 'course',
         tags: Array.isArray(course.tags) ? course.tags.join(', ') : '',
+        is_featured: course.is_featured || false,
       });
       
       if (course.image_url) {
@@ -192,6 +194,7 @@ export default function EditCoursePage() {
           course_type: formData.course_type,
           image_url: imageUrl,
           tags: tagsArray,
+          is_featured: formData.is_featured,
         })
         .eq('id', courseId);
 
@@ -384,6 +387,19 @@ export default function EditCoursePage() {
                 <option value="draft">Borrador</option>
                 <option value="published">Publicado</option>
               </select>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="is_featured"
+                checked={formData.is_featured}
+                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                className="w-4 h-4 text-[#a4c639] bg-gray-100 border-gray-300 rounded focus:ring-[#a4c639] focus:ring-2"
+              />
+              <label htmlFor="is_featured" className="text-sm font-semibold text-[#1a5744]">
+                Curso Destacado
+              </label>
             </div>
           </div>
 

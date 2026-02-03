@@ -33,6 +33,7 @@ export default function NewCoursePage() {
     course_type: 'course',
     tags: '',
     instructor_id: '',
+    is_featured: false,
   });
 
   useEffect(() => {
@@ -144,6 +145,7 @@ export default function NewCoursePage() {
           course_type: formData.course_type,
           image_url: imageUrl,
           tags: tagsArray,
+          is_featured: formData.is_featured,
         })
         .select()
         .single();
@@ -327,6 +329,19 @@ export default function NewCoursePage() {
                 <option value="draft">Borrador</option>
                 <option value="published">Publicado</option>
               </select>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="is_featured"
+                checked={formData.is_featured}
+                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                className="w-4 h-4 text-[#a4c639] bg-gray-100 border-gray-300 rounded focus:ring-[#a4c639] focus:ring-2"
+              />
+              <label htmlFor="is_featured" className="text-sm font-semibold text-[#1a5744]">
+                Curso Destacado
+              </label>
             </div>
           </div>
 
