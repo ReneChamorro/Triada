@@ -159,12 +159,12 @@ export default function HomePage() {
             <div className="order-2 md:order-1">
               <div className="bg-[#e8e4d0] rounded-3xl border-8 border-[#e8e4d0] shadow-2xl overflow-hidden aspect-square flex items-center justify-center">
                 {aboutSection?.image_url ? (
-                  <div className="relative w-full h-full">
+                  <div className="relative w-full h-full p-8">
                     <Image
                       src={aboutSection.image_url}
                       alt={aboutSection.title}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                     />
                   </div>
                 ) : (
