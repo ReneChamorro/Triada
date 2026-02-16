@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     .from('user_courses')
     .select('*, courses(*)', { count: 'exact' })
     .eq('user_id', user.id)
-    .order('access_granted_at', { ascending: false })
+    .order('enrolled_at', { ascending: false })
     .limit(3)
 
   return (
