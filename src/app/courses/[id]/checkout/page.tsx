@@ -320,7 +320,8 @@ export default function CheckoutPage() {
                     <div className="w-full">
                       <PayPalScriptProvider options={{ 
                         clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-                        currency: course.currency || 'USD'
+                        currency: course.currency || 'USD',
+                        locale: 'es_ES'
                       }}>
                         <PayPalButtons
                           style={{ 
