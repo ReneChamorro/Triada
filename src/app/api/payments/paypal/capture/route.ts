@@ -64,7 +64,12 @@ export async function POST(request: Request) {
     const { error: enrollError } = await supabase.from('user_courses').insert({
       user_id: user.id,
       course_id: courseId,
+      payment_id: captureData.id,
+      payment_method: 'paypal',
+      amount_paid: parseFloat(captureData.purchase_units[0].amount.value),
       enrolled_at: new Date().toISOString(),
+      progress_percentage: 0,
+      is_completed: false,
     })
 
     if (enrollError) {
@@ -74,17 +79,6 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
-
-    // Record the payment
-    await supabase.from('payments').insert({
-      user_id: user.id,
-      course_id: courseId,
-      amount: parseFloat(captureData.purchase_units[0].amount.value),
-      currency: captureData.purchase_units[0].amount.currency_code,
-      payment_method: 'paypal',
-      payment_status: 'completed',
-      transaction_id: captureData.id,
-    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

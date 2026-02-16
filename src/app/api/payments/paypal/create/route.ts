@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       .from('courses')
       .select('*')
       .eq('id', courseId)
-      .eq('is_published', true)
+      .eq('status', 'published')
       .single()
 
     if (courseError || !course) {
