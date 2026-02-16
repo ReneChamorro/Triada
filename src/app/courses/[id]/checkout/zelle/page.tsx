@@ -56,7 +56,7 @@ export default function ZelleCheckoutPage({
         .from('courses')
         .select('*')
         .eq('id', resolvedParams.id)
-        .eq('is_published', true)
+        .eq('status', 'published')
         .single()
 
       if (!courseData) {
