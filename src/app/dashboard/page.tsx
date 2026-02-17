@@ -33,19 +33,19 @@ export default async function DashboardPage() {
       <DashboardHeader profile={profile} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#1a5744] mb-4">
+        <div className="text-center mb-8 md:mb-12 lg:mb-16">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a5744] mb-3 md:mb-4">
             ¡Bienvenido, {profile?.full_name || 'Estudiante'}!
           </h1>
-          <p className="text-lg text-[#1a5744]/70 mb-8">
+          <p className="text-base md:text-lg text-[#1a5744]/70 mb-6 md:mb-8">
             Continúa tu aprendizaje y alcanza tus metas profesionales
           </p>
         </div>
 
         {/* Stats Cards - Similar a landing */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12 lg:mb-16">
           <StatsCard
             icon={BookOpen}
             title="Mis Cursos"
@@ -71,29 +71,29 @@ export default async function DashboardPage() {
 
         {/* Cursos Section */}
         <div>
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-[#1a5744]">Tus Cursos</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#1a5744]">Tus Cursos</h2>
             <Link 
               href="/courses" 
-              className="bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-medium transition-colors"
+              className="w-full sm:w-auto text-center bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base">
             >
               Explorar más cursos
             </Link>
           </div>
 
           {userCourses && userCourses.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {userCourses.map((uc: any) => (
                 <Link
                   key={uc.id}
                   href={`/courses/${uc.courses.id}/learn`}
                   className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
                 >
-                  <div className="h-48 bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
-                    <BookOpen className="h-16 w-16 text-white opacity-50" />
+                  <div className="h-40 md:h-48 bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
+                    <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-white opacity-50" />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-[#1a5744] mb-3 group-hover:text-[#2d7a5f] transition-colors">
+                  <div className="p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-bold text-[#1a5744] mb-2 md:mb-3 group-hover:text-[#2d7a5f] transition-colors line-clamp-2">
                       {uc.courses.title}
                     </h3>
                     <p className="text-sm text-gray-600 mb-4 line-clamp-2">

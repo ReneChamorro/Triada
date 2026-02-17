@@ -21,14 +21,17 @@ export default function CourseCard({
   category 
 }: CourseCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+    <Link 
+      href={`/courses/${id}`}
+      className="block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer"
+    >
       {/* Icon or Image Header */}
       <div className="h-48 bg-white flex items-center justify-center relative overflow-hidden">
         {thumbnail_url ? (
           <img 
             src={thumbnail_url} 
             alt={title}
-            className="w-full h-full object-contain p-4"
+            className="w-full h-full object-contain p-8"
           />
         ) : Icon ? (
           <Icon className="h-16 w-16 text-white" />
@@ -52,15 +55,12 @@ export default function CourseCard({
           <span className="text-2xl font-bold text-[#2d7a5f]">
             ${price}
           </span>
-          <Link 
-            href={`/courses/${id}`} 
-            className="text-[#2d7a5f] font-medium group-hover:underline flex items-center"
-          >
+          <span className="text-[#2d7a5f] font-medium group-hover:underline flex items-center">
             Ver más
             <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

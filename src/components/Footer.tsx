@@ -3,18 +3,18 @@ import { GraduationCap } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-[#a4c639] text-white py-12">
+    <footer className="bg-[#a4c639] text-white py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
+          <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <GraduationCap className="h-8 w-8 text-white" />
-              <span className="text-2xl font-bold">TRIADA</span>
+              <GraduationCap className="h-6 md:h-8 w-6 md:w-8 text-white" />
+              <span className="text-xl md:text-2xl font-bold">TRIADA</span>
             </div>
-            <p className="text-[#e8e4d0] text-sm">
+            <p className="text-[#e8e4d0] text-sm md:text-base">
               Global, Docencia e Investigación
             </p>
-            <p className="text-[#e8e4d0]/80 text-sm mt-2">
+            <p className="text-[#e8e4d0]/80 text-xs md:text-sm mt-2">
               Tu plataforma de aprendizaje profesional
             </p>
           </div>

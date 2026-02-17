@@ -112,10 +112,10 @@ function RegisterForm() {
       </div>
 
       {/* Contenido */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 min-h-screen flex items-center justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
           {/* Logo */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 md:mb-8">
             <Link href="/" className="inline-flex items-center justify-center">
               <Image 
                 src="/logos/Triada-logo-mono-green.png" 
@@ -123,15 +123,15 @@ function RegisterForm() {
                 width={240} 
                 height={80}
                 priority
-                className="h-20 w-auto drop-shadow-md"
+                className="h-16 md:h-20 w-auto drop-shadow-md"
               />
             </Link>
           </div>
 
           {/* Card */}
-          <div className="bg-white rounded-2xl shadow-2xl p-8 backdrop-blur-sm border border-gray-100">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 backdrop-blur-sm border border-gray-100">
+          <div className="mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Crear cuenta
             </h2>
             <p className="text-gray-600">

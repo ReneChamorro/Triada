@@ -76,7 +76,7 @@ export default function HomePage() {
       <Header currentPage="home" />
 
       {/* Hero Section */}
-      <section className="relative bg-[#e8e4d0] pt-16 pb-0 overflow-hidden">
+      <section className="relative bg-[#e8e4d0] pt-8 md:pt-16 pb-0 overflow-hidden">
         {/* Decorative Wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 320" className="w-full h-auto">
@@ -88,18 +88,18 @@ export default function HomePage() {
           </svg>
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10 pb-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10 pb-20 md:pb-32">
           {/* Main Heading */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a5744] mb-6 leading-tight uppercase">
-            Transforma tu Carrera Profesional,<br />
-            Aprende con los Mejores
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-[#1a5744] mb-4 md:mb-6 leading-tight uppercase">
+            Transforma tu Carrera Profesional,<br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>Aprende con los Mejores
           </h1>
-          <p className="text-lg md:text-xl text-[#1a5744]/80 mb-16 max-w-3xl mx-auto">
+          <p className="text-base md:text-lg lg:text-xl text-[#1a5744]/80 mb-8 md:mb-16 max-w-3xl mx-auto px-4">
             Accede a cursos de alta calidad diseñados por expertos. Aprende a tu ritmo y obtén certificación reconocida internacionalmente.
           </p>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-5xl mx-auto">
             {features.map((feature, index) => (
               <div
                 key={feature.id}
@@ -107,31 +107,31 @@ export default function HomePage() {
                   feature.is_highlighted
                     ? 'bg-[#a4c639] transform md:-translate-y-4'
                     : 'bg-[#e8e4d0]'
-                } rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all`}
+                } rounded-xl md:rounded-2xl p-3 md:p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all`}
               >
-                <div className="w-full h-40 bg-white rounded-xl mb-6 flex items-center justify-center overflow-hidden">
+                <div className="w-full h-24 md:h-32 lg:h-40 bg-white rounded-lg md:rounded-xl mb-3 md:mb-4 lg:mb-6 flex items-center justify-center overflow-hidden">
                   {feature.icon_url ? (
                     <div className="relative w-full h-full">
                       <Image
                         src={feature.icon_url}
                         alt={feature.title}
                         fill
-                        className="object-contain p-4"
+                        className="object-contain p-2 md:p-4"
                       />
                     </div>
                   ) : (
                     // Fallback icons
-                    index === 0 ? <Award className="h-20 w-20 text-[#2d7a5f]" /> :
-                    index === 1 ? <Users className="h-20 w-20 text-[#2d7a5f]" /> :
-                    <BookOpen className="h-20 w-20 text-[#2d7a5f]" />
+                    index === 0 ? <Award className="h-12 md:h-16 lg:h-20 w-12 md:w-16 lg:w-20 text-[#2d7a5f]" /> :
+                    index === 1 ? <Users className="h-12 md:h-16 lg:h-20 w-12 md:w-16 lg:w-20 text-[#2d7a5f]" /> :
+                    <BookOpen className="h-12 md:h-16 lg:h-20 w-12 md:w-16 lg:w-20 text-[#2d7a5f]" />
                   )}
                 </div>
-                <h3 className={`text-xl font-bold mb-3 ${
+                <h3 className={`text-xs md:text-lg lg:text-xl font-bold mb-1 md:mb-2 lg:mb-3 ${
                   feature.is_highlighted ? 'text-[#1a5744]' : 'text-[#1a5744]'
                 }`}>
                   {feature.title}
                 </h3>
-                <p className={`text-sm leading-relaxed ${
+                <p className={`text-[10px] md:text-xs lg:text-sm leading-relaxed ${
                   feature.is_highlighted ? 'text-[#1a5744]' : 'text-gray-700'
                 }`}>
                   {feature.description}
@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* About Us Section */}
-      <section className="relative bg-[#a4c639] py-20 overflow-hidden -mt-1 pb-0">
+      <section className="relative bg-[#a4c639] py-12 md:py-20 overflow-hidden -mt-1 pb-0">
         {/* Decorative Wave Bottom */}
         <div className="absolute bottom-0 left-0 right-0 -mb-1">
           <svg viewBox="0 0 1440 320" className="w-full h-auto block">
@@ -155,8 +155,8 @@ export default function HomePage() {
           </svg>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pb-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 pb-20 md:pb-32">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             {/* Image/Placeholder */}
             <div className="order-2 md:order-1">
               <div className="bg-[#e8e4d0] rounded-3xl border-8 border-[#e8e4d0] shadow-2xl overflow-hidden aspect-square flex items-center justify-center">
@@ -179,10 +179,10 @@ export default function HomePage() {
 
             {/* Content */}
             <div className="order-1 md:order-2">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6">
                 {aboutSection?.title || 'Sobre Nosotros'}
               </h2>
-              <div className="space-y-4 text-white/90 text-lg leading-relaxed mb-8">
+              <div className="space-y-3 md:space-y-4 text-white/90 text-base md:text-lg leading-relaxed mb-6 md:mb-8">
                 <p>
                   {aboutSection?.subtitle && (
                     <span className="font-bold text-[#1a5744]">{aboutSection.subtitle} </span>
@@ -195,7 +195,7 @@ export default function HomePage() {
               </div>
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="inline-block bg-[#e8e4d0] text-[#1a5744] hover:bg-white px-8 py-3 rounded-full text-lg font-bold transition-colors shadow-lg cursor-pointer"
+                className="inline-block bg-[#e8e4d0] text-[#1a5744] hover:bg-white px-6 md:px-8 py-2 md:py-3 rounded-full text-base md:text-lg font-bold transition-colors shadow-lg cursor-pointer"
               >
                 {aboutSection?.button_text || 'Ver Más'}
               </button>
@@ -205,15 +205,15 @@ export default function HomePage() {
       </section>
 
       {/* Featured Courses */}
-      <section className="bg-[#e8e4d0] pt-0 pb-16">
+      <section className="bg-[#e8e4d0] pt-0 pb-12 md:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1a5744] mb-4">Cursos Destacados</h2>
-            <p className="text-lg text-gray-600">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1a5744] mb-3 md:mb-4">Cursos Destacados</h2>
+            <p className="text-base md:text-lg text-gray-600">
               Explora nuestra selección de cursos más recientes
             </p>
           </div>
-          <div className={`grid gap-8 ${courses.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : courses.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-3'}`}>
+          <div className={`grid gap-4 md:gap-6 lg:gap-8 ${courses.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : courses.length === 2 ? 'grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-3'}`}>
             {courses && courses.length > 0 ? (
               courses.slice(0, 3).map((course) => (
                 <CourseCard

@@ -173,23 +173,23 @@ export default function CheckoutPage() {
       </div>
 
       {/* Contenido */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
         {/* Header con logo */}
-        <div className="mb-8 md:mb-12">
-          <Link href="/dashboard" className="inline-flex items-center justify-center mb-6">
+        <div className="mb-6 md:mb-8 lg:mb-12">
+          <Link href="/dashboard" className="inline-flex items-center justify-center mb-4 md:mb-6">
             <Image
               src="/logos/Triada-logo-mono-green.png"
               alt="Triada Logo"
               width={180}
               height={60}
               priority
-              className="h-14 md:h-16 w-auto drop-shadow-md"
+              className="h-12 md:h-14 lg:h-16 w-auto drop-shadow-md"
             />
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#1a5744] mb-2">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a5744] mb-2">
             Completar compra
           </h1>
-          <p className="text-gray-700">
+          <p className="text-sm md:text-base text-gray-700">
             Elige tu método de pago preferido
           </p>
         </div>
@@ -197,20 +197,20 @@ export default function CheckoutPage() {
         <div className="grid md:grid-cols-3 gap-6 md:gap-8">
           {/* Course Summary - Diseño burbuja */}
           <div className="md:col-span-1 order-2 md:order-1">
-            <div className="bg-white rounded-3xl shadow-xl p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20">
-              <h3 className="font-bold text-xl text-[#1a5744] mb-4">Resumen del curso</h3>
+            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20">
+              <h3 className="font-bold text-lg md:text-xl text-[#1a5744] mb-3 md:mb-4">Resumen del curso</h3>
               
               {course.image_url && (
-                <div className="aspect-video bg-gradient-to-br from-[#a4c639] to-[#1a5744] rounded-2xl mb-4 overflow-hidden">
+                <div className="aspect-video bg-white rounded-2xl mb-3 md:mb-4 overflow-hidden border border-gray-200">
                   <img 
                     src={course.image_url} 
                     alt={course.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-8"
                   />
                 </div>
               )}
               
-              <h4 className="font-semibold text-lg text-gray-900 mb-4 line-clamp-2">
+              <h4 className="font-semibold text-base md:text-lg text-gray-900 mb-3 md:mb-4 line-clamp-2">
                 {course.title}
               </h4>
               
@@ -220,16 +220,16 @@ export default function CheckoutPage() {
                 </p>
               )}
               
-              <div className="border-t-2 border-[#F5E6D3] pt-4 mt-4">
+              <div className="border-t-2 border-[#F5E6D3] pt-3 md:pt-4 mt-3 md:mt-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700 font-medium">Total a pagar</span>
-                  <span className="text-3xl font-bold text-[#a4c639]">
+                  <span className="text-sm md:text-base text-gray-700 font-medium">Total a pagar</span>
+                  <span className="text-2xl md:text-3xl font-bold text-[#a4c639]">
                     {formatPrice(course.price, course.currency)}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-6 bg-[#a4c639]/10 rounded-2xl p-4">
+              <div className="mt-4 md:mt-6 bg-[#a4c639]/10 rounded-2xl p-3 md:p-4">
                 <p className="text-xs text-gray-700 flex items-start">
                   <span className="text-[#a4c639] mr-2">🔒</span>
                   <span>Pago 100% seguro y encriptado. Acceso inmediato al curso.</span>

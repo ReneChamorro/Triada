@@ -66,21 +66,21 @@ export default function CoursesPage() {
       <Header currentPage="courses" />
 
       {/* Hero Section */}
-      <section className="bg-[#e8e4d0] py-16">
+      <section className="bg-[#e8e4d0] py-8 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#1a5744] mb-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a5744] mb-3 md:mb-4">
             Catálogo de Cursos
           </h1>
-          <p className="text-xl text-[#1a5744]/80 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-[#1a5744]/80 max-w-2xl mx-auto">
             Encuentra el curso perfecto para tu desarrollo profesional
           </p>
         </div>
       </section>
 
       {/* Search and Filters */}
-      <section className="bg-white border-b py-8">
+      <section className="bg-white border-b py-6 md:py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
             {/* Search Bar */}
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -118,15 +118,15 @@ export default function CoursesPage() {
       </section>
 
       {/* Courses Grid */}
-      <section className="py-12 bg-gradient-to-br from-[#e8e4d0]/30 to-white">
+      <section className="py-8 md:py-12 bg-gradient-to-br from-[#e8e4d0]/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#2d7a5f] border-r-transparent"></div>
-              <p className="mt-4 text-gray-600">Cargando cursos...</p>
+            <div className="text-center py-12 md:py-20">
+              <div className="inline-block h-10 w-10 md:h-12 md:w-12 animate-spin rounded-full border-4 border-solid border-[#2d7a5f] border-r-transparent"></div>
+              <p className="mt-4 text-gray-600 text-sm md:text-base">Cargando cursos...</p>
             </div>
           ) : filteredCourses.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {filteredCourses.map((course) => (
                 <Link 
                   key={course.id} 
@@ -138,7 +138,7 @@ export default function CoursesPage() {
                       <img 
                         src={course.image_url} 
                         alt={course.title}
-                        className="w-full h-full object-contain p-4"
+                        className="w-full h-full object-contain p-8"
                       />
                     </div>
                   ) : (
@@ -146,15 +146,15 @@ export default function CoursesPage() {
                       <BookOpen className="h-16 w-16 text-white" />
                     </div>
                   )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-[#1a5744] mb-3 group-hover:text-[#2d7a5f] transition-colors">
+                  <div className="p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-bold text-[#1a5744] mb-2 md:mb-3 group-hover:text-[#2d7a5f] transition-colors line-clamp-2">
                       {course.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
                       {course.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-[#2d7a5f]">
+                      <span className="text-xl md:text-2xl font-bold text-[#2d7a5f]">
                         ${course.price}
                       </span>
                       <span className="text-[#2d7a5f] font-medium group-hover:underline flex items-center">
