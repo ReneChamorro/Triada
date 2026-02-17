@@ -38,12 +38,14 @@ export default function HomePage() {
     async function fetchData() {
       const supabase = createClient()
       
-      // Fetch courses
+      // Fetch featured courses
       const { data: coursesData } = await supabase
         .from('courses')
         .select('*')
-        .eq('is_published', true)
-        .limit(6)
+        .eq('status', 'published')
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
+        .limit(3)
       
       if (coursesData) setCourses(coursesData)
 
