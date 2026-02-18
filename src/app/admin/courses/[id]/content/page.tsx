@@ -287,11 +287,29 @@ export default function CourseContentPage() {
 
   const saveLesson = async () => {
     try {
+      // Extract YouTube ID if video_url is a YouTube URL
+      let youtubeVideoId = null;
+      if (lessonForm.content_type === 'video' && lessonForm.video_url) {
+        const youtubePatterns = [
+          /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+          /^([a-zA-Z0-9_-]{11})$/ // Direct ID
+        ];
+        
+        for (const pattern of youtubePatterns) {
+          const match = lessonForm.video_url.match(pattern);
+          if (match && match[1]) {
+            youtubeVideoId = match[1];
+            break;
+          }
+        }
+      }
+
       const lessonData = {
         title: lessonForm.title,
         description: lessonForm.description,
         content_type: lessonForm.content_type,
         video_url: lessonForm.content_type === 'video' ? lessonForm.video_url : null,
+        youtube_video_id: youtubeVideoId,
         pdf_url: lessonForm.content_type === 'pdf' ? lessonForm.pdf_url : null,
         text_content: lessonForm.content_type === 'text' ? lessonForm.text_content : null,
         duration_minutes: lessonForm.duration_minutes,
@@ -638,11 +656,34 @@ export default function CourseContentPage() {
 
               {/* Content Type Fields */}
               {lessonForm.content_type === 'video' && (
-                <div>
-                  <label className="block text-sm font-semibold text-[#1a5744] mb-2">
-                    Video
-                  </label>
-                  {lessonForm.video_url ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1a5744] mb-2">
+                      URL de YouTube
+                    </label>
+                    <input
+                      type="text"
+                      value={lessonForm.video_url}
+                      onChange={(e) => setLessonForm({ ...lessonForm, video_url: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
+                      placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Recomendado: Sube tu video a YouTube (puede ser unlisted) y pega aquí la URL. 
+                      Esto ahorra almacenamiento y ofrece mejor rendimiento.
+                    </p>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">o sube un archivo</span>
+                    </div>
+                  </div>
+
+                  {lessonForm.video_url && !lessonForm.video_url.includes('youtube') && !lessonForm.video_url.includes('youtu.be') ? (
                     <div className="space-y-2">
                       <video
                         src={lessonForm.video_url}
@@ -656,7 +697,7 @@ export default function CourseContentPage() {
                         Eliminar video
                       </button>
                     </div>
-                  ) : (
+                  ) : !lessonForm.video_url && (
                     <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#a4c639] transition-colors">
                       {uploadingVideo ? (
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a4c639]"></div>
@@ -665,6 +706,7 @@ export default function CourseContentPage() {
                           <Upload className="w-8 h-8 text-gray-400 mb-2" />
                           <span className="text-gray-600">Subir video</span>
                           <span className="text-sm text-gray-400">MP4, MOV hasta 500MB</span>
+                          <span className="text-xs text-red-500 mt-1">⚠️ No recomendado - usa YouTube en su lugar</span>
                         </>
                       )}
                       <input
