@@ -123,23 +123,28 @@ export default function CheckoutPage() {
   const handlePayPalSuccess = async (orderId: string) => {
     setProcessing(true)
     try {
+      console.log('[Checkout] Capturing PayPal payment:', orderId, courseId)
+      
       const response = await fetch('/api/payments/paypal/capture', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId, courseId }),
       })
 
-      const { success, error } = await response.json()
+      const data = await response.json()
+      console.log('[Checkout] Capture response:', data)
 
-      if (success) {
+      if (data.success) {
+        console.log('[Checkout] Payment successful, redirecting...')
         router.push(`/courses/${courseId}/learn?payment=success`)
       } else {
-        alert(error || 'Error al procesar el pago con PayPal')
+        console.error('[Checkout] Payment failed:', data)
+        alert(data.error || 'Error al procesar el pago con PayPal. Por favor contacta a soporte.')
         setProcessing(false)
       }
     } catch (error) {
-      console.error('Error:', error)
-      alert('Ocurrió un error al procesar el pago')
+      console.error('[Checkout] Exception during payment capture:', error)
+      alert('Ocurrió un error al procesar el pago. Por favor verifica tu compra en el dashboard.')
       setProcessing(false)
     }
   }
@@ -332,20 +337,33 @@ export default function CheckoutPage() {
                           }}
                           disabled={processing}
                           createOrder={async () => {
-                            const response = await fetch('/api/payments/paypal/create', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ courseId }),
-                            })
-                            const { orderId } = await response.json()
-                            return orderId
+                            try {
+                              console.log('[PayPal] Creating order for course:', courseId)
+                              const response = await fetch('/api/payments/paypal/create', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ courseId }),
+                              })
+                              const data = await response.json()
+                              console.log('[PayPal] Order created:', data.orderId)
+                              return data.orderId
+                            } catch (error) {
+                              console.error('[PayPal] Error creating order:', error)
+                              throw error
+                            }
                           }}
                           onApprove={async (data) => {
+                            console.log('[PayPal] Payment approved:', data.orderID)
                             await handlePayPalSuccess(data.orderID!)
                           }}
                           onError={(err) => {
-                            console.error('PayPal error:', err)
-                            alert('Error al procesar el pago con PayPal')
+                            console.error('[PayPal] Payment error:', err)
+                            alert('Error al procesar el pago con PayPal. Por favor intenta nuevamente.')
+                            setProcessing(false)
+                          }}
+                          onCancel={() => {
+                            console.log('[PayPal] Payment cancelled by user')
+                            setProcessing(false)
                           }}
                         />
                       </PayPalScriptProvider>
