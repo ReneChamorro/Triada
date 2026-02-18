@@ -98,13 +98,43 @@ export async function POST(request: Request) {
       )
     }
 
-    // Grant access to the course
+    const amountPaid = parseFloat(captureData.purchase_units[0].amount.value)
+    const currency = captureData.purchase_units[0].amount.currency_code
+
+    // 1. Register the purchase transaction
+    const purchaseData = {
+      user_id: user.id,
+      course_id: courseId,
+      amount: amountPaid,
+      currency: currency,
+      payment_method: 'paypal',
+      payment_id: captureData.id,
+      status: 'approved', // PayPal already approved it
+      admin_notes: 'Aprobado automáticamente por PayPal',
+      reviewed_at: new Date().toISOString(),
+    }
+
+    console.log('[PayPal Capture] Registering purchase transaction:', purchaseData)
+
+    const { error: purchaseError, data: purchaseRecord } = await supabase
+      .from('purchases')
+      .insert(purchaseData)
+      .select()
+
+    if (purchaseError) {
+      console.error('[PayPal Capture] Purchase registration error:', purchaseError)
+      // Continue anyway - the important part is granting access
+    } else {
+      console.log('[PayPal Capture] Purchase registered successfully:', purchaseRecord)
+    }
+
+    // 2. Grant access to the course
     const enrollmentData = {
       user_id: user.id,
       course_id: courseId,
       payment_id: captureData.id,
       payment_method: 'paypal',
-      amount_paid: parseFloat(captureData.purchase_units[0].amount.value),
+      amount_paid: amountPaid,
       enrolled_at: new Date().toISOString(),
       progress_percentage: 0,
       is_completed: false,
