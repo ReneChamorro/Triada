@@ -217,7 +217,7 @@ export default function AdminDashboard() {
                 <div
                   key={course.id}
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#a4c639] transition-colors cursor-pointer"
-                  onClick={() => router.push(`/admin/courses/${course.id}`)}
+                  onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="bg-[#a4c639]/10 p-2 rounded-lg">
