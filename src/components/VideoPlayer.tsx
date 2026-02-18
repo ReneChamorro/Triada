@@ -63,7 +63,18 @@ export default function VideoPlayer({
   // If we have YouTube ID, render YouTube player
   if (extractedYoutubeId || youtubeVideoId) {
     const videoId = extractedYoutubeId || youtubeVideoId
-    const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1${autoplay ? '&autoplay=1' : ''}`
+    // Parameters to minimize YouTube UI and branding
+    const params = new URLSearchParams({
+      rel: '0',                    // No related videos at end
+      modestbranding: '1',         // Minimal YouTube branding
+      fs: '1',                     // Allow fullscreen
+      disablekb: '0',              // Enable keyboard controls
+      playsinline: '1',            // Play inline on iOS
+      enablejsapi: '1',            // Enable JS API for tracking
+      origin: typeof window !== 'undefined' ? window.location.origin : '',
+      ...(autoplay && { autoplay: '1' })
+    })
+    const embedUrl = `https://www.youtube.com/embed/${videoId}?${params.toString()}`
 
     return (
       <div className={`relative w-full ${className}`}>
