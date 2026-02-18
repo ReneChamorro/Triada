@@ -93,8 +93,9 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="flex md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors z-50 relative"
               aria-label="Toggle menu"
+              type="button"
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -176,7 +177,7 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-[60] bg-black/50" onClick={() => setMobileMenuOpen(false)}>
           <div 
             className="absolute top-16 right-0 left-0 bg-white shadow-lg border-t border-gray-200 max-h-[calc(100vh-4rem)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
