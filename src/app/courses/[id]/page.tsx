@@ -68,9 +68,9 @@ export default async function CourseDetailPage({
 
       {/* Course Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 order-2 lg:order-1">
+          <div className="w-full lg:col-span-2 order-2 lg:order-1">
             <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-8">
               <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Acerca de este curso</h2>
               {course.description ? (
@@ -89,7 +89,7 @@ export default async function CourseDetailPage({
           </div>
 
           {/* Sidebar - Purchase Card */}
-          <div className="lg:col-span-1 order-1 lg:order-2">
+          <div className="w-full lg:col-span-1 order-1 lg:order-2">
             <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 lg:sticky lg:top-6">
               <div className="aspect-video bg-white rounded-lg mb-4 overflow-hidden border border-gray-200">
                 {course.image_url ? (

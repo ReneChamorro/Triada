@@ -175,7 +175,7 @@ export default function CheckoutPage() {
       {/* Contenido */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
         {/* Header con logo */}
-        <div className="mb-6 md:mb-8 lg:mb-12">
+        <div className="mb-6 md:mb-8 lg:mb-12 text-center md:text-left">
           <Link href="/dashboard" className="inline-flex items-center justify-center mb-4 md:mb-6">
             <Image
               src="/logos/Triada-logo-mono-green.png"
@@ -194,10 +194,10 @@ export default function CheckoutPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-full mx-auto">
           {/* Course Summary - Diseño burbuja */}
-          <div className="md:col-span-1 order-2 md:order-1">
-            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20">
+          <div className="w-full md:col-span-1 order-2 md:order-1">
+            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20 mx-auto max-w-lg md:max-w-none">
               <h3 className="font-bold text-lg md:text-xl text-[#1a5744] mb-3 md:mb-4">Resumen del curso</h3>
               
               {course.image_url && (
@@ -239,7 +239,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Payment Methods */}
-          <div className="md:col-span-2 space-y-4 md:space-y-6 order-1 md:order-2">
+          <div className="w-full md:col-span-2 space-y-4 md:space-y-6 order-1 md:order-2 mx-auto max-w-2xl md:max-w-none">
             {/* Trial Access - NEW */}
             <div
               className={`bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] rounded-3xl shadow-xl p-6 border-2 cursor-pointer transition-all ${
