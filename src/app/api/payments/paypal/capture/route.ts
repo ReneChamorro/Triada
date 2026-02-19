@@ -84,9 +84,13 @@ export async function POST(request: Request) {
     )
 
     const captureData = await captureResponse.json()
-    console.log('[PayPal Capture] Capture response:', {
+    console.log('[PayPal Capture] Full capture response:', JSON.stringify(captureData, null, 2))
+    
+    console.log('[PayPal Capture] Capture response summary:', {
       status: captureData.status,
       id: captureData.id,
+      has_purchase_units: !!captureData.purchase_units,
+      purchase_units_length: captureData.purchase_units?.length,
       amount: captureData.purchase_units?.[0]?.amount?.value
     })
 
@@ -98,8 +102,28 @@ export async function POST(request: Request) {
       )
     }
 
-    const amountPaid = parseFloat(captureData.purchase_units[0].amount.value)
-    const currency = captureData.purchase_units[0].amount.currency_code
+    // Validate purchase_units structure
+    if (!captureData.purchase_units || 
+        !Array.isArray(captureData.purchase_units) || 
+        captureData.purchase_units.length === 0) {
+      console.error('[PayPal Capture] Invalid purchase_units structure:', captureData)
+      return NextResponse.json(
+        { error: 'Respuesta inválida de PayPal: purchase_units vacío', details: captureData },
+        { status: 400 }
+      )
+    }
+
+    const purchaseUnit = captureData.purchase_units[0]
+    if (!purchaseUnit.amount || !purchaseUnit.amount.value) {
+      console.error('[PayPal Capture] Invalid amount structure:', purchaseUnit)
+      return NextResponse.json(
+        { error: 'Respuesta inválida de PayPal: amount vacío', details: purchaseUnit },
+        { status: 400 }
+      )
+    }
+
+    const amountPaid = parseFloat(purchaseUnit.amount.value)
+    const currency = purchaseUnit.amount.currency_code || 'USD'
 
     // Use service client to bypass RLS for server-side inserts
     const serviceClient = createServiceClient()
