@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 const PAYPAL_API = process.env.NODE_ENV === 'production'
@@ -101,6 +101,9 @@ export async function POST(request: Request) {
     const amountPaid = parseFloat(captureData.purchase_units[0].amount.value)
     const currency = captureData.purchase_units[0].amount.currency_code
 
+    // Use service client to bypass RLS for server-side inserts
+    const serviceClient = createServiceClient()
+
     // 1. Register the purchase transaction
     const purchaseData = {
       user_id: user.id,
@@ -116,17 +119,20 @@ export async function POST(request: Request) {
 
     console.log('[PayPal Capture] Registering purchase transaction:', purchaseData)
 
-    const { error: purchaseError, data: purchaseRecord } = await supabase
+    const { error: purchaseError, data: purchaseRecord } = await serviceClient
       .from('purchases')
       .insert(purchaseData)
       .select()
 
     if (purchaseError) {
       console.error('[PayPal Capture] Purchase registration error:', purchaseError)
-      // Continue anyway - the important part is granting access
-    } else {
-      console.log('[PayPal Capture] Purchase registered successfully:', purchaseRecord)
+      return NextResponse.json(
+        { error: 'Error al registrar la compra', details: purchaseError },
+        { status: 500 }
+      )
     }
+
+    console.log('[PayPal Capture] Purchase registered successfully:', purchaseRecord)
 
     // 2. Grant access to the course
     const enrollmentData = {
@@ -142,7 +148,7 @@ export async function POST(request: Request) {
 
     console.log('[PayPal Capture] Inserting enrollment:', enrollmentData)
 
-    const { error: enrollError, data: enrollData } = await supabase
+    const { error: enrollError, data: enrollData } = await serviceClient
       .from('user_courses')
       .insert(enrollmentData)
       .select()
