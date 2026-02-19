@@ -121,9 +121,11 @@ export default function CheckoutPage() {
   }
 
   const handlePayPalSuccess = async (orderId: string) => {
+    console.log('[Checkout] handlePayPalSuccess called with orderId:', orderId)
     setProcessing(true)
+    
     try {
-      console.log('[Checkout] Capturing PayPal payment:', orderId, courseId)
+      console.log('[Checkout] Capturing PayPal payment. OrderID:', orderId, 'CourseID:', courseId)
       
       const response = await fetch('/api/payments/paypal/capture', {
         method: 'POST',
@@ -131,20 +133,23 @@ export default function CheckoutPage() {
         body: JSON.stringify({ orderId, courseId }),
       })
 
+      console.log('[Checkout] Response status:', response.status, response.statusText)
+      
       const data = await response.json()
-      console.log('[Checkout] Capture response:', data)
+      console.log('[Checkout] Capture response data:', JSON.stringify(data, null, 2))
 
-      if (data.success) {
-        console.log('[Checkout] Payment successful, redirecting...')
+      if (response.ok && data.success) {
+        console.log('[Checkout] Payment successful! Redirecting to course...')
+        alert('¡Pago exitoso! Redirigiendo al curso...')
         router.push(`/courses/${courseId}/learn?payment=success`)
       } else {
-        console.error('[Checkout] Payment failed:', data)
+        console.error('[Checkout] Payment failed. Response:', data)
         alert(data.error || 'Error al procesar el pago con PayPal. Por favor contacta a soporte.')
         setProcessing(false)
       }
     } catch (error) {
       console.error('[Checkout] Exception during payment capture:', error)
-      alert('Ocurrió un error al procesar el pago. Por favor verifica tu compra en el dashboard.')
+      alert('Ocurrió un error al procesar el pago. Error: ' + (error instanceof Error ? error.message : 'Unknown'))
       setProcessing(false)
     }
   }
@@ -353,8 +358,22 @@ export default function CheckoutPage() {
                             }
                           }}
                           onApprove={async (data) => {
-                            console.log('[PayPal] Payment approved:', data.orderID)
-                            await handlePayPalSuccess(data.orderID!)
+                            try {
+                              console.log('[PayPal] onApprove triggered with data:', JSON.stringify(data, null, 2))
+                              console.log('[PayPal] Payment approved. OrderID:', data.orderID)
+                              
+                              if (!data.orderID) {
+                                console.error('[PayPal] No orderID in approval data!')
+                                alert('Error: No se recibió ID de orden de PayPal')
+                                return
+                              }
+                              
+                              await handlePayPalSuccess(data.orderID)
+                            } catch (error) {
+                              console.error('[PayPal] Error in onApprove:', error)
+                              alert('Error al procesar la aprobación de PayPal: ' + (error instanceof Error ? error.message : 'Unknown'))
+                              setProcessing(false)
+                            }
                           }}
                           onError={(err) => {
                             console.error('[PayPal] Payment error:', err)

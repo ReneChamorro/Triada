@@ -26,14 +26,18 @@ async function getPayPalAccessToken() {
 export async function POST(request: Request) {
   try {
     const { courseId } = await request.json()
+    console.log('[PayPal Create] Starting order creation for course:', courseId)
 
     const supabase = await createClient()
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
+      console.error('[PayPal Create] Auth error:', authError)
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
     }
+
+    console.log('[PayPal Create] User authenticated:', user.id)
 
     // Get course details
     const { data: course, error: courseError } = await supabase
@@ -44,11 +48,38 @@ export async function POST(request: Request) {
       .single()
 
     if (courseError || !course) {
+      console.error('[PayPal Create] Course not found:', courseError)
       return NextResponse.json({ error: 'Curso no encontrado' }, { status: 404 })
     }
 
+    console.log('[PayPal Create] Course found:', course.title, 'Price:', course.price)
+
     // Get PayPal access token
     const accessToken = await getPayPalAccessToken()
+    console.log('[PayPal Create] Access token obtained')
+
+    const orderPayload = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          reference_id: courseId,
+          description: course.title,
+          amount: {
+            currency_code: course.currency || 'USD',
+            value: course.price.toFixed(2),
+          },
+        },
+      ],
+      application_context: {
+        brand_name: 'Triada',
+        landing_page: 'NO_PREFERENCE',
+        user_action: 'PAY_NOW',
+        return_url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}/learn?payment=success`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}/checkout?payment=cancelled`,
+      },
+    }
+
+    console.log('[PayPal Create] Creating order with payload:', JSON.stringify(orderPayload, null, 2))
 
     // Create PayPal order
     const orderResponse = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
@@ -57,41 +88,24 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [
-          {
-            reference_id: courseId,
-            description: course.title,
-            amount: {
-              currency_code: course.currency || 'USD',
-              value: course.price.toFixed(2),
-            },
-          },
-        ],
-        application_context: {
-          brand_name: 'Triada',
-          landing_page: 'NO_PREFERENCE',
-          user_action: 'PAY_NOW',
-          return_url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}/learn?payment=success`,
-          cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}/checkout?payment=cancelled`,
-        },
-      }),
+      body: JSON.stringify(orderPayload),
     })
 
     const orderData = await orderResponse.json()
+    console.log('[PayPal Create] Order response:', JSON.stringify(orderData, null, 2))
 
     if (!orderResponse.ok) {
-      console.error('PayPal error:', orderData)
+      console.error('[PayPal Create] PayPal error:', orderData)
       return NextResponse.json(
         { error: 'Error al crear orden de PayPal' },
         { status: 500 }
       )
     }
 
+    console.log('[PayPal Create] Order created successfully. ID:', orderData.id)
     return NextResponse.json({ orderId: orderData.id })
   } catch (error) {
-    console.error('Error:', error)
+    console.error('[PayPal Create] Unexpected error:', error)
     return NextResponse.json(
       { error: 'Error al procesar la solicitud' },
       { status: 500 }
