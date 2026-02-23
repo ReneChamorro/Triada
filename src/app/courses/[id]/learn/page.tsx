@@ -56,8 +56,7 @@ export default function LearnCoursePage() {
   const [modules, setModules] = useState<Module[]>([]);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(true); // Track if on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Start closed on mobile
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -66,16 +65,13 @@ export default function LearnCoursePage() {
     checkAccessAndLoadData();
   }, [courseId]);
 
-  // Auto-open sidebar on desktop, track mobile state
+  // Auto-open sidebar on desktop
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024; // lg breakpoint
-      setIsMobile(mobile);
-      
-      if (!mobile) {
-        setSidebarOpen(true); // Auto-open on desktop
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setSidebarOpen(true);
       } else {
-        setSidebarOpen(false); // Auto-close on mobile
+        setSidebarOpen(false);
       }
     };
 
@@ -347,11 +343,11 @@ export default function LearnCoursePage() {
   }
 
   return (
-    <div className="flex h-screen bg-[#F5E6D3] relative overflow-hidden">
-      {/* Mobile Overlay - SOLO en mobile cuando sidebar abierto */}
-      {isMobile && sidebarOpen && (
+    <div className="flex h-screen bg-[#F5E6D3] relative">
+      {/* Mobile Overlay - debe estar ANTES del main content */}
+      {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -360,7 +356,7 @@ export default function LearnCoursePage() {
       <aside
         className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed lg:relative lg:translate-x-0 z-30 w-80 h-full bg-white shadow-xl transition-transform duration-300 ease-in-out flex flex-col border-r border-gray-200 overflow-hidden`}
+        } fixed lg:relative lg:translate-x-0 z-30 w-80 h-full bg-white shadow-xl transition-transform duration-300 ease-in-out flex flex-col border-r border-gray-200`}
       >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200">
