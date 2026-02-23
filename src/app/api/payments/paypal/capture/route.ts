@@ -114,16 +114,29 @@ export async function POST(request: Request) {
     }
 
     const purchaseUnit = captureData.purchase_units[0]
-    if (!purchaseUnit.amount || !purchaseUnit.amount.value) {
-      console.error('[PayPal Capture] Invalid amount structure:', purchaseUnit)
+    
+    // PayPal returns amount in payments.captures[0].amount (not directly in purchase_units)
+    if (!purchaseUnit.payments || 
+        !purchaseUnit.payments.captures || 
+        !purchaseUnit.payments.captures[0] ||
+        !purchaseUnit.payments.captures[0].amount) {
+      console.error('[PayPal Capture] Invalid payments/captures structure:', purchaseUnit)
       return NextResponse.json(
-        { error: 'Respuesta inválida de PayPal: amount vacío', details: purchaseUnit },
+        { error: 'Respuesta inválida de PayPal: estructura de pagos incorrecta', details: purchaseUnit },
         { status: 400 }
       )
     }
 
-    const amountPaid = parseFloat(purchaseUnit.amount.value)
-    const currency = purchaseUnit.amount.currency_code || 'USD'
+    const capture = purchaseUnit.payments.captures[0]
+    const amountPaid = parseFloat(capture.amount.value)
+    const currency = capture.amount.currency_code || 'USD'
+    
+    console.log('[PayPal Capture] Payment details:', {
+      captureId: capture.id,
+      amount: amountPaid,
+      currency: currency,
+      status: capture.status
+    })
 
     // Use service client to bypass RLS for server-side inserts
     const serviceClient = createServiceClient()
