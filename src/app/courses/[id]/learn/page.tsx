@@ -56,7 +56,7 @@ export default function LearnCoursePage() {
   const [modules, setModules] = useState<Module[]>([]);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Start closed on mobile
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -64,6 +64,24 @@ export default function LearnCoursePage() {
   useEffect(() => {
     checkAccessAndLoadData();
   }, [courseId]);
+
+  // Auto-open sidebar on desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    // Listen for resize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   async function checkAccessAndLoadData() {
     try {
@@ -325,7 +343,15 @@ export default function LearnCoursePage() {
   }
 
   return (
-    <div className="flex h-screen bg-[#F5E6D3]">
+    <div className="flex h-screen bg-[#F5E6D3] relative">
+      {/* Mobile Overlay - debe estar ANTES del main content */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={`${
@@ -429,7 +455,7 @@ export default function LearnCoursePage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col relative z-10">
         {/* Top Bar */}
         <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
           <button
@@ -573,14 +599,6 @@ export default function LearnCoursePage() {
           </footer>
         )}
       </main>
-
-      {/* Overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 }
