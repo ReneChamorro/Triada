@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 
 # database migrations (optional - comment out if you want to version migrations)
-
+supabase/migrations/
 
 # vercel
 .vercel
