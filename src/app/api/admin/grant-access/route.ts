@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { grantAccessSchema, formatZodErrors } from '@/lib/validations'
+import { sendApprovalEmail } from '@/lib/emails'
 
 export async function POST(request: Request) {
   try {
@@ -77,7 +78,34 @@ export async function POST(request: Request) {
       courseId,
       note: adminNote
     })
+// Send approval email to the student
+    try {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', userId)
+        .single()
 
+      const { data: course } = await supabase
+        .from('courses')
+        .select('title')
+        .eq('id', courseId)
+        .single()
+
+      if (userProfile && course) {
+        await sendApprovalEmail(
+          userProfile.email,
+          userProfile.full_name || userProfile.email,
+          course.title,
+          courseId
+        )
+      }
+    } catch (emailError) {
+      console.error('[Manual Grant] Failed to send approval email:', emailError)
+      // Don't fail the request if email fails
+    }
+
+    
     return NextResponse.json({ 
       success: true,
       enrollment: enrollment[0]
