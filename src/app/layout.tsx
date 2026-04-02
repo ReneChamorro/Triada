@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import SessionTimeoutProvider from "@/components/SessionTimeoutProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -66,7 +67,9 @@ export default function RootLayout({
       <head>
         <link rel="canonical" href="https://triadave.com" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <SessionTimeoutProvider>{children}</SessionTimeoutProvider>
+      </body>
     </html>
   );
 }
