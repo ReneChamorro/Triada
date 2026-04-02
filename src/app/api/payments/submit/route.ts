@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     if (ADMIN_EMAILS.length > 0) {
       try {
         await resend.emails.send({
-          from: 'Triada <onboarding@resend.dev>',
+          from: 'Triada <noreply@triadave.com>',
           to: ADMIN_EMAILS,
           subject: `💰 Nuevo pago pendiente — ${course.title}`,
           html: `
