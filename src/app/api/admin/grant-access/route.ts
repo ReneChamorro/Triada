@@ -1,9 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { grantAccessSchema, formatZodErrors } from '@/lib/validations'
 
 export async function POST(request: Request) {
   try {
-    const { userId, courseId, paymentMethod, amountPaid, paymentId, adminNote } = await request.json()
+    const body = await request.json()
+    const parsed = grantAccessSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: formatZodErrors(parsed.error) },
+        { status: 400 }
+      )
+    }
+    const { userId, courseId, paymentMethod, amountPaid, paymentId, adminNote } = parsed.data
 
     const supabase = await createClient()
 

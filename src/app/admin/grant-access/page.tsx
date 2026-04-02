@@ -19,7 +19,7 @@ export default function GrantAccessPage() {
   const [formData, setFormData] = useState({
     userId: '',
     courseId: '',
-    paymentMethod: 'paypal',
+    paymentMethod: 'zelle',
     amountPaid: '',
     paymentId: '',
     adminNote: ''
@@ -103,7 +103,7 @@ export default function GrantAccessPage() {
         setFormData({
           userId: '',
           courseId: '',
-          paymentMethod: 'paypal',
+          paymentMethod: 'zelle',
           amountPaid: '',
           paymentId: '',
           adminNote: ''
@@ -147,7 +147,7 @@ export default function GrantAccessPage() {
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-yellow-800">
           <strong>⚠️ Importante:</strong> Solo usa esta función para pagos ya verificados. 
-          Verifica primero en PayPal/Zelle que el pago haya sido recibido.
+          Verifica primero que el pago haya sido recibido antes de otorgar acceso.
         </p>
       </div>
 
@@ -203,8 +203,10 @@ export default function GrantAccessPage() {
               onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
             >
-              <option value="paypal">PayPal</option>
               <option value="zelle">Zelle</option>
+              <option value="pago_movil">Pago Móvil</option>
+              <option value="transferencia_usd">Transferencia USD</option>
+              <option value="paypal_manual">PayPal</option>
               <option value="manual">Manual/Otro</option>
             </select>
           </div>
@@ -235,10 +237,10 @@ export default function GrantAccessPage() {
             value={formData.paymentId}
             onChange={(e) => setFormData({ ...formData, paymentId: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
-            placeholder="PayPal Transaction ID, Zelle Reference, etc."
+            placeholder="Referencia de Zelle, Pago Móvil, Transferencia, etc."
           />
           <p className="text-xs text-gray-500 mt-1">
-            ID de PayPal, referencia de Zelle, o cualquier identificador del pago
+            Número de referencia o identificador del pago
           </p>
         </div>
 

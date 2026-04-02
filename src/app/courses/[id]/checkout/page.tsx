@@ -1,13 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useParams } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload, CheckCircle, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
+
+type PaymentMethod = 'zelle' | 'pago_movil' | 'transferencia_usd' | 'paypal_manual'
+
+const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: string }[] = [
+  { value: 'zelle', label: 'Zelle', icon: '💜' },
+  { value: 'pago_movil', label: 'Pago Móvil', icon: '📱' },
+  { value: 'transferencia_usd', label: 'Transferencia USD', icon: '🏦' },
+  { value: 'paypal_manual', label: 'PayPal', icon: '🅿️' },
+]
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -17,7 +25,16 @@ export default function CheckoutPage() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'trial' | 'paypal' | 'zelle'>('trial')
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('zelle')
+  const [referenceCode, setReferenceCode] = useState('')
+  const [notes, setNotes] = useState('')
+  const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  // Honeypot field
+  const [honeypot, setHoneypot] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,7 +42,6 @@ export default function CheckoutPage() {
 
       const supabase = createClient()
 
-      // Check authentication
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push(`/login?redirect=/courses/${courseId}/checkout`)
@@ -33,7 +49,6 @@ export default function CheckoutPage() {
       }
       setUser(user)
 
-      // Check if user already has access (optional - don't block if error)
       try {
         const { data: userCourse } = await supabase
           .from('user_courses')
@@ -43,15 +58,13 @@ export default function CheckoutPage() {
           .maybeSingle()
 
         if (userCourse) {
-          // Already has access, redirect to learn
           router.push(`/courses/${courseId}/learn`)
           return
         }
-      } catch (error) {
-        console.log('Error checking access (continuing anyway):', error)
+      } catch (err) {
+        console.log('Error checking access:', err)
       }
 
-      // Fetch course details
       const { data: courseData, error } = await supabase
         .from('courses')
         .select('*')
@@ -60,8 +73,6 @@ export default function CheckoutPage() {
         .single()
 
       if (error || !courseData) {
-        console.error('Error loading course:', error)
-        // Try without status filter if published check fails
         const { data: courseDataAlt } = await supabase
           .from('courses')
           .select('*')
@@ -84,72 +95,65 @@ export default function CheckoutPage() {
     fetchData()
   }, [courseId, router])
 
-  const handleZelleCheckout = () => {
-    router.push(`/courses/${courseId}/checkout/zelle`)
-  }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const handleTrialAccess = async () => {
-    if (!user || !course || processing) return
-
-    setProcessing(true)
-    try {
-      const supabase = createClient()
-      
-      // Insert into user_courses to grant access
-      const { error } = await supabase
-        .from('user_courses')
-        .insert({
-          user_id: user.id,
-          course_id: courseId,
-          payment_method: 'trial',
-          amount_paid: 0,
-          payment_id: `trial_${Date.now()}`,
-          progress_percentage: 0,
-          is_completed: false
-        })
-
-      if (error) throw error
-
-      // Redirect to course
-      router.push(`/courses/${courseId}/learn`)
-    } catch (error: any) {
-      console.error('Error granting trial access:', error)
-      alert('Error al obtener acceso de prueba. Intenta nuevamente.')
-    } finally {
-      setProcessing(false)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen no puede superar 5MB')
+      return
     }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Solo se aceptan imágenes JPG, PNG o WebP')
+      return
+    }
+
+    setReceiptFile(file)
+    setReceiptPreview(URL.createObjectURL(file))
+    setError('')
   }
 
-  const handlePayPalSuccess = async (orderId: string) => {
-    console.log('[Checkout] handlePayPalSuccess called with orderId:', orderId)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    // Honeypot check
+    if (honeypot) return
+
+    if (!receiptFile) {
+      setError('Sube una imagen del comprobante')
+      return
+    }
+    if (!referenceCode.trim()) {
+      setError('Ingresa el código de referencia')
+      return
+    }
+
     setProcessing(true)
-    
     try {
-      console.log('[Checkout] Capturing PayPal payment. OrderID:', orderId, 'CourseID:', courseId)
-      
-      const response = await fetch('/api/payments/paypal/capture', {
+      const formData = new FormData()
+      formData.append('courseId', courseId)
+      formData.append('paymentMethod', paymentMethod)
+      formData.append('referenceCode', referenceCode.trim())
+      formData.append('receipt', receiptFile)
+      if (notes.trim()) formData.append('notes', notes.trim())
+
+      const response = await fetch('/api/payments/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, courseId }),
+        body: formData,
       })
 
-      console.log('[Checkout] Response status:', response.status, response.statusText)
-      
       const data = await response.json()
-      console.log('[Checkout] Capture response data:', JSON.stringify(data, null, 2))
 
-      if (response.ok && data.success) {
-        console.log('[Checkout] Payment successful! Redirecting to course...')
-        alert('¡Pago exitoso! Redirigiendo al curso...')
-        router.push(`/courses/${courseId}/learn?payment=success`)
-      } else {
-        console.error('[Checkout] Payment failed. Response:', data)
-        alert(data.error || 'Error al procesar el pago con PayPal. Por favor contacta a soporte.')
+      if (!response.ok) {
+        setError(data.error || 'Error al enviar el comprobante')
         setProcessing(false)
+        return
       }
-    } catch (error) {
-      console.error('[Checkout] Exception during payment capture:', error)
-      alert('Ocurrió un error al procesar el pago. Error: ' + (error instanceof Error ? error.message : 'Unknown'))
+
+      setSubmitted(true)
+    } catch (err) {
+      setError('Error de conexión. Intenta nuevamente.')
       setProcessing(false)
     }
   }
@@ -162,288 +166,264 @@ export default function CheckoutPage() {
     )
   }
 
-  if (!course) {
-    return null
+  if (!course) return null
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-[#F5E6D3] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center">
+          <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="h-10 w-10 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Comprobante Enviado!</h2>
+          <p className="text-gray-600 mb-6">
+            Tu pago está pendiente de verificación. Te notificaremos por email cuando sea aprobado (usualmente dentro de 24 horas).
+          </p>
+          <div className="space-y-3">
+            <Link
+              href="/my-courses"
+              className="block w-full bg-[#a4c639] text-white hover:bg-[#8ba832] px-6 py-3 rounded-xl font-semibold transition-colors"
+            >
+              Ir a Mis Cursos
+            </Link>
+            <Link
+              href="/courses"
+              className="block w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-6 py-3 rounded-xl font-semibold transition-colors"
+            >
+              Ver Más Cursos
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const paymentInstructions: Record<PaymentMethod, React.ReactNode> = {
+    zelle: (
+      <div className="space-y-2 text-sm">
+        <p><span className="font-medium text-gray-700">Email:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_ZELLE_EMAIL || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Teléfono:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_ZELLE_PHONE || '___RELLENAR___'}</span></p>
+      </div>
+    ),
+    pago_movil: (
+      <div className="space-y-2 text-sm">
+        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAGO_MOVIL_BANCO || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Cédula:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAGO_MOVIL_CI || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Teléfono:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAGO_MOVIL_TELEFONO || '___RELLENAR___'}</span></p>
+      </div>
+    ),
+    transferencia_usd: (
+      <div className="space-y-2 text-sm">
+        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_TRANSFER_BANCO || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Cuenta:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_TRANSFER_CUENTA || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Beneficiario:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_TRANSFER_BENEFICIARIO || '___RELLENAR___'}</span></p>
+      </div>
+    ),
+    paypal_manual: (
+      <div className="space-y-2 text-sm">
+        <p><span className="font-medium text-gray-700">Enviar a:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAYPAL_EMAIL || '___RELLENAR___'}</span></p>
+        <p className="text-gray-500">Envía como &quot;Amigos y familiares&quot; para evitar comisiones.</p>
+      </div>
+    ),
   }
 
   return (
     <div className="min-h-screen bg-[#F5E6D3] relative overflow-hidden">
-      {/* Fondo con ondas decorativas */}
       <div className="absolute inset-0 z-0">
-        <svg
-          className="absolute bottom-0 w-full h-64 text-white opacity-20"
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="currentColor"
-            d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          />
+        <svg className="absolute bottom-0 w-full h-64 text-white opacity-20" viewBox="0 0 1440 320" preserveAspectRatio="none">
+          <path fill="currentColor" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
         </svg>
       </div>
 
-      {/* Contenido */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
-        {/* Header con logo */}
         <div className="mb-6 md:mb-8 lg:mb-12 text-center md:text-left">
           <Link href="/dashboard" className="inline-flex items-center justify-center mb-4 md:mb-6">
-            <Image
-              src="/logos/Triada-logo-mono-green.png"
-              alt="Triada Logo"
-              width={180}
-              height={60}
-              priority
-              className="h-12 md:h-14 lg:h-16 w-auto drop-shadow-md"
-            />
+            <Image src="/logos/Triada-logo-mono-green.png" alt="Triada Logo" width={180} height={60} priority className="h-12 md:h-14 lg:h-16 w-auto drop-shadow-md" />
           </Link>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a5744] mb-2">
-            Completar compra
-          </h1>
-          <p className="text-sm md:text-base text-gray-700">
-            Elige tu método de pago preferido
-          </p>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a5744] mb-2">Completar compra</h1>
+          <p className="text-sm md:text-base text-gray-700">Elige tu método de pago y sube tu comprobante</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-full mx-auto">
-          {/* Course Summary - Diseño burbuja */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          {/* Course Summary */}
           <div className="w-full md:col-span-1 order-2 md:order-1">
-            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20 mx-auto max-w-lg md:max-w-none">
+            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20">
               <h3 className="font-bold text-lg md:text-xl text-[#1a5744] mb-3 md:mb-4">Resumen del curso</h3>
-              
               {course.image_url && (
                 <div className="aspect-video bg-white rounded-2xl mb-3 md:mb-4 overflow-hidden border border-gray-200">
-                  <img 
-                    src={course.image_url} 
-                    alt={course.title}
-                    className="w-full h-full object-contain p-8"
-                  />
+                  <img src={course.image_url} alt={course.title} className="w-full h-full object-contain p-8" />
                 </div>
               )}
-              
-              <h4 className="font-semibold text-base md:text-lg text-gray-900 mb-3 md:mb-4 line-clamp-2">
-                {course.title}
-              </h4>
-              
-              {course.description && (
-                <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                  {course.description}
-                </p>
-              )}
-              
-              <div className="border-t-2 border-[#F5E6D3] pt-3 md:pt-4 mt-3 md:mt-4">
+              <h4 className="font-semibold text-base md:text-lg text-gray-900 mb-3 line-clamp-2">{course.title}</h4>
+              {course.description && <p className="text-sm text-gray-600 mb-4 line-clamp-3">{course.description}</p>}
+              <div className="border-t-2 border-[#F5E6D3] pt-3 mt-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm md:text-base text-gray-700 font-medium">Total a pagar</span>
-                  <span className="text-2xl md:text-3xl font-bold text-[#a4c639]">
-                    {formatPrice(course.price, course.currency)}
-                  </span>
+                  <span className="text-2xl md:text-3xl font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
                 </div>
               </div>
-
-              <div className="mt-4 md:mt-6 bg-[#a4c639]/10 rounded-2xl p-3 md:p-4">
+              <div className="mt-4 bg-[#a4c639]/10 rounded-2xl p-3">
                 <p className="text-xs text-gray-700 flex items-start">
                   <span className="text-[#a4c639] mr-2">🔒</span>
-                  <span>Pago 100% seguro y encriptado. Acceso inmediato al curso.</span>
+                  <span>Verificación manual. Te confirmaremos por email en 24h.</span>
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Payment Methods */}
-          <div className="w-full md:col-span-2 space-y-4 md:space-y-6 order-1 md:order-2 mx-auto max-w-2xl md:max-w-none">
-            {/* Trial Access - NEW */}
-            <div
-              className={`bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] rounded-3xl shadow-xl p-6 border-2 cursor-pointer transition-all ${
-                paymentMethod === 'trial' 
-                  ? 'border-white ring-4 ring-white/30' 
-                  : 'border-[#a4c639]/50 hover:border-white/50'
-              }`}
-              onClick={() => setPaymentMethod('trial')}
-            >
-              <div className="flex items-start gap-4">
-                <input
-                  type="radio"
-                  checked={paymentMethod === 'trial'}
-                  onChange={() => setPaymentMethod('trial')}
-                  className="mt-1 w-5 h-5 text-white focus:ring-white"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                      🎁 Acceso de Prueba
-                    </h3>
-                    <span className="text-3xl font-bold text-white">$0</span>
-                  </div>
-                  <p className="text-white/90 mb-4">
-                    Obtén acceso inmediato y gratuito al curso para probar el sistema. 
-                    Ideal para testing y demostración.
-                  </p>
-                  {paymentMethod === 'trial' && (
+          {/* Payment Form */}
+          <div className="w-full md:col-span-2 order-1 md:order-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 text-sm">{error}</div>
+              )}
+
+              {/* Step 1: Select method */}
+              <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
+                <h3 className="text-lg font-bold text-[#1a5744] mb-4">1. Método de pago</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {PAYMENT_METHODS.map((m) => (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleTrialAccess()
-                      }}
-                      disabled={processing}
-                      className="w-full bg-white text-[#2d7a5f] hover:bg-gray-100 px-6 py-3 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      key={m.value}
+                      type="button"
+                      onClick={() => setPaymentMethod(m.value)}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                        paymentMethod === m.value
+                          ? 'border-[#a4c639] bg-[#a4c639]/10 ring-2 ring-[#a4c639]/20'
+                          : 'border-gray-200 hover:border-[#a4c639]/50'
+                      }`}
                     >
-                      {processing ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          <span>Procesando...</span>
-                        </>
-                      ) : (
-                        <span>Adquirir Acceso Gratis Ahora</span>
-                      )}
+                      <span className="text-2xl block mb-1">{m.icon}</span>
+                      <span className="font-semibold text-sm text-gray-900">{m.label}</span>
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* PayPal Payment */}
-            <div
-              className={`bg-white rounded-3xl shadow-xl p-6 border-2 cursor-pointer transition-all ${
-                paymentMethod === 'paypal' 
-                  ? 'border-[#a4c639] ring-4 ring-[#a4c639]/20' 
-                  : 'border-gray-200 hover:border-[#a4c639]/50'
-              }`}
-              onClick={() => setPaymentMethod('paypal')}
-            >
-              <div className="flex items-start gap-4">
-                <input
-                  type="radio"
-                  checked={paymentMethod === 'paypal'}
-                  onChange={() => setPaymentMethod('paypal')}
-                  className="mt-1 w-5 h-5 text-[#a4c639] focus:ring-[#a4c639]"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-[#1a5744]">PayPal</h3>
-                    <svg className="h-7 w-7" viewBox="0 0 24 24" fill="#003087">
-                      <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.993-.028.15a.805.805 0 0 1-.794.679H7.723a.483.483 0 0 1-.477-.558L9.24 11.35h2.613c4.264 0 7.563-1.73 8.214-6.872zM9.203 4.25h5.866c1.917 0 3.63.298 4.914 1.007 1.3.717 2.213 1.858 2.594 3.512.118.512.177 1.053.177 1.613v.058c0 3.25-2.018 5.81-5.668 6.486a9.95 9.95 0 0 1-2.018.184H12.18c-.512 0-.95.388-1.007.898l-.986 6.25a.668.668 0 0 1-.66.565H6.152a.334.334 0 0 1-.33-.387l2.362-14.967a1.002 1.002 0 0 1 .988-.844z"/>
-                    </svg>
+              {/* Step 2: Payment instructions */}
+              <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
+                <h3 className="text-lg font-bold text-[#1a5744] mb-2">2. Realiza tu pago</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Envía <span className="font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span> a:
+                </p>
+                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                  {paymentInstructions[paymentMethod]}
+                </div>
+              </div>
+
+              {/* Step 3: Upload receipt */}
+              <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
+                <h3 className="text-lg font-bold text-[#1a5744] mb-4">3. Sube tu comprobante</h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Código de referencia *
+                    </label>
+                    <input
+                      type="text"
+                      value={referenceCode}
+                      onChange={(e) => setReferenceCode(e.target.value)}
+                      placeholder="Ej: 1234567890"
+                      maxLength={100}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
+                    />
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Pago rápido y seguro con tu cuenta PayPal o tarjeta de crédito/débito.
-                  </p>
-                  {paymentMethod === 'paypal' && (
-                    <div className="w-full">
-                      <PayPalScriptProvider options={{ 
-                        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-                        currency: course.currency || 'USD',
-                        locale: 'es_ES'
-                      }}>
-                        <PayPalButtons
-                          style={{ 
-                            layout: 'vertical',
-                            color: 'gold',
-                            shape: 'rect',
-                            label: 'pay'
-                          }}
-                          disabled={processing}
-                          createOrder={async () => {
-                            try {
-                              console.log('[PayPal] Creating order for course:', courseId)
-                              const response = await fetch('/api/payments/paypal/create', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ courseId }),
-                              })
-                              const data = await response.json()
-                              console.log('[PayPal] Order created:', data.orderId)
-                              return data.orderId
-                            } catch (error) {
-                              console.error('[PayPal] Error creating order:', error)
-                              throw error
-                            }
-                          }}
-                          onApprove={async (data) => {
-                            try {
-                              console.log('[PayPal] onApprove triggered with data:', JSON.stringify(data, null, 2))
-                              console.log('[PayPal] Payment approved. OrderID:', data.orderID)
-                              
-                              if (!data.orderID) {
-                                console.error('[PayPal] No orderID in approval data!')
-                                alert('Error: No se recibió ID de orden de PayPal')
-                                return
-                              }
-                              
-                              await handlePayPalSuccess(data.orderID)
-                            } catch (error) {
-                              console.error('[PayPal] Error in onApprove:', error)
-                              alert('Error al procesar la aprobación de PayPal: ' + (error instanceof Error ? error.message : 'Unknown'))
-                              setProcessing(false)
-                            }
-                          }}
-                          onError={(err) => {
-                            console.error('[PayPal] Payment error:', err)
-                            alert('Error al procesar el pago con PayPal. Por favor intenta nuevamente.')
-                            setProcessing(false)
-                          }}
-                          onCancel={() => {
-                            console.log('[PayPal] Payment cancelled by user')
-                            setProcessing(false)
-                          }}
-                        />
-                      </PayPalScriptProvider>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* Zelle Payment */}
-            <div
-              className={`bg-white rounded-3xl shadow-xl p-6 border-2 cursor-pointer transition-all ${
-                paymentMethod === 'zelle' 
-                  ? 'border-[#a4c639] ring-4 ring-[#a4c639]/20' 
-                  : 'border-gray-200 hover:border-[#a4c639]/50'
-              }`}
-              onClick={() => setPaymentMethod('zelle')}
-            >
-              <div className="flex items-start gap-4">
-                <input
-                  type="radio"
-                  checked={paymentMethod === 'zelle'}
-                  onChange={() => setPaymentMethod('zelle')}
-                  className="mt-1 w-5 h-5 text-[#a4c639] focus:ring-[#a4c639]"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-[#1a5744]">Zelle</h3>
-                    <div className="bg-[#6d1ed4] text-white rounded-xl px-3 py-1 font-bold text-lg">
-                      Z
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Imagen del comprobante *
+                    </label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    {receiptPreview ? (
+                      <div className="relative">
+                        <img src={receiptPreview} alt="Comprobante" className="w-full max-h-64 object-contain rounded-xl border border-gray-200" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReceiptFile(null)
+                            setReceiptPreview(null)
+                            if (fileInputRef.current) fileInputRef.current.value = ''
+                          }}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-red-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full border-2 border-dashed border-gray-300 rounded-xl py-8 flex flex-col items-center justify-center hover:border-[#a4c639] transition-colors"
+                      >
+                        <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                        <span className="text-sm text-gray-600">Haz clic para subir imagen</span>
+                        <span className="text-xs text-gray-400 mt-1">JPG, PNG o WebP — Máx. 5MB</span>
+                      </button>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Transferencia instantánea vía Zelle. Requiere verificación manual (24-48 horas).
-                  </p>
-                  {paymentMethod === 'zelle' && (
-                    <button
-                      onClick={handleZelleCheckout}
-                      disabled={processing}
-                      className="w-full bg-[#1a5744] text-white py-3 md:py-4 rounded-2xl font-bold text-lg hover:bg-[#134233] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
-                    >
-                      Continuar con Zelle
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* Nota de seguridad */}
-            <div className="bg-[#F5E6D3] rounded-3xl p-6 border-2 border-[#a4c639]/30">
-              <div className="flex gap-3">
-                <span className="text-2xl">🔒</span>
-                <div>
-                  <p className="font-bold text-[#1a5744] mb-1">Compra 100% Segura</p>
-                  <p className="text-sm text-gray-700">
-                    Todos tus datos están protegidos con encriptación SSL de nivel bancario. 
-                    Nunca almacenamos información de tarjetas.
-                  </p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Notas (opcional)
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Información adicional sobre tu pago..."
+                      maxLength={500}
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#a4c639] focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  {/* Honeypot */}
+                  <div className="hidden" aria-hidden="true">
+                    <input
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+
+              <button
+                type="submit"
+                disabled={processing || !receiptFile || !referenceCode.trim()}
+                className="w-full bg-[#a4c639] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#8ba832] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg flex items-center justify-center gap-2"
+              >
+                {processing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  'Enviar Comprobante de Pago'
+                )}
+              </button>
+
+              <div className="bg-[#F5E6D3] rounded-3xl p-6 border-2 border-[#a4c639]/30">
+                <div className="flex gap-3">
+                  <span className="text-2xl">🔒</span>
+                  <div>
+                    <p className="font-bold text-[#1a5744] mb-1">Compra 100% Segura</p>
+                    <p className="text-sm text-gray-700">
+                      Tu comprobante será revisado por nuestro equipo. Recibirás confirmación por email en un máximo de 24 horas.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>

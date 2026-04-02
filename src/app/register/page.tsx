@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { registerSchema, formatZodErrors } from '@/lib/validations'
 
 function RegisterForm() {
   const router = useRouter()
@@ -47,15 +48,10 @@ function RegisterForm() {
     e.preventDefault()
     setError('')
 
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden')
-      return
-    }
-
-    // Validate password length
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
+    // Validate with Zod
+    const parsed = registerSchema.safeParse(formData)
+    if (!parsed.success) {
+      setError(formatZodErrors(parsed.error))
       return
     }
 
@@ -260,6 +256,7 @@ function RegisterForm() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="••••••••"
               />
+              <p className="text-xs text-gray-500 mt-1">Mínimo 12 caracteres, una mayúscula, un número y un símbolo</p>
             </div>
 
             <div>

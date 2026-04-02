@@ -32,6 +32,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Server-side absolute session timeout: 8 hours
+  if (user) {
+    const lastSignIn = user.last_sign_in_at
+    if (lastSignIn) {
+      const signInTime = new Date(lastSignIn).getTime()
+      const maxSessionMs = 8 * 60 * 60 * 1000
+      if (Date.now() - signInTime > maxSessionMs) {
+        await supabase.auth.signOut()
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        url.searchParams.set('reason', 'expired')
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
   // Protected routes
   const protectedPaths = ['/dashboard', '/my-courses', '/admin']
   const isProtectedPath = protectedPaths.some(path => 
