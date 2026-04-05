@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Search, Filter, BookOpen, ArrowRight } from 'lucide-react'
+import { Search, Filter, BookOpen } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CourseCard from '@/components/CourseCard'
@@ -128,42 +127,19 @@ export default function CoursesPage() {
           ) : filteredCourses.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {filteredCourses.map((course) => (
-                <Link 
-                  key={course.id} 
-                  href={`/courses/${course.id}`}
-                  className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
-                >
-                  {course.image_url ? (
-                    <div className="aspect-video relative overflow-hidden bg-white">
-                      <img 
-                        src={course.image_url} 
-                        alt={course.title}
-                        className="w-full h-full object-contain p-8"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
-                      <BookOpen className="h-16 w-16 text-white" />
-                    </div>
-                  )}
-                  <div className="p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-bold text-[#1a5744] mb-2 md:mb-3 group-hover:text-[#2d7a5f] transition-colors line-clamp-2">
-                      {course.title}
-                    </h3>
-                    <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
-                      {course.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl md:text-2xl font-bold text-[#2d7a5f]">
-                        ${course.price}
-                      </span>
-                      <span className="text-[#2d7a5f] font-medium group-hover:underline flex items-center">
-                        Ver más
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                <CourseCard
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  description={course.description || ''}
+                  short_description={course.short_description}
+                  price={course.price}
+                  currency={course.currency}
+                  thumbnail_url={course.image_url}
+                  Icon={BookOpen}
+                  category={course.category}
+                  duration_minutes={course.duration_minutes}
+                />
               ))}
             </div>
           ) : (

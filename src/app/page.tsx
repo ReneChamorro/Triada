@@ -4,11 +4,25 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { BookOpen, GraduationCap, Users, Award, ArrowRight, PlayCircle, CheckCircle2, Shield, Star } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import AboutModal from '@/components/AboutModal'
+import { ExpandableAboutCards } from '@/components/ExpandableAboutCards'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CourseCard from '@/components/CourseCard'
 import { createClient } from '@/lib/supabase/client'
+
+interface Course {
+  id: string
+  title: string
+  description: string | null
+  short_description: string | null
+  price: number
+  currency: string
+  image_url: string | null
+  category: string | null
+  duration_minutes: number | null
+  status: string
+  is_featured: boolean
+}
 
 interface LandingFeature {
   id: string
@@ -29,8 +43,7 @@ interface AboutSection {
 }
 
 export default function HomePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [courses, setCourses] = useState<any[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [features, setFeatures] = useState<LandingFeature[]>([])
   const [aboutSection, setAboutSection] = useState<AboutSection | null>(null)
 
@@ -70,8 +83,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <AboutModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-
       {/* Main Navigation */}
       <Header currentPage="home" />
 
@@ -193,12 +204,9 @@ export default function HomePage() {
                   <p>{aboutSection.description_secondary}</p>
                 )}
               </div>
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="inline-block bg-[#e8e4d0] text-[#1a5744] hover:bg-white px-8 md:px-8 py-3 md:py-3 rounded-full text-lg md:text-lg font-bold transition-colors shadow-lg cursor-pointer"
-              >
-                {aboutSection?.button_text || 'Ver Más'}
-              </button>
+              
+              {/* Single expandable button */}
+              <ExpandableAboutCards />
             </div>
           </div>
         </div>
@@ -221,10 +229,13 @@ export default function HomePage() {
                   id={course.id}
                   title={course.title}
                   description={course.description || course.short_description || ''}
+                  short_description={course.short_description}
                   price={course.price}
+                  currency={course.currency}
                   thumbnail_url={course.image_url}
                   Icon={BookOpen}
                   category={course.category}
+                  duration_minutes={course.duration_minutes}
                 />
               ))
             ) : (
