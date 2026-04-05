@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -99,7 +100,7 @@ export default function EditCoursePage() {
         setInstructors(instructorsData);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       alert('Error al cargar el curso');
       router.push('/admin/courses');
     } finally {
@@ -203,7 +204,7 @@ export default function EditCoursePage() {
       alert('Curso actualizado exitosamente');
       router.push('/admin/courses');
     } catch (error: any) {
-      console.error('Error updating course:', error);
+      logger.error('Error updating course:', error);
       alert(error.message || 'Error al actualizar el curso');
     } finally {
       setLoading(false);

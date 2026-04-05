@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { paymentSubmitSchema, formatZodErrors } from '@/lib/validations'
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
-      console.error('[PaymentSubmit] Upload error:', uploadError)
+      logger.error('[PaymentSubmit] Upload error:', uploadError)
       return NextResponse.json({ error: 'Error al subir el comprobante' }, { status: 500 })
     }
 
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (purchaseError) {
-      console.error('[PaymentSubmit] Purchase insert error:', purchaseError)
+      logger.error('[PaymentSubmit] Purchase insert error:', purchaseError)
       return NextResponse.json({ error: 'Error al registrar el pago' }, { status: 500 })
     }
 
@@ -168,13 +169,13 @@ export async function POST(request: NextRequest) {
           `.trim(),
         })
       } catch (emailErr) {
-        console.error('[PaymentSubmit] Email error:', emailErr)
+        logger.error('[PaymentSubmit] Email error:', emailErr)
       }
     }
 
     return NextResponse.json({ success: true }, { headers: getRateLimitHeaders(rl) })
   } catch (error) {
-    console.error('[PaymentSubmit] Unexpected error:', error)
+    logger.error('[PaymentSubmit] Unexpected error:', error)
     return NextResponse.json({ error: 'Error al procesar la solicitud' }, { status: 500 })
   }
 }

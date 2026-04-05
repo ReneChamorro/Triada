@@ -1,5 +1,5 @@
-
 'use client';
+import { logger } from '@/lib/logger'
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -146,12 +146,16 @@ export default function LearnCoursePage() {
         
         setModules(modulesWithLessons);
 
-        // Load completed lessons from database
+        // Collect all lesson IDs for this course
+        const allLessonIds = modulesWithLessons.flatMap(m => m.lessons.map((l: Lesson) => l.id));
+
+        // Load completed lessons from database (filtered by this course's lessons)
         const { data: progressData } = await supabase
           .from('lesson_progress')
-          .select('lesson_id')
+          .select('lesson_id, completed_at')
           .eq('user_id', userData.id)
-          .eq('course_id', courseId);
+          .in('lesson_id', allLessonIds)
+          .not('completed_at', 'is', null);
 
         const completed = new Set<string>();
         if (progressData) {
@@ -159,19 +163,23 @@ export default function LearnCoursePage() {
         }
         setCompletedLessons(completed);
 
-        // Resume functionality: try to load last accessed lesson
-        const { data: lastLessonId } = await supabase
-          .rpc('get_last_accessed_lesson', {
-            p_user_id: userData.id,
-            p_course_id: courseId
-          });
+        // Resume functionality: try to load last accessed lesson (filtered by this course)
+        const { data: lastAccessedData } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', userData.id)
+          .in('lesson_id', allLessonIds)
+          .not('last_accessed_at', 'is', null)
+          .order('last_accessed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
         let lessonToSelect = null;
 
-        if (lastLessonId) {
+        if (lastAccessedData?.lesson_id) {
           // Find the last accessed lesson
           for (const module of modulesWithLessons) {
-            const foundLesson = module.lessons.find((l: Lesson) => l.id === lastLessonId);
+            const foundLesson = module.lessons.find((l: Lesson) => l.id === lastAccessedData.lesson_id);
             if (foundLesson) {
               lessonToSelect = foundLesson;
               break;
@@ -190,7 +198,7 @@ export default function LearnCoursePage() {
       }
 
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -208,7 +216,6 @@ export default function LearnCoursePage() {
         .from('lesson_progress')
         .upsert({
           user_id: user.id,
-          course_id: courseId,
           lesson_id: lesson.id,
           last_accessed_at: new Date().toISOString()
         }, {
@@ -229,7 +236,6 @@ export default function LearnCoursePage() {
       .from('lesson_progress')
       .upsert({
         user_id: user.id,
-        course_id: courseId,
         lesson_id: currentLesson.id,
         completed_at: new Date().toISOString(),
         last_accessed_at: new Date().toISOString()

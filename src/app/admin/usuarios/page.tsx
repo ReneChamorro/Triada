@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { logger } from '@/lib/logger';
 
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -34,7 +35,7 @@ export default function UsersPage() {
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
-      console.error('Error loading users:', error);
+      logger.error('Error loading users:', error);
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export default function UsersPage() {
 
       alert('Rol actualizado exitosamente');
     } catch (error) {
-      console.error('Error updating role:', error);
+      logger.error('Error updating role:', error);
       alert('Error al actualizar el rol');
     }
   }

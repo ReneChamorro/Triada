@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
@@ -62,20 +63,20 @@ function LoginForm() {
         .eq('id', authData.user.id)
         .single()
 
-      console.log('Login - User role:', profile?.role)
+      logger.log('Login - User role:', profile?.role)
 
       // Redirect based on role - using window.location to force navigation
       if (profile?.role === 'admin' || profile?.role === 'teacher') {
-        console.log('Redirecting to /admin')
+        logger.log('Redirecting to /admin')
         window.location.href = '/admin'
         return
       } else {
-        console.log('Redirecting to', redirect)
+        logger.log('Redirecting to', redirect)
         window.location.href = redirect
         return
       }
     } catch (err) {
-      console.error('Login error:', err)
+      logger.error('Login error:', err)
       setError('Error al iniciar sesión')
       setLoading(false)
     }

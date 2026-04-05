@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -94,7 +95,7 @@ export default function ZelleCheckoutPage({
 
       setSubmitted(true)
     } catch (error: any) {
-      console.error('Error:', error)
+      logger.error('Error:', error)
       alert('Error al enviar la solicitud: ' + error.message)
       setSubmitting(false)
     }

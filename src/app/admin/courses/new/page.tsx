@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -155,7 +156,7 @@ export default function NewCoursePage() {
       alert('Curso creado exitosamente');
       router.push('/admin/courses');
     } catch (error: any) {
-      console.error('Error creating course:', error);
+      logger.error('Error creating course:', error);
       alert(error.message || 'Error al crear el curso');
     } finally {
       setLoading(false);

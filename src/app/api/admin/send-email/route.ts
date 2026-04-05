@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendApprovalEmail, sendRejectionEmail } from '@/lib/emails'
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[SendEmail] Error:', error)
+    logger.error('[SendEmail] Error:', error)
     return NextResponse.json({ error: 'Error al enviar email' }, { status: 500 })
   }
 }

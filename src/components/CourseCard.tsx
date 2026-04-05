@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -58,7 +59,7 @@ export default function CourseCard({
           setHasAccess(!!userCourse)
         }
       } catch (error) {
-        console.error('Auth check failed:', error)
+        logger.error('Auth check failed:', error)
         setUser(null)
         setHasAccess(false)      } finally {
         setAuthChecked(true)

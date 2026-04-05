@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { logger } from '@/lib/logger';
 
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -53,24 +54,16 @@ export default function AdminDashboard() {
         .eq('id', session.user.id)
         .single();
 
-      console.log('Admin check - Profile:', profile);
-      console.log('Admin check - Role:', profile?.role);
-      console.log('Admin check - Is admin?', profile?.role === 'admin');
-      console.log('Admin check - Is teacher?', profile?.role === 'teacher');
-
       // Only allow admin and teacher roles
       const allowedRoles = ['admin', 'teacher'];
       if (!profile || !allowedRoles.includes(profile.role)) {
-        console.log('Access denied - redirecting to home');
         router.push('/');
         return;
       }
-
-      console.log('Access granted - loading dashboard');
       // Load dashboard data
       await loadDashboardData();
     } catch (error) {
-      console.error('Error checking user:', error);
+      logger.error('Error checking user:', error);
       router.push('/login');
     }
   }
@@ -106,7 +99,7 @@ export default function AdminDashboard() {
 
       setRecentCourses(courses || []);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }

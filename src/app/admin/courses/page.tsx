@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { logger } from '@/lib/logger';
 
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -49,7 +50,7 @@ export default function CoursesPage() {
       if (error) throw error;
       setCourses(data || []);
     } catch (error) {
-      console.error('Error loading courses:', error);
+      logger.error('Error loading courses:', error);
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ export default function CoursesPage() {
       
       setCourses(courses.filter(c => c.id !== id));
     } catch (error) {
-      console.error('Error deleting course:', error);
+      logger.error('Error deleting course:', error);
       alert('Error al eliminar el curso');
     }
   }
@@ -88,7 +89,7 @@ export default function CoursesPage() {
         c.id === course.id ? { ...c, status: newStatus } : c
       ));
     } catch (error) {
-      console.error('Error updating status:', error);
+      logger.error('Error updating status:', error);
       alert('Error al actualizar el estado');
     }
   }

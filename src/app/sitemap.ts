@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 
@@ -49,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticPages, ...coursePages]
   } catch (error) {
-    console.error('Error generating sitemap:', error)
+    logger.error('Error generating sitemap:', error)
     return staticPages
   }
 }

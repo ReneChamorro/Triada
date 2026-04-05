@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { grantAccessSchema, formatZodErrors } from '@/lib/validations'
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
       .select()
 
     if (enrollError) {
-      console.error('[Manual Grant] Error:', enrollError)
+      logger.error('[Manual Grant] Error:', enrollError)
       return NextResponse.json({ 
         error: 'Error al otorgar acceso',
         details: enrollError
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     // Log the action
-    console.log('[Manual Grant] Admin granted access:', {
+    logger.log('[Manual Grant] Admin granted access:', {
       adminId: adminUser.id,
       userId,
       courseId,
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
         )
       }
     } catch (emailError) {
-      console.error('[Manual Grant] Failed to send approval email:', emailError)
+      logger.error('[Manual Grant] Failed to send approval email:', emailError)
       // Don't fail the request if email fails
     }
 
@@ -111,7 +112,7 @@ export async function POST(request: Request) {
       enrollment: enrollment[0]
     })
   } catch (error) {
-    console.error('[Manual Grant] Unexpected error:', error)
+    logger.error('[Manual Grant] Unexpected error:', error)
     return NextResponse.json({ 
       error: 'Error al procesar la solicitud',
       details: error instanceof Error ? error.message : 'Unknown error'

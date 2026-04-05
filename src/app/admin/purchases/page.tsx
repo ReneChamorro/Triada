@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -77,7 +78,7 @@ export default function AdminPurchasesPage() {
       if (error) throw error
       setAllPurchases(data || [])
     } catch (error) {
-      console.error('Error loading purchases:', error)
+      logger.error('Error loading purchases:', error)
       alert('Error al cargar las compras')
     } finally {
       setLoading(false)
@@ -158,7 +159,7 @@ export default function AdminPurchasesPage() {
       alert('✅ Compra aprobada y acceso otorgado')
       loadPurchases()
     } catch (error: any) {
-      console.error('Error:', error)
+      logger.error('Error:', error)
       alert('Error al aprobar la compra: ' + error.message)
     } finally {
       setProcessing(null)
@@ -215,7 +216,7 @@ export default function AdminPurchasesPage() {
       alert('❌ Compra rechazada')
       loadPurchases()
     } catch (error: any) {
-      console.error('Error:', error)
+      logger.error('Error:', error)
       alert('Error al rechazar la compra: ' + error.message)
     } finally {
       setProcessing(null)

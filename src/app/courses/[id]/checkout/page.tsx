@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -62,7 +63,7 @@ export default function CheckoutPage() {
           return
         }
       } catch (err) {
-        console.log('Error checking access:', err)
+        logger.log('Error checking access:', err)
       }
 
       const { data: courseData, error } = await supabase

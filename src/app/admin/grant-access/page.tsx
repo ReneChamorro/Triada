@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -65,7 +66,7 @@ export default function GrantAccessPage() {
 
       if (coursesData) setCourses(coursesData)
     } catch (error) {
-      console.error('Error loading data:', error)
+      logger.error('Error loading data:', error)
     } finally {
       setLoading(false)
     }
@@ -113,7 +114,7 @@ export default function GrantAccessPage() {
         alert(data.error || 'Error al otorgar acceso')
       }
     } catch (error) {
-      console.error('Error:', error)
+      logger.error('Error:', error)
       alert('Error al procesar la solicitud')
     } finally {
       setProcessing(false)

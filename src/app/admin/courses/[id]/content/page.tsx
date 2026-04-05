@@ -1,4 +1,5 @@
-'use client';
+'use client'
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
@@ -122,7 +123,7 @@ export default function CourseContentPage() {
         setModules(modulesWithLessons);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -212,7 +213,7 @@ export default function CourseContentPage() {
       setShowModuleModal(false);
       loadData();
     } catch (error) {
-      console.error('Error saving module:', error);
+      logger.error('Error saving module:', error);
       alert('Error al guardar el módulo');
     }
   };
@@ -228,7 +229,7 @@ export default function CourseContentPage() {
       
       loadData();
     } catch (error) {
-      console.error('Error deleting module:', error);
+      logger.error('Error deleting module:', error);
     }
   };
 
@@ -262,7 +263,7 @@ export default function CourseContentPage() {
       const url = await handleFileUpload(file, 'video');
       setLessonForm({ ...lessonForm, video_url: url });
     } catch (error) {
-      console.error('Error uploading video:', error);
+      logger.error('Error uploading video:', error);
       alert('Error al subir el video');
     } finally {
       setUploadingVideo(false);
@@ -278,7 +279,7 @@ export default function CourseContentPage() {
       const url = await handleFileUpload(file, 'pdf');
       setLessonForm({ ...lessonForm, pdf_url: url });
     } catch (error) {
-      console.error('Error uploading PDF:', error);
+      logger.error('Error uploading PDF:', error);
       alert('Error al subir el PDF');
     } finally {
       setUploadingPDF(false);
@@ -341,7 +342,7 @@ export default function CourseContentPage() {
       setShowLessonModal(false);
       loadData();
     } catch (error) {
-      console.error('Error saving lesson:', error);
+      logger.error('Error saving lesson:', error);
       alert('Error al guardar la lección');
     }
   };
@@ -357,7 +358,7 @@ export default function CourseContentPage() {
       
       loadData();
     } catch (error) {
-      console.error('Error deleting lesson:', error);
+      logger.error('Error deleting lesson:', error);
     }
   };
 

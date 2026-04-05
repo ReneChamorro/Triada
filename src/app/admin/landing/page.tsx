@@ -1,4 +1,5 @@
 'use client'
+import { logger } from '@/lib/logger'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -95,7 +96,7 @@ export default function LandingSettingsPage() {
 
       alert('Imagen subida correctamente')
     } catch (error) {
-      console.error('Error uploading image:', error)
+      logger.error('Error uploading image:', error)
       alert('Error al subir la imagen')
     } finally {
       setUploadingId(null)
@@ -110,7 +111,7 @@ export default function LandingSettingsPage() {
       .eq('id', featureId)
 
     if (error) {
-      console.error('Error updating feature:', error)
+      logger.error('Error updating feature:', error)
       alert('Error al actualizar')
       return
     }
@@ -227,7 +228,7 @@ export default function LandingSettingsPage() {
 
       alert('Imagen subida correctamente')
     } catch (error) {
-      console.error('Error uploading image:', error)
+      logger.error('Error uploading image:', error)
       alert('Error al subir la imagen')
     } finally {
       setUploadingId(null)
