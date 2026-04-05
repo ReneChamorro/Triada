@@ -249,7 +249,18 @@ export default function LearnCoursePage() {
       // Revert optimistic update
       newCompleted.delete(currentLesson.id);
       setCompletedLessons(new Set(newCompleted));
+      return;
     }
+
+    // Update course progress percentage
+    const totalLessons = modules.reduce((acc, module) => acc + module.lessons.length, 0);
+    const progressPercentage = totalLessons > 0 ? Math.round((newCompleted.size / totalLessons) * 100) : 0;
+    
+    await supabase
+      .from('user_courses')
+      .update({ progress_percentage: progressPercentage })
+      .eq('user_id', user.id)
+      .eq('course_id', courseId);
   };
 
   const goToNextLesson = () => {
