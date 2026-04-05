@@ -232,18 +232,24 @@ export default function LearnCoursePage() {
     setCompletedLessons(newCompleted);
     
     // Save to database
-    await supabase
+    const { error } = await supabase
       .from('lesson_progress')
       .upsert({
         user_id: user.id,
         lesson_id: currentLesson.id,
+        completed: true,
         completed_at: new Date().toISOString(),
         last_accessed_at: new Date().toISOString()
       }, {
         onConflict: 'user_id,lesson_id'
       });
     
-    // The trigger will automatically update user_courses.progress_percentage
+    if (error) {
+      logger.error('Error saving progress:', error);
+      // Revert optimistic update
+      newCompleted.delete(currentLesson.id);
+      setCompletedLessons(new Set(newCompleted));
+    }
   };
 
   const goToNextLesson = () => {
