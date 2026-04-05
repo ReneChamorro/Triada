@@ -89,9 +89,19 @@ export default async function DashboardPage() {
                   href={`/courses/${uc.courses.id}/learn`}
                   className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
                 >
-                  <div className="h-40 md:h-48 bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
-                    <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-white opacity-50" />
-                  </div>
+                  {uc.courses.thumbnail_url ? (
+                    <div className="h-40 md:h-48 relative overflow-hidden bg-white flex items-center justify-center">
+                      <img
+                        src={uc.courses.thumbnail_url}
+                        alt={uc.courses.title}
+                        className="max-h-full max-w-full object-contain p-4 md:p-6"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-40 md:h-48 bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
+                      <BookOpen className="h-12 w-12 md:h-16 md:w-16 text-white opacity-50" />
+                    </div>
+                  )}
                   <div className="p-4 md:p-6">
                     <h3 className="text-lg md:text-xl font-bold text-[#1a5744] mb-2 md:mb-3 group-hover:text-[#2d7a5f] transition-colors line-clamp-2">
                       {uc.courses.title}
