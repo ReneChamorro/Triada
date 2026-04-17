@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     } catch {
       // Non-blocking
     }
-// Send approval email to the student
+    // Send approval email to the student
     try {
       const { data: userProfile } = await supabase
         .from('profiles')
@@ -101,12 +101,16 @@ export async function POST(request: Request) {
         .single()
 
       if (userProfile && course) {
+        logger.log('[Grant Access] Sending approval email to:', userProfile.email)
         await sendApprovalEmail(
           userProfile.email,
           userProfile.full_name || userProfile.email,
           course.title,
           courseId
         )
+        logger.log('[Grant Access] Approval email sent successfully')
+      } else {
+        logger.error('[Grant Access] Missing user profile or course data')
       }
     } catch (emailError) {
       logger.error('[Manual Grant] Failed to send approval email:', emailError)
