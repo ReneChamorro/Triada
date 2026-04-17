@@ -188,7 +188,7 @@ export default function ZelleCheckoutPage({
                 <div className="bg-gray-50 rounded p-3 font-mono text-sm">
                   <p className="mb-1">
                     <span className="text-gray-600">Email:</span>{' '}
-                    <span className="font-semibold">{process.env.NEXT_PUBLIC_ZELLE_EMAIL || 'tu-email@ejemplo.com'}</span>
+                    <span className="font-semibold">triadaglobal2026@gmail.com</span>
                   </p>
 
                 </div>

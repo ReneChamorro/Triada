@@ -202,26 +202,26 @@ export default function CheckoutPage() {
   const paymentInstructions: Record<PaymentMethod, React.ReactNode> = {
     zelle: (
       <div className="space-y-2 text-sm">
-        <p><span className="font-medium text-gray-700">Email:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_ZELLE_EMAIL || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Email:</span> <span className="font-mono">triadaglobal2026@gmail.com</span></p>
       </div>
     ),
     pago_movil: (
       <div className="space-y-2 text-sm">
-        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAGO_MOVIL_BANCO || '___RELLENAR___'}</span></p>
-        <p><span className="font-medium text-gray-700">Cédula:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAGO_MOVIL_CI || '___RELLENAR___'}</span></p>
-        <p><span className="font-medium text-gray-700">Teléfono:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAGO_MOVIL_TELEFONO || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">Banco Provincial</span></p>
+        <p><span className="font-medium text-gray-700">Cédula:</span> <span className="font-mono">V-17.922.825</span></p>
+        <p><span className="font-medium text-gray-700">Teléfono:</span> <span className="font-mono">0414-791-7048</span></p>
       </div>
     ),
     transferencia_usd: (
       <div className="space-y-2 text-sm">
-        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_TRANSFER_BANCO || '___RELLENAR___'}</span></p>
-        <p><span className="font-medium text-gray-700">Cuenta:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_TRANSFER_CUENTA || '___RELLENAR___'}</span></p>
-        <p><span className="font-medium text-gray-700">Beneficiario:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_TRANSFER_BENEFICIARIO || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">___RELLENAR___</span></p>
+        <p><span className="font-medium text-gray-700">Cuenta:</span> <span className="font-mono">___RELLENAR___</span></p>
+        <p><span className="font-medium text-gray-700">Beneficiario:</span> <span className="font-mono">___RELLENAR___</span></p>
       </div>
     ),
     paypal_manual: (
       <div className="space-y-2 text-sm">
-        <p><span className="font-medium text-gray-700">Enviar a:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_PAYPAL_EMAIL || '___RELLENAR___'}</span></p>
+        <p><span className="font-medium text-gray-700">Enviar a:</span> <span className="font-mono">___RELLENAR___</span></p>
         <p className="text-gray-500">Envía como &quot;Amigos y familiares&quot; para evitar comisiones.</p>
       </div>
     ),
