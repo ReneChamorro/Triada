@@ -1,19 +1,33 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Play, AlertCircle } from 'lucide-react'
+
+const MuxVideoPlayer = dynamic(() => import('@/components/MuxVideoPlayer'), {
+  ssr: false,
+  loading: () => (
+    <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+    </div>
+  ),
+})
 
 interface VideoPlayerProps {
   videoUrl?: string | null
   youtubeVideoId?: string | null
+  muxPlaybackId?: string | null
+  viewerUserId?: string | null
   title?: string
   className?: string
   autoplay?: boolean
+  onEnded?: () => void
 }
 
 /**
  * Video Player Component
  * Supports:
+ * - Mux Video (via mux_playback_id) - highest priority
  * - YouTube videos (via youtube_video_id or extracting from videoUrl)
  * - Direct video URLs (MP4, etc.)
  * - Supabase Storage URLs
@@ -21,9 +35,12 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ 
   videoUrl, 
   youtubeVideoId,
+  muxPlaybackId,
+  viewerUserId,
   title = 'Video',
   className = '',
-  autoplay = false
+  autoplay = false,
+  onEnded,
 }: VideoPlayerProps) {
   const [extractedYoutubeId, setExtractedYoutubeId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -60,7 +77,22 @@ export default function VideoPlayer({
     return null
   }
 
-  // If we have YouTube ID, render YouTube player
+  // Priority 1: Mux Video
+  if (muxPlaybackId) {
+    return (
+      <div className={`relative w-full ${className}`}>
+        <MuxVideoPlayer
+          playbackId={muxPlaybackId}
+          title={title}
+          viewerUserId={viewerUserId ?? undefined}
+          autoplay={autoplay}
+          onEnded={onEnded}
+        />
+      </div>
+    )
+  }
+
+  // Priority 2: YouTube player
   if (extractedYoutubeId || youtubeVideoId) {
     const videoId = extractedYoutubeId || youtubeVideoId
     // Parameters to minimize YouTube UI and branding

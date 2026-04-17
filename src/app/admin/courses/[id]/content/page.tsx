@@ -74,6 +74,7 @@ export default function CourseContentPage() {
     description: '',
     content_type: 'video' as 'video' | 'pdf' | 'text',
     video_url: '',
+    mux_playback_id: '',
     pdf_url: '',
     text_content: '',
     duration_minutes: 0,
@@ -162,6 +163,7 @@ export default function CourseContentPage() {
         description: lesson.description || '',
         content_type: lesson.content_type,
         video_url: lesson.video_url || '',
+        mux_playback_id: (lesson as any).mux_playback_id || '',
         pdf_url: lesson.pdf_url || '',
         text_content: lesson.text_content || '',
         duration_minutes: lesson.duration_minutes || 0,
@@ -174,6 +176,7 @@ export default function CourseContentPage() {
         description: '',
         content_type: 'video',
         video_url: '',
+        mux_playback_id: '',
         pdf_url: '',
         text_content: '',
         duration_minutes: 0,
@@ -311,6 +314,7 @@ export default function CourseContentPage() {
         content_type: lessonForm.content_type,
         video_url: lessonForm.content_type === 'video' ? lessonForm.video_url : null,
         youtube_video_id: youtubeVideoId,
+        mux_playback_id: lessonForm.content_type === 'video' && lessonForm.mux_playback_id ? lessonForm.mux_playback_id : null,
         pdf_url: lessonForm.content_type === 'pdf' ? lessonForm.pdf_url : null,
         text_content: lessonForm.content_type === 'text' ? lessonForm.text_content : null,
         duration_minutes: lessonForm.duration_minutes,
@@ -658,6 +662,31 @@ export default function CourseContentPage() {
               {/* Content Type Fields */}
               {lessonForm.content_type === 'video' && (
                 <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1a5744] mb-2">
+                      Mux Playback ID
+                    </label>
+                    <input
+                      type="text"
+                      value={lessonForm.mux_playback_id}
+                      onChange={(e) => setLessonForm({ ...lessonForm, mux_playback_id: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
+                      placeholder="Ej: DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      ⭐ Recomendado: Pega el Playback ID de Mux para streaming profesional con analytics.
+                    </p>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">o usa YouTube</span>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-semibold text-[#1a5744] mb-2">
                       URL de YouTube

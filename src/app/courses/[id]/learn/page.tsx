@@ -35,6 +35,7 @@ interface Lesson {
   content_type: 'video' | 'pdf' | 'text';
   video_url: string | null;
   youtube_video_id: string | null;
+  mux_playback_id: string | null;
   pdf_url: string | null;
   text_content: string | null;
   duration_minutes: number;
@@ -499,9 +500,11 @@ export default function LearnCoursePage() {
           {currentLesson ? (
             <div className="max-w-6xl mx-auto">
               {/* Video Content */}
-              {currentLesson.content_type === 'video' && (currentLesson.video_url || currentLesson.youtube_video_id) && (
+              {currentLesson.content_type === 'video' && (currentLesson.mux_playback_id || currentLesson.video_url || currentLesson.youtube_video_id) && (
                 <div className="relative rounded-xl overflow-hidden m-6 shadow-2xl">
                   <VideoPlayer
+                    muxPlaybackId={currentLesson.mux_playback_id}
+                    viewerUserId={user?.id}
                     videoUrl={currentLesson.video_url}
                     youtubeVideoId={currentLesson.youtube_video_id}
                     title={currentLesson.title}

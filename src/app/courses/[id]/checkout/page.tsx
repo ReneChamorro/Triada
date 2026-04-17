@@ -203,7 +203,6 @@ export default function CheckoutPage() {
     zelle: (
       <div className="space-y-2 text-sm">
         <p><span className="font-medium text-gray-700">Email:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_ZELLE_EMAIL || '___RELLENAR___'}</span></p>
-        <p><span className="font-medium text-gray-700">Teléfono:</span> <span className="font-mono">{process.env.NEXT_PUBLIC_ZELLE_PHONE || '___RELLENAR___'}</span></p>
       </div>
     ),
     pago_movil: (

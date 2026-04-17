@@ -7,6 +7,25 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { registerSchema, formatZodErrors } from '@/lib/validations'
 
+// Helper to translate Supabase errors to user-friendly Spanish messages
+function getAuthErrorMessage(error: string): string {
+  const errorMap: Record<string, string> = {
+    'User already registered': 'Este correo ya está registrado. ¿Quieres iniciar sesión?',
+    'Invalid email': 'El formato del correo electrónico no es válido.',
+    'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres.',
+    'Email rate limit exceeded': 'Demasiados intentos. Por favor intenta más tarde.',
+    'Signup requires a valid password': 'Por favor ingresa una contraseña válida.',
+  }
+  
+  // Check if error message contains any of the keys
+  for (const [key, value] of Object.entries(errorMap)) {
+    if (error.includes(key)) return value
+  }
+  
+  // Default friendly message
+  return 'Ocurrió un error al crear tu cuenta. Por favor intenta nuevamente.'
+}
+
 function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -40,7 +59,7 @@ function RegisterForm() {
     })
 
     if (error) {
-      setError(error.message)
+      setError(getAuthErrorMessage(error.message))
     }
   }
 
@@ -72,7 +91,7 @@ function RegisterForm() {
     })
 
     if (error) {
-      setError(error.message)
+      setError(getAuthErrorMessage(error.message))
       setLoading(false)
     } else {
       // Update profile with phone

@@ -190,10 +190,7 @@ export default function ZelleCheckoutPage({
                     <span className="text-gray-600">Email:</span>{' '}
                     <span className="font-semibold">{process.env.NEXT_PUBLIC_ZELLE_EMAIL || 'tu-email@ejemplo.com'}</span>
                   </p>
-                  <p>
-                    <span className="text-gray-600">Teléfono:</span>{' '}
-                    <span className="font-semibold">{process.env.NEXT_PUBLIC_ZELLE_PHONE || '+1234567890'}</span>
-                  </p>
+
                 </div>
               </div>
 
