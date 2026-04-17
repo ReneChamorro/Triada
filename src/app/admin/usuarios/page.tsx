@@ -43,6 +43,9 @@ export default function UsersPage() {
 
   async function updateUserRole(userId: string, newRole: 'admin' | 'teacher' | 'user') {
     try {
+      const targetUser = users.find(u => u.id === userId);
+      const oldRole = targetUser?.role;
+
       const { error } = await supabase
         .from('profiles')
         .update({ role: newRole })
@@ -53,6 +56,22 @@ export default function UsersPage() {
       setUsers(users.map(u => 
         u.id === userId ? { ...u, role: newRole } : u
       ));
+
+      // Log admin action
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('audit_log').insert({
+            admin_id: user.id,
+            action: 'change_role',
+            target_type: 'user',
+            target_id: userId,
+            details: { email: targetUser?.email, from: oldRole, to: newRole },
+          });
+        }
+      } catch {
+        // Non-blocking
+      }
 
       alert('Rol actualizado exitosamente');
     } catch (error) {

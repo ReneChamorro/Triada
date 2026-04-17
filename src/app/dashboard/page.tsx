@@ -89,10 +89,10 @@ export default async function DashboardPage() {
                   href={`/courses/${uc.courses.id}/learn`}
                   className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
                 >
-                  {uc.courses.thumbnail_url ? (
+                  {uc.courses.image_url ? (
                     <div className="h-40 md:h-48 relative overflow-hidden bg-white flex items-center justify-center">
                       <img
-                        src={uc.courses.thumbnail_url}
+                        src={uc.courses.image_url}
                         alt={uc.courses.title}
                         className="max-h-full max-w-full object-contain p-4 md:p-6"
                       />

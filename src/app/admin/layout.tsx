@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, DollarSign } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, DollarSign, Shield } from 'lucide-react'
 
 export default function AdminLayout({
   children,
@@ -17,6 +17,7 @@ export default function AdminLayout({
     { name: 'Cursos', href: '/admin/courses', icon: BookOpen },
     { name: 'Pagos', href: '/admin/purchases', icon: DollarSign },
     { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
+    { name: 'Auditoría', href: '/admin/audit-log', icon: Shield },
     { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
   ]
 

@@ -72,13 +72,20 @@ export async function POST(request: Request) {
       }, { status: 500 })
     }
 
-    // Log the action
-    logger.log('[Manual Grant] Admin granted access:', {
-      adminId: adminUser.id,
-      userId,
-      courseId,
-      note: adminNote
-    })
+    // Log to audit_log table
+    try {
+      const { data: targetProfile } = await supabase.from('profiles').select('email').eq('id', userId).single()
+      const { data: courseData } = await supabase.from('courses').select('title').eq('id', courseId).single()
+      await supabase.from('audit_log').insert({
+        admin_id: adminUser.id,
+        action: 'grant_access',
+        target_type: 'user',
+        target_id: userId,
+        details: { student: targetProfile?.email, course: courseData?.title, amount: amountPaid, note: adminNote },
+      })
+    } catch {
+      // Non-blocking
+    }
 // Send approval email to the student
     try {
       const { data: userProfile } = await supabase

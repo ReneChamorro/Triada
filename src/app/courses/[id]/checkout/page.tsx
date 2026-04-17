@@ -314,7 +314,11 @@ export default function CheckoutPage() {
 
               {/* Step 3: Upload receipt */}
               <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
-                <h3 className="text-lg font-bold text-[#1a5744] mb-4">3. Sube tu comprobante</h3>
+                <h3 className="text-lg font-bold text-[#1a5744] mb-2">3. Sube tu comprobante</h3>
+                <p className="text-xs text-gray-500 mb-4 flex items-start gap-1.5">
+                  <span className="text-[#2d7a5f]">🔐</span>
+                  Tu comprobante se almacena de forma segura y se elimina automáticamente una vez verificado tu pago. En caso de rechazo, se retiene por 7 días adicionales para tu revisión.
+                </p>
 
                 <div className="space-y-4">
                   <div>

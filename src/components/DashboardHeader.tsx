@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Settings } from 'lucide-react'
 
 interface DashboardHeaderProps {
   profile: any
@@ -80,6 +81,13 @@ export default function DashboardHeader({ profile }: DashboardHeaderProps) {
                 Admin
               </Link>
             )}
+            <Link
+              href="/dashboard/settings"
+              className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-all"
+              title="Configuración"
+            >
+              <Settings className="h-5 w-5" />
+            </Link>
             <button
               onClick={handleLogout}
               className="px-4 py-2 rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600 font-medium transition-all border border-gray-200"

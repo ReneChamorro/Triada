@@ -138,6 +138,16 @@ export default function AdminPurchasesPage() {
         if (enrollErr && !enrollErr.message.includes('duplicate')) throw enrollErr
       }
 
+      // Delete receipt from storage after approval
+      if (purchase.receipt_image_url) {
+        try {
+          await supabase.storage.from('payment-receipts').remove([purchase.receipt_image_url])
+          await supabase.from('purchases').update({ receipt_image_url: null }).eq('id', purchase.id)
+        } catch {
+          // Non-blocking: receipt cleanup failure shouldn't block approval
+        }
+      }
+
       // Send approval email via API
       try {
         await fetch('/api/admin/send-email', {
@@ -154,6 +164,22 @@ export default function AdminPurchasesPage() {
         })
       } catch {
         // Email failure shouldn't block the approval
+      }
+
+      // Log admin action
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('audit_log').insert({
+            admin_id: user.id,
+            action: 'approve_purchase',
+            target_type: 'purchase',
+            target_id: purchase.id,
+            details: { student: purchase.profiles.email, course: purchase.courses.title, amount: purchase.amount },
+          })
+        }
+      } catch {
+        // Non-blocking
       }
 
       alert('✅ Compra aprobada y acceso otorgado')
@@ -195,6 +221,16 @@ export default function AdminPurchasesPage() {
         if (updateErr) throw updateErr
       }
 
+      // Schedule receipt deletion (7 days from now)
+      if (purchase.receipt_image_url) {
+        try {
+          const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          await supabase.from('purchases').update({ receipt_expires_at: expiresAt }).eq('id', purchase.id)
+        } catch {
+          // Non-blocking
+        }
+      }
+
       // Send rejection email
       try {
         await fetch('/api/admin/send-email', {
@@ -211,6 +247,22 @@ export default function AdminPurchasesPage() {
         })
       } catch {
         // Email failure shouldn't block the rejection
+      }
+
+      // Log admin action
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('audit_log').insert({
+            admin_id: user.id,
+            action: 'reject_purchase',
+            target_type: 'purchase',
+            target_id: purchase.id,
+            details: { student: purchase.profiles.email, course: purchase.courses.title, reason },
+          })
+        }
+      } catch {
+        // Non-blocking
       }
 
       alert('❌ Compra rechazada')
