@@ -36,10 +36,6 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
     setPasswordError('')
     setPasswordSuccess(false)
 
-    if (!currentPassword) {
-      setPasswordError('Ingresa tu contraseña actual')
-      return
-    }
     if (newPassword.length < 6) {
       setPasswordError('La nueva contraseña debe tener al menos 6 caracteres')
       return
