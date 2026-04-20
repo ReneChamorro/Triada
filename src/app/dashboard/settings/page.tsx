@@ -18,6 +18,9 @@ export default async function SettingsPage() {
     .eq('id', user.id)
     .single()
 
+  // Users who signed in with Google/OAuth don't have an email identity (no password set)
+  const hasPasswordAuth = user.identities?.some(i => i.provider === 'email') ?? false
+
   return (
     <div className="min-h-screen bg-[#e8e4d0]">
       <DashboardHeader profile={profile} />
@@ -54,7 +57,7 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        <AccountActions userEmail={user.email || ''} />
+        <AccountActions userEmail={user.email || ''} hasPasswordAuth={hasPasswordAuth} />
       </div>
 
       <Footer />

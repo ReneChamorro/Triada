@@ -12,9 +12,10 @@ const supabase = createBrowserClient(
 
 interface AccountActionsProps {
   userEmail: string
+  hasPasswordAuth: boolean
 }
 
-export default function AccountActions({ userEmail }: AccountActionsProps) {
+export default function AccountActions({ userEmail, hasPasswordAuth }: AccountActionsProps) {
   const router = useRouter()
   const [exporting, setExporting] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -50,14 +51,16 @@ export default function AccountActions({ userEmail }: AccountActionsProps) {
 
     setChangingPassword(true)
     try {
-      // Verify current password by re-signing in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userEmail,
-        password: currentPassword,
-      })
-      if (signInError) {
-        setPasswordError('La contraseña actual es incorrecta')
-        return
+      if (hasPasswordAuth) {
+        // Verify current password by re-signing in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: userEmail,
+          password: currentPassword,
+        })
+        if (signInError) {
+          setPasswordError('La contraseña actual es incorrecta')
+          return
+        }
       }
 
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
@@ -125,10 +128,16 @@ export default function AccountActions({ userEmail }: AccountActionsProps) {
       {/* Change Password */}
       <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
         <h2 className="text-xl font-bold text-[#1a5744] mb-2">Cambiar Contraseña</h2>
+        {!hasPasswordAuth && (
+          <div className="mb-4 flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+            <span>Iniciaste sesión con Google. Puedes establecer una contraseña aquí para poder iniciar sesión también con tu email.</span>
+          </div>
+        )}
         <p className="text-sm text-gray-600 mb-4">
           Actualiza tu contraseña de acceso. Debe tener al menos 6 caracteres.
         </p>
         <div className="space-y-3 max-w-sm">
+          {hasPasswordAuth && (
           <div>
             <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
             <div className="relative">
@@ -151,6 +160,7 @@ export default function AccountActions({ userEmail }: AccountActionsProps) {
               </button>
             </div>
           </div>
+          )}
           <div>
             <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
             <div className="relative">
@@ -206,7 +216,7 @@ export default function AccountActions({ userEmail }: AccountActionsProps) {
           )}
           <button
             onClick={handleChangePassword}
-            disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
+            disabled={changingPassword || (hasPasswordAuth && !currentPassword) || !newPassword || !confirmPassword}
             className="flex items-center gap-2 bg-[#2d7a5f] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1a5744] transition-colors disabled:opacity-50"
           >
             {changingPassword ? (
