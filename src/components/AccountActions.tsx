@@ -51,7 +51,7 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
 
     setChangingPassword(true)
     try {
-      if (hasPasswordAuth) {
+      if (currentPassword) {
         // Verify current password by re-signing in
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: userEmail,
@@ -139,7 +139,7 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
         <div className="space-y-3 max-w-sm">
           {hasPasswordAuth && (
           <div>
-            <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
+            <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual <span className="text-gray-400 font-normal">(dejar vacío si no tienes contraseña)</span></label>
             <div className="relative">
               <input
                 id="current-password"
@@ -216,7 +216,7 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
           )}
           <button
             onClick={handleChangePassword}
-            disabled={changingPassword || (hasPasswordAuth && !currentPassword) || !newPassword || !confirmPassword}
+            disabled={changingPassword || !newPassword || !confirmPassword}
             className="flex items-center gap-2 bg-[#2d7a5f] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1a5744] transition-colors disabled:opacity-50"
           >
             {changingPassword ? (
