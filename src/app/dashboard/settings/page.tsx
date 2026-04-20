@@ -18,8 +18,8 @@ export default async function SettingsPage() {
     .eq('id', user.id)
     .single()
 
-  // Users who signed in with Google/OAuth don't have an email identity (no password set)
-  const hasPasswordAuth = user.identities?.some(i => i.provider === 'email') ?? false
+  // Users who primarily signed up via OAuth (Google etc.) don't have a password
+  const hasPasswordAuth = user.app_metadata?.provider === 'email'
 
   return (
     <div className="min-h-screen bg-[#e8e4d0]">
