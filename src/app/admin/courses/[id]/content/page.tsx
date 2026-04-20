@@ -686,7 +686,7 @@ export default function CourseContentPage() {
 
       {/* Lesson Modal */}
       {showLessonModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-lg max-w-3xl w-full p-6 my-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-[#1a5744]">
