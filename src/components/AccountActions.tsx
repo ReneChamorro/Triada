@@ -45,10 +45,16 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
       return
     }
 
+    // Email+password users must provide their current password
+    if (hasPasswordAuth && !currentPassword) {
+      setPasswordError('Ingresa tu contraseña actual')
+      return
+    }
+
     setChangingPassword(true)
     try {
-      if (currentPassword) {
-        // Verify current password by re-signing in
+      // Verify current password only for email+password accounts
+      if (hasPasswordAuth) {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: userEmail,
           password: currentPassword,
@@ -60,7 +66,10 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
       }
 
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
-      if (updateError) throw updateError
+      if (updateError) {
+        setPasswordError(updateError.message)
+        return
+      }
       setPasswordSuccess(true)
       setCurrentPassword('')
       setNewPassword('')
