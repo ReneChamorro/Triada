@@ -83,6 +83,9 @@ export default function CourseContentPage() {
 
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingPDF, setUploadingPDF] = useState(false);
+  const [muxUploadProgress, setMuxUploadProgress] = useState(0);
+  const [muxUploadStatus, setMuxUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'ready' | 'error'>('idle');
+  const [muxAbortController, setMuxAbortController] = useState<AbortController | null>(null);
 
   useEffect(() => {
     loadData();
@@ -184,6 +187,10 @@ export default function CourseContentPage() {
       });
     }
     setShowLessonModal(true);
+    setMuxUploadStatus('idle');
+    setMuxUploadProgress(0);
+    muxAbortController?.abort();
+    setMuxAbortController(null);
   };
 
   const saveModule = async () => {
@@ -270,6 +277,96 @@ export default function CourseContentPage() {
       alert('Error al subir el video');
     } finally {
       setUploadingVideo(false);
+    }
+  };
+
+  const handleMuxUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Abort any previous upload
+    muxAbortController?.abort();
+    const abortCtrl = new AbortController();
+    setMuxAbortController(abortCtrl);
+
+    setMuxUploadStatus('uploading');
+    setMuxUploadProgress(0);
+
+    let xhr: XMLHttpRequest | null = null;
+
+    // Clean up on abort
+    abortCtrl.signal.addEventListener('abort', () => {
+      xhr?.abort();
+    });
+
+    try {
+      // 1. Get direct upload URL from our API
+      const res = await fetch('/api/admin/mux/upload', { method: 'POST', signal: abortCtrl.signal });
+      if (!res.ok) throw new Error('Error al crear upload');
+      const { uploadUrl, uploadId } = await res.json();
+
+      // 2. Upload file directly to Mux via PUT
+      xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          setMuxUploadProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      });
+
+      await new Promise<void>((resolve, reject) => {
+        xhr!.open('PUT', uploadUrl);
+        xhr!.setRequestHeader('Content-Type', file.type);
+        xhr!.onload = () => xhr!.status >= 200 && xhr!.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr!.status}`));
+        xhr!.onerror = () => reject(new Error('Upload failed'));
+        xhr!.onabort = () => reject(new Error('Upload cancelled'));
+        xhr!.send(file);
+      });
+
+      // 3. Poll for asset readiness
+      setMuxUploadStatus('processing');
+      let attempts = 0;
+      const maxAttempts = 60; // 5 minutes max
+
+      const poll = async (): Promise<void> => {
+        if (abortCtrl.signal.aborted) return;
+        if (attempts >= maxAttempts) {
+          throw new Error('Timeout esperando el procesamiento del video');
+        }
+        attempts++;
+
+        const statusRes = await fetch(`/api/admin/mux/asset/${uploadId}`, { signal: abortCtrl.signal });
+        if (!statusRes.ok) throw new Error('Error checking status');
+        const data = await statusRes.json();
+
+        if (data.status === 'ready' && data.playbackId) {
+          setLessonForm(prev => ({
+            ...prev,
+            mux_playback_id: data.playbackId,
+            ...(data.duration ? { duration_minutes: Math.ceil(data.duration / 60) } : {}),
+          }));
+          setMuxUploadStatus('ready');
+          return;
+        }
+
+        if (data.status === 'errored') {
+          throw new Error('Error procesando el video en Mux');
+        }
+
+        await new Promise(r => setTimeout(r, 5000));
+        return poll();
+      };
+
+      await poll();
+    } catch (error: unknown) {
+      if (abortCtrl.signal.aborted) return;
+      if (error instanceof Error && (error.name === 'AbortError' || error.message === 'Upload cancelled')) return;
+      const message = error instanceof Error ? error.message : 'Error al subir el video a Mux';
+      logger.error('Error uploading to Mux:', message);
+      setMuxUploadStatus('error');
+      alert(message);
+    } finally {
+      // Only clear if this is still the active controller
+      setMuxAbortController(prev => prev === abortCtrl ? null : prev);
     }
   };
 
@@ -384,9 +481,9 @@ export default function CourseContentPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <button
           onClick={() => router.push('/admin/courses')}
           className="flex items-center space-x-2 text-gray-600 hover:text-[#1a5744] mb-4"
@@ -394,7 +491,7 @@ export default function CourseContentPage() {
           <ArrowLeft className="w-5 h-5" />
           <span>Volver a Cursos</span>
         </button>
-        <h1 className="text-3xl font-bold text-[#1a5744]">Contenido del Curso</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Contenido del Curso</h1>
         <p className="text-gray-600 mt-2">{course?.title}</p>
       </div>
 
@@ -629,7 +726,7 @@ export default function CourseContentPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-[#1a5744] mb-2">
                     Tipo de Contenido *
@@ -662,20 +759,80 @@ export default function CourseContentPage() {
               {/* Content Type Fields */}
               {lessonForm.content_type === 'video' && (
                 <div className="space-y-4">
+                  {/* Mux Direct Upload */}
                   <div>
                     <label className="block text-sm font-semibold text-[#1a5744] mb-2">
-                      Mux Playback ID
+                      ⭐ Subir Video a Mux (Recomendado)
                     </label>
-                    <input
-                      type="text"
-                      value={lessonForm.mux_playback_id}
-                      onChange={(e) => setLessonForm({ ...lessonForm, mux_playback_id: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
-                      placeholder="Ej: DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      ⭐ Recomendado: Pega el Playback ID de Mux para streaming profesional con analytics.
-                    </p>
+                    
+                    {lessonForm.mux_playback_id ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <Video className="w-5 h-5 text-green-600" />
+                          <span className="text-sm text-green-700 font-medium">Video listo</span>
+                          <span className="text-xs text-green-600 ml-auto font-mono">{lessonForm.mux_playback_id}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLessonForm({ ...lessonForm, mux_playback_id: '' });
+                            setMuxUploadStatus('idle');
+                          }}
+                          className="text-sm text-red-600 hover:text-red-700"
+                        >
+                          Eliminar video
+                        </button>
+                      </div>
+                    ) : muxUploadStatus === 'uploading' ? (
+                      <div className="p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#a4c639]"></div>
+                          <span className="text-sm text-gray-700">Subiendo video... {muxUploadProgress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-[#a4c639] h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${muxUploadProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ) : muxUploadStatus === 'processing' ? (
+                      <div className="flex items-center gap-3 p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-500"></div>
+                        <span className="text-sm text-yellow-700">Procesando video en Mux... esto puede tomar unos minutos</span>
+                      </div>
+                    ) : muxUploadStatus === 'error' ? (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                          Error al subir el video. Intenta de nuevo.
+                        </div>
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#a4c639] transition-colors">
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <span className="text-gray-600">Reintentar subida</span>
+                          <input type="file" className="hidden" accept="video/*" onChange={handleMuxUpload} />
+                        </label>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#a4c639]/50 rounded-lg cursor-pointer hover:border-[#a4c639] transition-colors bg-green-50/30">
+                        <Upload className="w-8 h-8 text-[#a4c639] mb-2" />
+                        <span className="text-gray-700 font-medium">Subir video a Mux</span>
+                        <span className="text-sm text-gray-400">MP4, MOV, MKV — streaming profesional con analytics</span>
+                        <input type="file" className="hidden" accept="video/*" onChange={handleMuxUpload} />
+                      </label>
+                    )}
+                    
+                    {/* Manual Playback ID input */}
+                    {!lessonForm.mux_playback_id && muxUploadStatus === 'idle' && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={lessonForm.mux_playback_id}
+                          onChange={(e) => setLessonForm({ ...lessonForm, mux_playback_id: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent text-sm"
+                          placeholder="O pega un Playback ID existente"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="relative">

@@ -114,9 +114,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-8">
+    <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1a5744]">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Dashboard</h1>
         <p className="text-gray-600 mt-2">Bienvenido al panel de administración</p>
       </div>
 

@@ -501,7 +501,7 @@ export default function LearnCoursePage() {
             <div className="max-w-6xl mx-auto">
               {/* Video Content */}
               {currentLesson.content_type === 'video' && (currentLesson.mux_playback_id || currentLesson.video_url || currentLesson.youtube_video_id) && (
-                <div className="relative rounded-xl overflow-hidden m-6 shadow-2xl">
+                <div className="relative rounded-xl overflow-hidden m-2 sm:m-4 lg:m-6 shadow-2xl">
                   <VideoPlayer
                     muxPlaybackId={currentLesson.mux_playback_id}
                     viewerUserId={user?.id}
@@ -515,9 +515,9 @@ export default function LearnCoursePage() {
 
               {/* PDF Content */}
               {currentLesson.content_type === 'pdf' && currentLesson.pdf_url && (
-                <div className="p-8">
-                  <div className="bg-white rounded-xl p-8 max-w-4xl mx-auto shadow-2xl">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="p-3 sm:p-6 lg:p-8">
+                  <div className="bg-white rounded-xl p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto shadow-2xl">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
                       <h2 className="text-2xl font-bold text-gray-900">
                         {currentLesson.title}
                       </h2>
@@ -543,8 +543,8 @@ export default function LearnCoursePage() {
 
               {/* Text Content */}
               {currentLesson.content_type === 'text' && (
-                <div className="p-8">
-                  <div className="bg-white rounded-xl p-8 max-w-4xl mx-auto shadow-2xl">
+                <div className="p-3 sm:p-6 lg:p-8">
+                  <div className="bg-white rounded-xl p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto shadow-2xl">
                     <h2 className="text-3xl font-bold text-gray-900 mb-4">
                       {currentLesson.title}
                     </h2>
@@ -562,7 +562,7 @@ export default function LearnCoursePage() {
 
               {/* Lesson Description */}
               {currentLesson.description && currentLesson.content_type !== 'text' && (
-                <div className="p-8">
+                <div className="p-3 sm:p-6 lg:p-8">
                   <div className="max-w-4xl mx-auto bg-white rounded-xl p-6 shadow-lg">
                     <h3 className="text-[#1a5744] text-xl font-semibold mb-3">
                       Sobre esta lección
@@ -584,42 +584,46 @@ export default function LearnCoursePage() {
 
         {/* Bottom Navigation */}
         {currentLesson && (
-          <footer className="bg-white border-t border-gray-200 p-4 shadow-lg">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <footer className="bg-white border-t border-gray-200 p-3 sm:p-4 shadow-lg">
+            <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
               <button
                 onClick={goToPreviousLesson}
                 disabled={!canGoPrevious()}
-                className="flex items-center space-x-2 px-6 py-3 bg-gray-100 text-[#2d7a5f] border-2 border-gray-200 rounded-lg hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 bg-gray-100 text-[#2d7a5f] border-2 border-gray-200 rounded-lg hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm sm:text-base"
               >
-                <ChevronLeft className="w-5 h-5" />
-                <span>Anterior</span>
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Anterior</span>
               </button>
 
               <button
                 onClick={markAsCompleted}
-                className={`px-6 py-3 rounded-lg transition-all font-semibold ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg transition-all font-semibold text-sm sm:text-base ${
                   completedLessons.has(currentLesson.id)
                     ? 'bg-green-500 text-white shadow-lg'
                     : 'bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white hover:shadow-lg'
                 }`}
               >
                 {completedLessons.has(currentLesson.id) ? (
-                  <span className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5" />
-                    <span>Completada</span>
+                  <span className="flex items-center space-x-1 sm:space-x-2">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Completada</span>
+                    <span className="sm:hidden">Hecho</span>
                   </span>
                 ) : (
-                  'Marcar como completada'
+                  <span>
+                    <span className="hidden sm:inline">Marcar como completada</span>
+                    <span className="sm:hidden">Completar</span>
+                  </span>
                 )}
               </button>
 
               <button
                 onClick={goToNextLesson}
                 disabled={!canGoNext()}
-                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#a4c639] to-[#2d7a5f] text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm sm:text-base"
               >
-                <span>Siguiente</span>
-                <ChevronRight className="w-5 h-5" />
+                <span className="hidden sm:inline">Siguiente</span>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </footer>

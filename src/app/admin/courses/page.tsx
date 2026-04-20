@@ -125,10 +125,10 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#1a5744]">Cursos</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Cursos</h1>
           <p className="text-gray-600 mt-2">Administra los cursos de la plataforma</p>
         </div>
         <button
@@ -141,7 +141,7 @@ export default function CoursesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex space-x-4 mb-6">
+      <div className="flex flex-wrap gap-2 sm:space-x-4 mb-6">
         <button
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg transition-colors ${
@@ -198,9 +198,9 @@ export default function CoursesPage() {
               key={course.id}
               className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
             >
-              <div className="flex">
+              <div className="flex flex-col sm:flex-row">
                 {/* Image */}
-                <div className="w-48 h-48 bg-gray-200 flex-shrink-0">
+                <div className="w-full sm:w-48 h-40 sm:h-48 bg-gray-200 flex-shrink-0">
                   {course.image_url ? (
                     <img
                       src={course.image_url}
@@ -215,8 +215,8 @@ export default function CoursesPage() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 p-6">
-                  <div className="flex justify-between items-start mb-4">
+                <div className="flex-1 p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2">
                     <div>
                       <h3 className="text-xl font-bold text-[#1a5744] mb-2">
                         {course.title}
@@ -251,7 +251,7 @@ export default function CoursesPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center space-x-3 pt-4 border-t border-gray-200">
+                  <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-200">
                     <button
                       onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
                       className="flex items-center space-x-2 px-4 py-2 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] transition-colors"
@@ -295,7 +295,7 @@ export default function CoursesPage() {
 
                     <button
                       onClick={() => deleteCourse(course.id)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors ml-auto"
+                      className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors sm:ml-auto"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Eliminar</span>

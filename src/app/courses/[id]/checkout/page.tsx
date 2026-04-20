@@ -244,14 +244,14 @@ export default function CheckoutPage() {
           <p className="text-sm md:text-base text-gray-700">Elige tu método de pago y sube tu comprobante</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Course Summary */}
-          <div className="w-full md:col-span-1 order-2 md:order-1">
-            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 md:sticky md:top-6 border-2 border-[#a4c639]/20">
+          <div className="w-full lg:col-span-1 order-2 lg:order-1">
+            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 lg:sticky lg:top-6 border-2 border-[#a4c639]/20">
               <h3 className="font-bold text-lg md:text-xl text-[#1a5744] mb-3 md:mb-4">Resumen del curso</h3>
               {course.image_url && (
                 <div className="aspect-video bg-white rounded-2xl mb-3 md:mb-4 overflow-hidden border border-gray-200">
-                  <img src={course.image_url} alt={course.title} className="w-full h-full object-contain p-8" />
+                  <img src={course.image_url} alt={course.title} className="w-full h-full object-contain p-4 md:p-8" />
                 </div>
               )}
               <h4 className="font-semibold text-base md:text-lg text-gray-900 mb-3 line-clamp-2">{course.title}</h4>
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Payment Form */}
-          <div className="w-full md:col-span-2 order-1 md:order-2">
+          <div className="w-full lg:col-span-2 order-1 lg:order-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 text-sm">{error}</div>

@@ -292,14 +292,14 @@ export default function AdminPurchasesPage() {
   }
 
   return (
-    <div className="p-8">
+    <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1a5744] mb-2">Gestión de Pagos</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744] mb-2">Gestión de Pagos</h1>
         <p className="text-gray-600">Revisa y aprueba compras manuales</p>
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
         <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -330,7 +330,7 @@ export default function AdminPurchasesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap items-center gap-4">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-4 mb-6 flex flex-wrap items-center gap-3 sm:gap-4">
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium text-gray-700">Estado:</span>
           {(['pending', 'approved', 'rejected', 'all'] as const).map((f) => (

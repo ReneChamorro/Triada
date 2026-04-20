@@ -130,8 +130,8 @@ export default function GrantAccessPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6 sm:mb-8">
         <Link 
           href="/admin" 
           className="inline-flex items-center text-[#2d7a5f] hover:text-[#1a5744] mb-4"
@@ -139,7 +139,7 @@ export default function GrantAccessPage() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Volver al Dashboard
         </Link>
-        <h1 className="text-3xl font-bold text-[#1a5744]">Otorgar Acceso Manual</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Otorgar Acceso Manual</h1>
         <p className="text-gray-600 mt-2">
           Usa esta herramienta cuando un pago haya sido recibido pero el acceso no se otorgó automáticamente.
         </p>

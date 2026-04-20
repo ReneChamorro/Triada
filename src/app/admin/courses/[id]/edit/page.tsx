@@ -220,8 +220,8 @@ export default function EditCoursePage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6 sm:mb-8">
         <button
           onClick={() => router.push('/admin/courses')}
           className="flex items-center space-x-2 text-gray-600 hover:text-[#1a5744] mb-4"

@@ -2,7 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Download, Trash2, AlertTriangle, Loader2 } from 'lucide-react'
+import { createBrowserClient } from '@supabase/ssr'
+import { Download, Trash2, AlertTriangle, Loader2, Lock, Eye, EyeOff, Check } from 'lucide-react'
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface AccountActionsProps {
   userEmail: string
@@ -15,6 +21,58 @@ export default function AccountActions({ userEmail }: AccountActionsProps) {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+
+  const handleChangePassword = async () => {
+    setPasswordError('')
+    setPasswordSuccess(false)
+
+    if (!currentPassword) {
+      setPasswordError('Ingresa tu contraseña actual')
+      return
+    }
+    if (newPassword.length < 6) {
+      setPasswordError('La nueva contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      // Verify current password by re-signing in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: currentPassword,
+      })
+      if (signInError) {
+        setPasswordError('La contraseña actual es incorrecta')
+        return
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+      if (updateError) throw updateError
+      setPasswordSuccess(true)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al cambiar la contraseña'
+      setPasswordError(message)
+    } finally {
+      setChangingPassword(false)
+    }
+  }
 
   const handleExport = async () => {
     setExporting(true)
@@ -55,14 +113,112 @@ export default function AccountActions({ userEmail }: AccountActionsProps) {
         throw new Error(data.error || 'Error al eliminar cuenta')
       }
       router.push('/login?reason=deleted')
-    } catch (err: any) {
-      setError(err.message || 'No se pudo eliminar la cuenta. Intenta de nuevo.')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'No se pudo eliminar la cuenta. Intenta de nuevo.'
+      setError(message)
       setDeleting(false)
     }
   }
 
   return (
     <>
+      {/* Change Password */}
+      <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+        <h2 className="text-xl font-bold text-[#1a5744] mb-2">Cambiar Contraseña</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Actualiza tu contraseña de acceso. Debe tener al menos 6 caracteres.
+        </p>
+        <div className="space-y-3 max-w-sm">
+          <div>
+            <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
+            <div className="relative">
+              <input
+                id="current-password"
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => { setCurrentPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
+                placeholder="Contraseña actual"
+                autoComplete="current-password"
+                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                aria-label={showCurrentPassword ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+            <div className="relative">
+              <input
+                id="new-password"
+                type={showNewPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => { setNewPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
+                placeholder="Nueva contraseña"
+                autoComplete="new-password"
+                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                aria-label={showNewPassword ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
+            <div className="relative">
+              <input
+                id="confirm-password"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
+                placeholder="Confirmar nueva contraseña"
+                autoComplete="new-password"
+                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          {passwordError && (
+            <p className="text-sm text-red-600">{passwordError}</p>
+          )}
+          {passwordSuccess && (
+            <div className="flex items-center gap-2 text-sm text-green-600">
+              <Check className="h-4 w-4" />
+              Contraseña actualizada correctamente
+            </div>
+          )}
+          <button
+            onClick={handleChangePassword}
+            disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
+            className="flex items-center gap-2 bg-[#2d7a5f] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1a5744] transition-colors disabled:opacity-50"
+          >
+            {changingPassword ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Lock className="h-4 w-4" />
+            )}
+            {changingPassword ? 'Cambiando...' : 'Cambiar contraseña'}
+          </button>
+        </div>
+      </div>
+
       {/* Export Data */}
       <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
         <h2 className="text-xl font-bold text-[#1a5744] mb-2">Exportar Mis Datos</h2>

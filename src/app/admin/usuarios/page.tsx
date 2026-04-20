@@ -111,13 +111,14 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="p-8">
+    <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1a5744]">Usuarios</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Usuarios</h1>
         <p className="text-gray-600 mt-2">Administra los usuarios de la plataforma</p>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-[#e8e4d0]">
             <tr>
@@ -184,6 +185,7 @@ export default function UsersPage() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {users.length === 0 && (
           <div className="text-center py-12">

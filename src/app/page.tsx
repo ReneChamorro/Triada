@@ -110,7 +110,7 @@ export default function HomePage() {
           </p>
 
           {/* Feature Cards */}
-          <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
             {features.map((feature, index) => (
               <div
                 key={feature.id}
@@ -142,7 +142,7 @@ export default function HomePage() {
                 }`}>
                   {feature.title}
                 </h3>
-                <p className={`text-[11px] md:text-xs lg:text-sm leading-relaxed ${
+                <p className={`text-xs md:text-xs lg:text-sm leading-relaxed ${
                   feature.is_highlighted ? 'text-[#1a5744]' : 'text-gray-700'
                 }`}>
                   {feature.description}
@@ -221,7 +221,7 @@ export default function HomePage() {
               Explora nuestra selección de cursos más recientes
             </p>
           </div>
-          <div className={`grid gap-4 md:gap-6 lg:gap-8 ${courses.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : courses.length === 2 ? 'grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-3'}`}>
+          <div className={`grid gap-4 md:gap-6 lg:gap-8 ${courses.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : courses.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-4xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
             {courses && courses.length > 0 ? (
               courses.slice(0, 3).map((course) => (
                 <CourseCard

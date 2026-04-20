@@ -164,9 +164,9 @@ export default function NewCoursePage() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1a5744]">Nuevo Curso</h1>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Nuevo Curso</h1>
         <p className="text-gray-600 mt-2">Crea un nuevo curso para la plataforma</p>
       </div>
 
