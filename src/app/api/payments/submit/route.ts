@@ -6,7 +6,7 @@ import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-lim
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
-const FROM = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+const FROM = process.env.RESEND_FROM_EMAIL || 'Triada <hola@triadave.com>'
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'triadaglobal2026@gmail.com').split(',').map(e => e.trim()).filter(Boolean)
 
 export async function POST(request: NextRequest) {
@@ -141,11 +141,11 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
           from: FROM,
           to: ADMIN_EMAILS,
-          subject: `💰 Nuevo pago pendiente — ${course.title}`,
+          subject: `Nuevo pago pendiente — ${course.title}`,
           html: `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
               <div style="background:#a4c639;color:white;padding:20px;border-radius:8px 8px 0 0">
-                <h1 style="margin:0">💰 Nuevo Pago Pendiente</h1>
+                <h1 style="margin:0">Nuevo Pago Pendiente</h1>
               </div>
               <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
                 <p><strong>Estudiante:</strong> ${profile?.full_name || user.email}</p>

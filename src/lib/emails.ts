@@ -15,11 +15,11 @@ export async function sendApprovalEmail(
   await resend.emails.send({
     from: FROM,
     to,
-    subject: `✅ ¡Acceso al curso listo! — ${courseName}`,
+    subject: `Acceso al curso aprobado — ${courseName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
         <div style="background:#a4c639;color:white;padding:20px;border-radius:8px 8px 0 0">
-          <h1 style="margin:0">✅ ¡Tu pago ha sido aprobado!</h1>
+          <h1 style="margin:0">Tu pago ha sido aprobado</h1>
         </div>
         <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
           <p>Hola <strong>${studentName}</strong>,</p>
@@ -49,11 +49,11 @@ export async function sendRejectionEmail(
   await resend.emails.send({
     from: FROM,
     to,
-    subject: `❌ Pago no verificado — ${courseName}`,
+    subject: `Pago no verificado — ${courseName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
         <div style="background:#dc2626;color:white;padding:20px;border-radius:8px 8px 0 0">
-          <h1 style="margin:0">❌ Pago no verificado</h1>
+          <h1 style="margin:0">Pago no verificado</h1>
         </div>
         <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
           <p>Hola <strong>${studentName}</strong>,</p>
