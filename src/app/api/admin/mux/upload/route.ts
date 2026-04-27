@@ -11,7 +11,7 @@ const mux = new Mux({
   tokenSecret: process.env.MUX_TOKEN_SECRET,
 })
 
-export async function POST() {
+export async function POST(request: Request) {
   // Verify admin
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -36,9 +36,12 @@ export async function POST() {
   }
 
   try {
+    // Use the request's origin so Mux allows uploads from any deployment (local, Vercel, custom domain)
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
     // Create a direct upload URL
     const upload = await mux.video.uploads.create({
-      cors_origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      cors_origin: origin,
       new_asset_settings: {
         playback_policy: ['public'],
         encoding_tier: 'baseline',
