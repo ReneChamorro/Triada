@@ -229,6 +229,13 @@ export default function HomePage() {
         </motion.div>
       </section>
 
+      {/* Wave: Hero → Features */}
+      <div className="relative h-16 bg-white pointer-events-none overflow-hidden">
+        <svg className="absolute bottom-0 w-full" viewBox="0 0 1440 64" preserveAspectRatio="none">
+          <path d="M0,28 C320,64 640,0 960,42 C1120,56 1280,14 1440,28 L1440,64 L0,64 Z" fill="#e8e4d0" />
+        </svg>
+      </div>
+
       {/* ── Features Section ─────────────────────────── */}
       <section className="bg-[#e8e4d0] py-20 md:py-28">
         <div ref={featuresRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -300,6 +307,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Wave: Features → About */}
+      <div className="relative h-24 bg-[#e8e4d0] pointer-events-none overflow-hidden">
+        <svg className="absolute bottom-0 w-full" viewBox="0 0 1440 96" preserveAspectRatio="none">
+          <path d="M0,48 C240,96 480,0 720,56 C900,96 1140,8 1440,48 L1440,96 L0,96 Z" fill="#2d7a5f" />
+        </svg>
+      </div>
+
       {/* ── About Us Section ─────────────────────────── */}
       <section className="relative bg-[#2d7a5f] overflow-hidden py-20 md:py-28">
         {/* Subtle pattern */}
@@ -368,6 +382,13 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Wave: About → Courses */}
+      <div className="relative h-24 bg-[#2d7a5f] pointer-events-none overflow-hidden">
+        <svg className="absolute bottom-0 w-full" viewBox="0 0 1440 96" preserveAspectRatio="none">
+          <path d="M0,56 C360,0 720,96 1080,40 C1260,8 1380,72 1440,48 L1440,96 L0,96 Z" fill="white" />
+        </svg>
+      </div>
 
       {/* ── Featured Courses ─────────────────────────── */}
       <section className="bg-white py-20 md:py-28">
@@ -444,6 +465,13 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Wave: Courses → Footer */}
+      <div className="relative h-16 bg-white pointer-events-none overflow-hidden">
+        <svg className="absolute bottom-0 w-full" viewBox="0 0 1440 64" preserveAspectRatio="none">
+          <path d="M0,20 C360,64 720,0 1080,44 C1260,56 1380,8 1440,32 L1440,64 L0,64 Z" fill="#2d7a5f" />
+        </svg>
+      </div>
 
       {/* Footer */}
       <Footer />

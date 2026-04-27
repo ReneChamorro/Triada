@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { Download, Trash2, AlertTriangle, Loader2, Lock, Eye, EyeOff, Check } from 'lucide-react'
+import { Download, Trash2, AlertTriangle, Loader2, Lock, Eye, EyeOff, Check, Mail } from 'lucide-react'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,6 +31,25 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
   const [changingPassword, setChangingPassword] = useState(false)
   const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const [sendingResetLink, setSendingResetLink] = useState(false)
+  const [resetLinkSent, setResetLinkSent] = useState(false)
+
+  const handleSendPasswordSetupLink = async () => {
+    setSendingResetLink(true)
+    setPasswordError('')
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`,
+      })
+      if (error) throw error
+      setResetLinkSent(true)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al enviar el correo'
+      setPasswordError(message)
+    } finally {
+      setSendingResetLink(false)
+    }
+  }
 
   const handleChangePassword = async () => {
     setPasswordError('')
@@ -44,25 +63,20 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
       setPasswordError('Las contraseñas no coinciden')
       return
     }
-
-    // Email+password users must provide their current password
-    if (hasPasswordAuth && !currentPassword) {
+    if (!currentPassword) {
       setPasswordError('Ingresa tu contraseña actual')
       return
     }
 
     setChangingPassword(true)
     try {
-      // Verify current password only for email+password accounts
-      if (hasPasswordAuth) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: userEmail,
-          password: currentPassword,
-        })
-        if (signInError) {
-          setPasswordError('La contraseña actual es incorrecta')
-          return
-        }
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: currentPassword,
+      })
+      if (signInError) {
+        setPasswordError('La contraseña actual es incorrecta')
+        return
       }
 
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
@@ -132,106 +146,142 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
     <>
       {/* Change Password */}
       <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
-        <h2 className="text-xl font-bold text-[#1a5744] mb-2">Cambiar Contraseña</h2>
-        {!hasPasswordAuth && (
-          <div className="mb-4 flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-            <span>Iniciaste sesión con Google. Puedes establecer una contraseña aquí para poder iniciar sesión también con tu email.</span>
-          </div>
-        )}
-        <p className="text-sm text-gray-600 mb-4">
-          Actualiza tu contraseña de acceso. Debe tener al menos 6 caracteres.
-        </p>
-        <div className="space-y-3 max-w-sm">
-          {hasPasswordAuth && (
-          <div>
-            <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual <span className="text-gray-400 font-normal">(dejar vacío si no tienes contraseña)</span></label>
-            <div className="relative">
-              <input
-                id="current-password"
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => { setCurrentPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
-                placeholder="Contraseña actual"
-                autoComplete="current-password"
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                aria-label={showCurrentPassword ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          )}
-          <div>
-            <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
-            <div className="relative">
-              <input
-                id="new-password"
-                type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => { setNewPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
-                placeholder="Nueva contraseña"
-                autoComplete="new-password"
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                aria-label={showNewPassword ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
-            <div className="relative">
-              <input
-                id="confirm-password"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
-                placeholder="Confirmar nueva contraseña"
-                autoComplete="new-password"
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          {passwordError && (
-            <p className="text-sm text-red-600">{passwordError}</p>
-          )}
-          {passwordSuccess && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
-              <Check className="h-4 w-4" />
-              Contraseña actualizada correctamente
-            </div>
-          )}
-          <button
-            onClick={handleChangePassword}
-            disabled={changingPassword || !newPassword || !confirmPassword}
-            className="flex items-center gap-2 bg-[#2d7a5f] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1a5744] transition-colors disabled:opacity-50"
-          >
-            {changingPassword ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+        <h2 className="text-xl font-bold text-[#1a5744] mb-2">
+          {hasPasswordAuth ? 'Cambiar Contraseña' : 'Establecer Contraseña'}
+        </h2>
+
+        {!hasPasswordAuth ? (
+          /* Google OAuth user — no inline form, send reset link instead */
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Tu cuenta está vinculada a Google. Para establecer una contraseña y poder
+              iniciar sesión también con tu correo, te enviaremos un enlace seguro a{' '}
+              <span className="font-semibold text-gray-800">{userEmail}</span>.
+            </p>
+            {resetLinkSent ? (
+              <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">
+                <Check className="h-5 w-5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">¡Correo enviado!</p>
+                  <p className="mt-0.5 text-green-600">
+                    Revisa tu bandeja de entrada en <span className="font-medium">{userEmail}</span> y sigue
+                    las instrucciones para establecer tu contraseña.
+                  </p>
+                </div>
+              </div>
             ) : (
-              <Lock className="h-4 w-4" />
+              <button
+                onClick={handleSendPasswordSetupLink}
+                disabled={sendingResetLink}
+                className="flex items-center gap-2 bg-[#2d7a5f] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1a5744] transition-colors disabled:opacity-50"
+              >
+                {sendingResetLink ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="h-4 w-4" />
+                )}
+                {sendingResetLink ? 'Enviando...' : 'Enviar enlace al correo'}
+              </button>
             )}
-            {changingPassword ? 'Cambiando...' : 'Cambiar contraseña'}
-          </button>
-        </div>
+            {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
+          </div>
+        ) : (
+          /* Email+password user — inline form */
+          <>
+            <p className="text-sm text-gray-600 mb-4">
+              Actualiza tu contraseña de acceso. Debe tener al menos 6 caracteres.
+            </p>
+            <div className="space-y-3 max-w-sm">
+              <div>
+                <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
+                <div className="relative">
+                  <input
+                    id="current-password"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => { setCurrentPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
+                    placeholder="Contraseña actual"
+                    autoComplete="current-password"
+                    className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    aria-label={showCurrentPassword ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+                <div className="relative">
+                  <input
+                    id="new-password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => { setNewPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
+                    placeholder="Nueva contraseña"
+                    autoComplete="new-password"
+                    className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    aria-label={showNewPassword ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">Confirmar nueva contraseña</label>
+                <div className="relative">
+                  <input
+                    id="confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(''); setPasswordSuccess(false) }}
+                    placeholder="Confirmar nueva contraseña"
+                    autoComplete="new-password"
+                    className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              {passwordError && (
+                <p className="text-sm text-red-600">{passwordError}</p>
+              )}
+              {passwordSuccess && (
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <Check className="h-4 w-4" />
+                  Contraseña actualizada correctamente
+                </div>
+              )}
+              <button
+                onClick={handleChangePassword}
+                disabled={changingPassword || !newPassword || !confirmPassword}
+                className="flex items-center gap-2 bg-[#2d7a5f] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#1a5744] transition-colors disabled:opacity-50"
+              >
+                {changingPassword ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
+                {changingPassword ? 'Cambiando...' : 'Cambiar contraseña'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Export Data */}
