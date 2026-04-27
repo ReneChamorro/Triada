@@ -23,13 +23,13 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
   useEffect(() => {
     async function loadUser() {
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        setUser(session.user)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUser(user)
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('id', user.id)
           .single()
         if (profileData) setProfile(profileData)
       }

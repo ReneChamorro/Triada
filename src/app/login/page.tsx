@@ -12,7 +12,7 @@ function getAuthErrorMessage(error: string): string {
   const errorMap: Record<string, string> = {
     'Invalid login credentials': 'Correo o contrasena incorrectos. Por favor verifica tus datos.',
     'Email not confirmed': 'Por favor verifica tu correo electronico antes de iniciar sesion.',
-    'User not found': 'No existe una cuenta con este correo electronico.',
+    'User not found': 'Correo o contrasena incorrectos. Por favor verifica tus datos.',
     'Invalid email': 'El formato del correo electronico no es valido.',
     'Password should be at least 6 characters': 'La contrasena debe tener al menos 6 caracteres.',
   }
@@ -34,7 +34,10 @@ const GoogleIcon = () => (
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
+  const rawRedirect = searchParams.get('redirect')
+  const redirect = rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+    ? rawRedirect
+    : '/dashboard'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,7 +48,7 @@ function LoginForm() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}` },
     })
     if (error) setError(getAuthErrorMessage(error.message))
   }

@@ -4,6 +4,14 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 // Domain triadave.com is verified in Resend — use it as the sending domain.
 const FROM = process.env.RESEND_FROM_EMAIL || 'Triada <hola@triadave.com>'
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 export async function sendApprovalEmail(
   to: string,
   studentName: string,
@@ -22,8 +30,8 @@ export async function sendApprovalEmail(
           <h1 style="margin:0">Tu pago ha sido aprobado</h1>
         </div>
         <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
-          <p>Hola <strong>${studentName}</strong>,</p>
-          <p>Tu pago para el curso <strong>${courseName}</strong> ha sido verificado y aprobado.</p>
+          <p>Hola <strong>${escapeHtml(studentName)}</strong>,</p>
+          <p>Tu pago para el curso <strong>${escapeHtml(courseName)}</strong> ha sido verificado y aprobado.</p>
           <p>Ya tienes acceso completo al curso. ¡Comienza a aprender ahora!</p>
           <p style="margin-top:20px">
             <a href="${courseUrl}"
@@ -56,9 +64,9 @@ export async function sendRejectionEmail(
           <h1 style="margin:0">Pago no verificado</h1>
         </div>
         <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
-          <p>Hola <strong>${studentName}</strong>,</p>
-          <p>Lamentamos informarte que no pudimos verificar tu pago para el curso <strong>${courseName}</strong>.</p>
-          ${reason ? `<div style="background:#fff;padding:15px;margin:15px 0;border-left:4px solid #dc2626"><strong>Motivo:</strong> ${reason}</div>` : ''}
+          <p>Hola <strong>${escapeHtml(studentName)}</strong>,</p>
+          <p>Lamentamos informarte que no pudimos verificar tu pago para el curso <strong>${escapeHtml(courseName)}</strong>.</p>
+          ${reason ? `<div style="background:#fff;padding:15px;margin:15px 0;border-left:4px solid #dc2626"><strong>Motivo:</strong> ${escapeHtml(reason)}</div>` : ''}
           <p>Si crees que esto es un error, puedes:</p>
           <ul>
             <li>Reenviar tu comprobante realizando una nueva compra</li>

@@ -36,8 +36,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Use the request's origin so Mux allows uploads from any deployment (local, Vercel, custom domain)
-    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    // Validate Origin against allowlist to prevent CORS misconfiguration
+    const ALLOWED_ORIGINS = new Set(
+      [process.env.NEXT_PUBLIC_APP_URL, 'http://localhost:3000'].filter(Boolean) as string[]
+    )
+    const requestOrigin = request.headers.get('origin') || ''
+    const origin = ALLOWED_ORIGINS.has(requestOrigin)
+      ? requestOrigin
+      : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
 
     // Create a direct upload URL
     const upload = await mux.video.uploads.create({

@@ -34,7 +34,10 @@ const GoogleIcon = () => (
 function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
+  const rawRedirect = searchParams.get('redirect')
+  const redirect = rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+    ? rawRedirect
+    : '/dashboard'
 
   const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', name: '', lastname: '', phone: '' })
   const [error, setError] = useState('')
@@ -48,7 +51,7 @@ function RegisterForm() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}` },
     })
     if (error) setError(getAuthErrorMessage(error.message))
   }

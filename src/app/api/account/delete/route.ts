@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function DELETE(request: NextRequest) {
+  // CSRF: verify Origin matches the application domain
+  const origin = request.headers.get('origin')
+  const referer = request.headers.get('referer')
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+  const allowedOrigins = new Set([appUrl, 'http://localhost:3000'].filter(Boolean))
+  const requestOrigin = origin ?? (referer ? new URL(referer).origin : null)
+  if (!requestOrigin || !allowedOrigins.has(requestOrigin)) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

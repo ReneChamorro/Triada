@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       .eq('id', adminUser.id)
       .single()
 
-    if (!adminProfile || adminProfile.role !== 'admin') {
+    if (!adminProfile || !['admin', 'teacher'].includes(adminProfile.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
@@ -67,8 +67,7 @@ export async function POST(request: Request) {
     if (enrollError) {
       logger.error('[Manual Grant] Error:', enrollError)
       return NextResponse.json({ 
-        error: 'Error al otorgar acceso',
-        details: enrollError
+        error: 'Error al otorgar acceso'
       }, { status: 500 })
     }
 
@@ -125,8 +124,7 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error('[Manual Grant] Unexpected error:', error)
     return NextResponse.json({ 
-      error: 'Error al procesar la solicitud',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Error al procesar la solicitud'
     }, { status: 500 })
   }
 }

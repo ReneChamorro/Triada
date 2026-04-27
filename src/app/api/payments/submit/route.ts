@@ -9,6 +9,14 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 const FROM = process.env.RESEND_FROM_EMAIL || 'Triada <hola@triadave.com>'
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'triadaglobal2026@gmail.com').split(',').map(e => e.trim()).filter(Boolean)
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 export async function POST(request: NextRequest) {
   try {
     // 1. Auth check
@@ -88,7 +96,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Upload receipt to Supabase Storage
-    const fileExt = receiptFile.name.split('.').pop() || 'jpg'
+    const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+    const fileExt = extMap[receiptFile.type] ?? 'jpg'
     const fileName = `${user.id}/${courseId}_${Date.now()}.${fileExt}`
     const buffer = Buffer.from(await receiptFile.arrayBuffer())
 
@@ -148,16 +157,16 @@ export async function POST(request: NextRequest) {
                 <h1 style="margin:0">Nuevo Pago Pendiente</h1>
               </div>
               <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
-                <p><strong>Estudiante:</strong> ${profile?.full_name || user.email}</p>
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>Curso:</strong> ${course.title}</p>
-                <p><strong>Monto:</strong> ${course.price} ${course.currency || 'USD'}</p>
-                <p><strong>Método:</strong> ${methodLabels[paymentMethod] || paymentMethod}</p>
+                <p><strong>Estudiante:</strong> ${escapeHtml(profile?.full_name || user.email || '')}</p>
+                <p><strong>Email:</strong> ${escapeHtml(user.email || '')}</p>
+                <p><strong>Curso:</strong> ${escapeHtml(course.title)}</p>
+                <p><strong>Monto:</strong> ${course.price} ${escapeHtml(course.currency || 'USD')}</p>
+                <p><strong>Método:</strong> ${escapeHtml(methodLabels[paymentMethod] || paymentMethod)}</p>
                 <div style="background:#fff;padding:15px;margin:15px 0;border-left:4px solid #a4c639">
                   <strong>Código de referencia:</strong><br/>
                   <span style="font-size:18px;font-family:monospace">${referenceCode}</span>
                 </div>
-                ${notes ? `<p><strong>Notas:</strong> ${notes}</p>` : ''}
+                ${notes ? `<p><strong>Notas:</strong> ${escapeHtml(notes)}</p>` : ''}
                 <p style="margin-top:20px">
                   <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/purchases"
                      style="background:#a4c639;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block">

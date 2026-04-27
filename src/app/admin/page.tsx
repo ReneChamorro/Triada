@@ -40,9 +40,9 @@ export default function AdminDashboard() {
 
   async function checkUser() {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!session) {
+      if (!user) {
         router.push('/login');
         return;
       }
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
 
       // Only allow admin and teacher roles

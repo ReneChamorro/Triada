@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Download, Trash2, AlertTriangle, Loader2, Lock, Eye, EyeOff, Check, Mail } from 'lucide-react'
+import { passwordSchema } from '@/lib/validations'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,7 +40,7 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
     setPasswordError('')
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`,
+        redirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard/settings`,
       })
       if (error) throw error
       setResetLinkSent(true)
@@ -55,8 +56,9 @@ export default function AccountActions({ userEmail, hasPasswordAuth }: AccountAc
     setPasswordError('')
     setPasswordSuccess(false)
 
-    if (newPassword.length < 6) {
-      setPasswordError('La nueva contraseña debe tener al menos 6 caracteres')
+    const pwValidation = passwordSchema.safeParse(newPassword)
+    if (!pwValidation.success) {
+      setPasswordError(pwValidation.error.issues[0]?.message || 'Contraseña inválida')
       return
     }
     if (newPassword !== confirmPassword) {
