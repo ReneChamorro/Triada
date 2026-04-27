@@ -5,17 +5,15 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useParams } from 'next/navigation'
-import { Loader2, Upload, CheckCircle, ChevronDown } from 'lucide-react'
+import { Loader2, Upload, CheckCircle, Zap, Smartphone, Lock, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 
-type PaymentMethod = 'zelle' | 'pago_movil' | 'transferencia_usd' | 'paypal_manual'
+type PaymentMethod = 'zelle' | 'pago_movil'
 
-const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: string }[] = [
-  { value: 'zelle', label: 'Zelle', icon: '💜' },
-  { value: 'pago_movil', label: 'Pago Móvil', icon: '📱' },
-  { value: 'transferencia_usd', label: 'Transferencia USD', icon: '🏦' },
-  { value: 'paypal_manual', label: 'PayPal', icon: '🅿️' },
+const PAYMENT_METHODS: { value: PaymentMethod; label: string; Icon: React.ElementType }[] = [
+  { value: 'zelle', label: 'Zelle', Icon: Zap },
+  { value: 'pago_movil', label: 'Pago Móvil', Icon: Smartphone },
 ]
 
 export default function CheckoutPage() {
@@ -161,7 +159,7 @@ export default function CheckoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5E6D3]">
+      <div className="min-h-screen flex items-center justify-center bg-[#f9f8f4]">
         <Loader2 className="h-8 w-8 animate-spin text-[#a4c639]" />
       </div>
     )
@@ -171,26 +169,22 @@ export default function CheckoutPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#F5E6D3] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center">
-          <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+      <div className="min-h-screen bg-[#f9f8f4] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+          <div className="w-16 h-16 bg-[#a4c639]/15 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <CheckCircle className="h-9 w-9 text-[#a4c639]" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Comprobante Enviado!</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-extrabold text-[#2d7a5f] mb-2">¡Comprobante Enviado!</h2>
+          <p className="text-gray-500 mb-8 text-sm leading-relaxed">
             Tu pago está pendiente de verificación. Te notificaremos por email cuando sea aprobado (usualmente dentro de 24 horas).
           </p>
           <div className="space-y-3">
-            <Link
-              href="/my-courses"
-              className="block w-full bg-[#a4c639] text-white hover:bg-[#8ba832] px-6 py-3 rounded-xl font-semibold transition-colors"
-            >
+            <Link href="/my-courses"
+              className="block w-full bg-[#a4c639] hover:bg-[#2d7a5f] text-white px-6 py-3.5 rounded-xl font-bold transition-all shadow-md shadow-[#a4c639]/30">
               Ir a Mis Cursos
             </Link>
-            <Link
-              href="/courses"
-              className="block w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-6 py-3 rounded-xl font-semibold transition-colors"
-            >
+            <Link href="/courses"
+              className="block w-full bg-white text-[#2d7a5f] border-2 border-gray-200 hover:border-[#2d7a5f] px-6 py-3 rounded-xl font-semibold transition-all">
               Ver Más Cursos
             </Link>
           </div>
@@ -212,60 +206,52 @@ export default function CheckoutPage() {
         <p><span className="font-medium text-gray-700">Teléfono:</span> <span className="font-mono">0414-791-7048</span></p>
       </div>
     ),
-    transferencia_usd: (
-      <div className="space-y-2 text-sm">
-        <p><span className="font-medium text-gray-700">Banco:</span> <span className="font-mono">___RELLENAR___</span></p>
-        <p><span className="font-medium text-gray-700">Cuenta:</span> <span className="font-mono">___RELLENAR___</span></p>
-        <p><span className="font-medium text-gray-700">Beneficiario:</span> <span className="font-mono">___RELLENAR___</span></p>
-      </div>
-    ),
-    paypal_manual: (
-      <div className="space-y-2 text-sm">
-        <p><span className="font-medium text-gray-700">Enviar a:</span> <span className="font-mono">___RELLENAR___</span></p>
-        <p className="text-gray-500">Envía como &quot;Amigos y familiares&quot; para evitar comisiones.</p>
-      </div>
-    ),
   }
 
   return (
-    <div className="min-h-screen bg-[#F5E6D3] relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <svg className="absolute bottom-0 w-full h-64 text-white opacity-20" viewBox="0 0 1440 320" preserveAspectRatio="none">
-          <path fill="currentColor" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
-        </svg>
+    <div className="min-h-screen bg-[#f9f8f4]">
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/dashboard">
+            <Image src="/logos/Triada-logo-mono-green.png" alt="Triada Logo" width={160} height={50} priority className="h-10 w-auto" />
+          </Link>
+          <span className="text-xs font-semibold uppercase tracking-widest text-[#a4c639]">Proceso de Pago</span>
+        </div>
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
-        <div className="mb-6 md:mb-8 lg:mb-12 text-center md:text-left">
-          <Link href="/dashboard" className="inline-flex items-center justify-center mb-4 md:mb-6">
-            <Image src="/logos/Triada-logo-mono-green.png" alt="Triada Logo" width={180} height={60} priority className="h-12 md:h-14 lg:h-16 w-auto drop-shadow-md" />
-          </Link>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a5744] mb-2">Completar compra</h1>
-          <p className="text-sm md:text-base text-gray-700">Elige tu método de pago y sube tu comprobante</p>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="mb-6 md:mb-10">
+          <p className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest mb-1">Paso final</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#2d7a5f]">Completar compra</h1>
+          <p className="text-gray-400 text-sm mt-1">Elige tu método de pago y sube tu comprobante</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Course Summary */}
           <div className="w-full lg:col-span-1 order-2 lg:order-1">
-            <div className="bg-white rounded-3xl shadow-xl p-4 md:p-6 lg:sticky lg:top-6 border-2 border-[#a4c639]/20">
-              <h3 className="font-bold text-lg md:text-xl text-[#1a5744] mb-3 md:mb-4">Resumen del curso</h3>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 lg:sticky lg:top-24">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-1 h-5 rounded-full bg-[#a4c639] inline-block" />
+                <h3 className="font-bold text-[#2d7a5f]">Resumen del curso</h3>
+              </div>
               {course.image_url && (
-                <div className="aspect-video bg-white rounded-2xl mb-3 md:mb-4 overflow-hidden border border-gray-200">
-                  <img src={course.image_url} alt={course.title} className="w-full h-full object-contain p-4 md:p-8" />
+                <div className="aspect-video bg-[#f5f3e8] rounded-xl mb-4 overflow-hidden">
+                  <img src={course.image_url} alt={course.title} className="w-full h-full object-contain p-4" />
                 </div>
               )}
-              <h4 className="font-semibold text-base md:text-lg text-gray-900 mb-3 line-clamp-2">{course.title}</h4>
-              {course.description && <p className="text-sm text-gray-600 mb-4 line-clamp-3">{course.description}</p>}
-              <div className="border-t-2 border-[#F5E6D3] pt-3 mt-3">
+              <h4 className="font-bold text-[#2d7a5f] mb-2 line-clamp-2">{course.title}</h4>
+              {course.description && <p className="text-xs text-gray-400 mb-4 line-clamp-3">{course.description}</p>}
+              <div className="border-t border-gray-100 pt-4 mt-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm md:text-base text-gray-700 font-medium">Total a pagar</span>
-                  <span className="text-2xl md:text-3xl font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
+                  <span className="text-sm text-gray-500 font-medium">Total a pagar</span>
+                  <span className="text-2xl font-extrabold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
                 </div>
               </div>
-              <div className="mt-4 bg-[#a4c639]/10 rounded-2xl p-3">
-                <p className="text-xs text-gray-700 flex items-start">
-                  <span className="text-[#a4c639] mr-2">🔒</span>
-                  <span>Verificación manual. Te confirmaremos por email en 24h.</span>
+              <div className="mt-4 bg-[#a4c639]/10 rounded-xl p-3 border border-[#a4c639]/20">
+                <p className="text-xs text-gray-600 flex items-start gap-2">
+                  <Lock className="h-3.5 w-3.5 text-[#a4c639] shrink-0 mt-0.5" />
+                  Verificación manual. Te confirmaremos por email en 24h.
                 </p>
               </div>
             </div>
@@ -279,21 +265,22 @@ export default function CheckoutPage() {
               )}
 
               {/* Step 1: Select method */}
-              <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
-                <h3 className="text-lg font-bold text-[#1a5744] mb-4">1. Método de pago</h3>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-6 h-6 rounded-full bg-[#a4c639] text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                  <h3 className="font-bold text-[#2d7a5f]">Método de pago</h3>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   {PAYMENT_METHODS.map((m) => (
-                    <button
-                      key={m.value}
-                      type="button"
-                      onClick={() => setPaymentMethod(m.value)}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                    <button key={m.value} type="button" onClick={() => setPaymentMethod(m.value)}
+                      className={`p-4 rounded-xl border-2 text-left transition-all ${
                         paymentMethod === m.value
-                          ? 'border-[#a4c639] bg-[#a4c639]/10 ring-2 ring-[#a4c639]/20'
+                          ? 'border-[#a4c639] bg-[#a4c639]/10'
                           : 'border-gray-200 hover:border-[#a4c639]/50'
-                      }`}
-                    >
-                      <span className="text-2xl block mb-1">{m.icon}</span>
+                      }`}>
+                      <m.Icon className={`w-6 h-6 mb-2 ${
+                        m.value === 'zelle' ? 'text-[#6b21a8]' : 'text-[#1e3a5f]'
+                      }`} />
                       <span className="font-semibold text-sm text-gray-900">{m.label}</span>
                     </button>
                   ))}
@@ -301,27 +288,33 @@ export default function CheckoutPage() {
               </div>
 
               {/* Step 2: Payment instructions */}
-              <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
-                <h3 className="text-lg font-bold text-[#1a5744] mb-2">2. Realiza tu pago</h3>
-                <p className="text-sm text-gray-600 mb-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-6 h-6 rounded-full bg-[#a4c639] text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                  <h3 className="font-bold text-[#2d7a5f]">Realiza tu pago</h3>
+                </div>
+                <p className="text-sm text-gray-500 mb-4">
                   Envía <span className="font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span> a:
                 </p>
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                <div className="bg-[#f5f3e8] rounded-xl p-4 border border-gray-200">
                   {paymentInstructions[paymentMethod]}
                 </div>
               </div>
 
               {/* Step 3: Upload receipt */}
-              <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-100">
-                <h3 className="text-lg font-bold text-[#1a5744] mb-2">3. Sube tu comprobante</h3>
-                <p className="text-xs text-gray-500 mb-4 flex items-start gap-1.5">
-                  <span className="text-[#2d7a5f]">🔐</span>
-                  Tu comprobante se almacena de forma segura y se elimina automáticamente una vez verificado tu pago. En caso de rechazo, se retiene por 7 días adicionales para tu revisión.
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-6 h-6 rounded-full bg-[#a4c639] text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                  <h3 className="font-bold text-[#2d7a5f]">Sube tu comprobante</h3>
+                </div>
+                <p className="text-xs text-gray-400 mb-4 flex items-start gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-[#2d7a5f] shrink-0 mt-0.5" />
+                  Tu comprobante se almacena de forma segura y se elimina automáticamente una vez verificado tu pago.
                 </p>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Código de referencia *
                     </label>
                     <input
@@ -331,12 +324,12 @@ export default function CheckoutPage() {
                       placeholder="Ej: 1234567890"
                       maxLength={100}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
+                      className="w-full px-4 py-3 bg-[#f5f3e8] border-2 border-transparent rounded-xl focus:border-[#a4c639] focus:bg-white focus:outline-none transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Imagen del comprobante *
                     </label>
                     <input
@@ -362,20 +355,17 @@ export default function CheckoutPage() {
                         </button>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full border-2 border-dashed border-gray-300 rounded-xl py-8 flex flex-col items-center justify-center hover:border-[#a4c639] transition-colors"
-                      >
-                        <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                        <span className="text-sm text-gray-600">Haz clic para subir imagen</span>
+                      <button type="button" onClick={() => fileInputRef.current?.click()}
+                        className="w-full border-2 border-dashed border-gray-200 rounded-xl py-10 flex flex-col items-center justify-center hover:border-[#a4c639] hover:bg-[#a4c639]/5 transition-all">
+                        <Upload className="h-8 w-8 text-gray-300 mb-2" />
+                        <span className="text-sm text-gray-500 font-medium">Haz clic para subir imagen</span>
                         <span className="text-xs text-gray-400 mt-1">JPG, PNG o WebP — Máx. 5MB</span>
                       </button>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Notas (opcional)
                     </label>
                     <textarea
@@ -384,7 +374,7 @@ export default function CheckoutPage() {
                       placeholder="Información adicional sobre tu pago..."
                       maxLength={500}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#a4c639] focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 bg-[#f5f3e8] border-2 border-transparent rounded-xl focus:border-[#a4c639] focus:bg-white focus:outline-none transition-all resize-none"
                     />
                   </div>
 
@@ -401,27 +391,17 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={processing || !receiptFile || !referenceCode.trim()}
-                className="w-full bg-[#a4c639] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#8ba832] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg flex items-center justify-center gap-2"
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  'Enviar Comprobante de Pago'
-                )}
+              <button type="submit" disabled={processing || !receiptFile || !referenceCode.trim()}
+                className="w-full bg-[#a4c639] hover:bg-[#2d7a5f] text-white py-4 rounded-xl font-bold text-base transition-all shadow-md shadow-[#a4c639]/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                {processing ? (<><Loader2 className="h-5 w-5 animate-spin" />Enviando...</>) : 'Enviar Comprobante de Pago'}
               </button>
 
-              <div className="bg-[#F5E6D3] rounded-3xl p-6 border-2 border-[#a4c639]/30">
+              <div className="bg-[#f5f3e8] rounded-2xl p-5 border border-[#a4c639]/20">
                 <div className="flex gap-3">
-                  <span className="text-2xl">🔒</span>
+                  <ShieldCheck className="h-5 w-5 text-[#a4c639] shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-[#1a5744] mb-1">Compra 100% Segura</p>
-                    <p className="text-sm text-gray-700">
+                    <p className="font-bold text-[#2d7a5f] mb-1 text-sm">Compra 100% Segura</p>
+                    <p className="text-xs text-gray-500">
                       Tu comprobante será revisado por nuestro equipo. Recibirás confirmación por email en un máximo de 24 horas.
                     </p>
                   </div>

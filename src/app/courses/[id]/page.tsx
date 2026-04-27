@@ -41,24 +41,29 @@ export default async function CourseDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f9f8f4]">
       <Header currentPage="courses" />
 
-      {/* Course Header */}
-      <div className="bg-gradient-to-r from-[#2d7a5f] to-[#a4c639] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
+      {/* Course Hero */}
+      <div className="bg-[#2d7a5f] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#a4c639]/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1a5744]/40 rounded-full blur-3xl" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative">
           <div className="max-w-3xl">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#a4c639]/20 border border-[#a4c639]/40 text-[#a4c639] text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
+              <BookOpen className="h-3 w-3" />
+              Curso Profesional
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-3 md:mb-4 leading-tight">
               {course.title}
             </h1>
             {course.short_description && (
-              <p className="text-base md:text-xl text-blue-100 mb-4 md:mb-6">
-                {course.short_description}
-              </p>
+              <p className="text-base md:text-lg text-white/70 mb-4 md:mb-6">{course.short_description}</p>
             )}
             {course.duration_minutes && (
-              <div className="flex items-center text-blue-100 text-sm md:text-base">
-                <Clock className="h-5 w-5 mr-2" />
+              <div className="flex items-center text-white/60 text-sm">
+                <Clock className="h-4 w-4 mr-2" />
                 <span>{course.duration_minutes} minutos de contenido</span>
               </div>
             )}
@@ -71,16 +76,19 @@ export default async function CourseDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
           <div className="w-full lg:col-span-2 order-2 lg:order-1">
-            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 lg:p-8">
-              <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Acerca de este curso</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-1 h-5 rounded-full bg-[#a4c639] inline-block" />
+                <h2 className="text-xl md:text-2xl font-extrabold text-[#2d7a5f]">Acerca de este curso</h2>
+              </div>
               {course.description ? (
-                <div className="prose max-w-none text-gray-700 text-sm md:text-base">
+                <div className="text-gray-600 text-sm md:text-base leading-relaxed space-y-4">
                   {course.description.split('\n').map((paragraph: string, index: number) => (
-                    <p key={index} className="mb-4">{paragraph}</p>
+                    <p key={index}>{paragraph}</p>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-600">
+                <p className="text-gray-500">
                   Este curso está diseñado para ayudarte a dominar nuevas habilidades
                   y avanzar en tu carrera profesional.
                 </p>
@@ -90,72 +98,58 @@ export default async function CourseDetailPage({
 
           {/* Sidebar - Purchase Card */}
           <div className="w-full lg:col-span-1 order-1 lg:order-2">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 lg:sticky lg:top-6">
-              <div className="aspect-video bg-white rounded-lg mb-4 overflow-hidden border border-gray-200">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 lg:sticky lg:top-24">
+              <div className="aspect-video bg-[#f5f3e8] rounded-xl mb-5 overflow-hidden">
                 {course.image_url ? (
-                  <img
-                    src={course.image_url}
-                    alt={course.title}
-                    className="w-full h-full object-contain p-8"
-                  />
+                  <img src={course.image_url} alt={course.title} className="w-full h-full object-contain p-6" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
-                    <BookOpen className="h-16 w-16 text-white" />
+                  <div className="w-full h-full bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center rounded-xl">
+                    <BookOpen className="h-14 w-14 text-white opacity-50" />
                   </div>
                 )}
               </div>
               
-              <div className="mb-4 md:mb-6">
-                <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+              <div className="mb-5">
+                <div className="text-3xl font-extrabold text-[#2d7a5f] mb-1">
                   {formatPrice(course.price, course.currency)}
                 </div>
-                <p className="text-sm text-gray-600">Pago único • Acceso de por vida</p>
+                <p className="text-xs text-gray-400">Pago único • Acceso de por vida</p>
               </div>
 
               {hasAccess ? (
-                <Link
-                  href={`/courses/${course.id}/learn`}
-                  className="w-full bg-green-600 text-white hover:bg-green-700 px-6 py-3 rounded-lg font-semibold text-center block mb-4"
-                >
-                  Ir al Curso
+                <Link href={`/courses/${course.id}/learn`}
+                  className="w-full bg-[#2d7a5f] hover:bg-[#1a5744] text-white px-6 py-3.5 rounded-xl font-bold text-center block mb-4 transition-all">
+                  Ir al Curso →
                 </Link>
               ) : user ? (
-                <Link
-                  href={`/courses/${course.id}/checkout`}
-                  className="w-full bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold text-center block mb-4"
-                >
+                <Link href={`/courses/${course.id}/checkout`}
+                  className="w-full bg-[#a4c639] hover:bg-[#2d7a5f] text-white px-6 py-3.5 rounded-xl font-bold text-center block mb-4 transition-all shadow-md shadow-[#a4c639]/30">
                   Comprar Ahora
                 </Link>
               ) : (
                 <div className="space-y-3">
-                  <Link
-                    href={`/register?redirect=/courses/${course.id}`}
-                    className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-semibold text-center block"
-                  >
+                  <Link href={`/register?redirect=/courses/${course.id}`}
+                    className="w-full bg-[#a4c639] hover:bg-[#2d7a5f] text-white px-6 py-3.5 rounded-xl font-bold text-center block transition-all shadow-md shadow-[#a4c639]/30">
                     Registrarse para Comprar
                   </Link>
-                  <Link
-                    href={`/login?redirect=/courses/${course.id}`}
-                    className="w-full bg-white text-[#2d7a5f] border-2 border-[#2d7a5f] hover:bg-[#e8e4d0] px-6 py-3 rounded-lg font-semibold text-center block"
-                  >
+                  <Link href={`/login?redirect=/courses/${course.id}`}
+                    className="w-full bg-white text-[#2d7a5f] border-2 border-[#2d7a5f] hover:bg-[#e8e4d0] px-6 py-3 rounded-xl font-semibold text-center block transition-all">
                     Ya tengo cuenta
                   </Link>
                 </div>
               )}
 
-              <div className="mt-6 pt-6 border-t space-y-3 text-sm text-gray-600">
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  <span>Acceso de por vida</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  <span>Certificado de finalización</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  <span>Contenido protegido</span>
-                </div>
+              <div className="mt-5 pt-5 border-t border-gray-100 space-y-2.5">
+                {[
+                  'Acceso de por vida',
+                  'Certificado de finalización',
+                  'Contenido protegido',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle className="h-4 w-4 text-[#a4c639] shrink-0" />
+                    {item}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

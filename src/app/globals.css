@@ -7,33 +7,150 @@
   --triada-green-light: #a4c639;
   --triada-beige: #e8e4d0;
   --triada-black: #1a1a1a;
-  
+
   --background: #ffffff;
   --foreground: var(--triada-green-dark);
 }
 
 @theme inline {
-  /* Triada Brand Colors */
   --color-triada-dark: #1a5744;
   --color-triada: #2d7a5f;
   --color-triada-light: #a4c639;
   --color-triada-beige: #e8e4d0;
-  
-  /* Primary colors mapped to Triada green */
   --color-primary: var(--triada-green);
   --color-primary-dark: var(--triada-green-dark);
   --color-primary-light: var(--triada-green-light);
-  
-  /* Accent color - lime green from logo */
   --color-accent: var(--triada-green-light);
-  
-  /* Neutral colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+}
+
+/* ─── Base ─────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Custom Scrollbar ──────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f4f2ea; }
+::-webkit-scrollbar-thumb { background: #2d7a5f; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #1a5744; }
+
+/* ─── Keyframes ─────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-12px) rotate(1.5deg); }
+  66%       { transform: translateY(-6px) rotate(-1deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(10px); }
+}
+
+@keyframes blob {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25%       { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50%       { border-radius: 50% 60% 30% 60% / 30% 40% 70% 50%; }
+  75%       { border-radius: 60% 40% 60% 30% / 70% 30% 50% 60%; }
+}
+
+@keyframes shimmer-text {
+  0%   { background-position: 0% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.5; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Animation Utilities ───────────────────────── */
+.animate-float           { animation: float 7s ease-in-out infinite; }
+.animate-float-reverse   { animation: float-reverse 9s ease-in-out infinite; }
+.animate-blob            { animation: blob 10s ease-in-out infinite; }
+.animate-blob-2          { animation: blob 10s ease-in-out infinite 3.3s; }
+.animate-blob-3          { animation: blob 10s ease-in-out infinite 6.6s; }
+.animate-pulse-dot       { animation: pulse-dot 2s ease-in-out infinite; }
+.animate-spin-slow       { animation: spin-slow 22s linear infinite; }
+.animate-gradient-x      { animation: gradient-x 5s ease infinite; background-size: 200% 200%; }
+.animate-fade-up         { animation: fade-up 0.6s ease forwards; }
+.animate-slide-in-left   { animation: slide-in-left 0.6s ease forwards; }
+
+/* ─── Glassmorphism ─────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+.glass-beige {
+  background: rgba(232, 228, 208, 0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ─── Gradient Text ─────────────────────────────── */
+.text-gradient-green {
+  background: linear-gradient(135deg, #2d7a5f 0%, #a4c639 60%, #a4c639 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-shimmer {
+  background: linear-gradient(90deg, #1a5744 0%, #a4c639 50%, #1a5744 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-text 3.5s linear infinite;
+}
+
+/* ─── Card Hover Lift ───────────────────────────── */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(26, 87, 68, 0.18);
+}
+
+/* ─── Gradient Backgrounds ──────────────────────── */
+.bg-hero-gradient {
+  background: radial-gradient(ellipse at 80% 10%, rgba(164, 198, 57, 0.15) 0%, transparent 55%),
+              radial-gradient(ellipse at 10% 80%, rgba(164, 198, 57, 0.08) 0%, transparent 50%),
+              #ffffff;
+}
+.bg-section-gradient {
+  background: linear-gradient(160deg, #e8e4d0 0%, #f5f3e8 100%);
 }

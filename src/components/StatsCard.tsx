@@ -16,13 +16,15 @@ export default function StatsCard({
   bgColor = 'bg-[#a4c639]'
 }: StatsCardProps) {
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow">
-      <div className={`w-16 h-16 ${bgColor} rounded-xl mb-6 flex items-center justify-center`}>
-        <Icon className="h-8 w-8 text-white" />
+    <div className="bg-white rounded-2xl p-6 border-l-4 border-[#a4c639] shadow-sm hover:shadow-md card-hover transition-all">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-12 h-12 ${bgColor} rounded-xl flex items-center justify-center`}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
       </div>
-      <h3 className="text-xl font-bold text-[#1a5744] mb-2">{title}</h3>
-      <p className="text-4xl font-bold text-[#2d7a5f]">{value}</p>
-      {subtitle && <p className="text-sm text-gray-600 mt-2">{subtitle}</p>}
+      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">{title}</p>
+      <p className="text-3xl font-extrabold text-[#2d7a5f] truncate">{value}</p>
+      {subtitle && <p className="text-xs text-gray-400 mt-1 truncate">{subtitle}</p>}
     </div>
   )
 }

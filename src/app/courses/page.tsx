@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Filter, BookOpen } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Search, BookOpen, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { motion, useInView } from 'motion/react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CourseCard from '@/components/CourseCard'
@@ -65,53 +66,99 @@ export default function CoursesPage() {
       <Header currentPage="courses" />
 
       {/* Hero Section */}
-      <section className="bg-[#e8e4d0] py-8 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a5744] mb-3 md:mb-4">
-            Catálogo de Cursos
-          </h1>
-          <p className="text-base md:text-xl text-[#1a5744]/80 max-w-2xl mx-auto">
+      <section className="relative bg-[#2d7a5f] py-16 md:py-24 overflow-hidden">
+        {/* Animated blobs */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-[#a4c639]/20 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#a4c639]/15 rounded-full blur-3xl animate-blob-2" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-blob-3" />
+
+        {/* Subtle dot grid */}
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 bg-[#a4c639]/20 border border-[#a4c639]/40 text-[#a4c639] text-sm font-semibold px-4 py-1.5 rounded-full mb-6"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Formación Profesional Especializada
+          </motion.div>
+
+          {/* Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 leading-tight"
+          >
+            Catálogo de{' '}
+            <span className="text-[#a4c639] relative">
+              Cursos
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, delay: 0.7, ease: 'easeOut' }}
+                className="absolute left-0 -bottom-1 h-1 w-full bg-[#a4c639]/50 rounded-full origin-left block"
+              />
+            </span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10"
+          >
             Encuentra el curso perfecto para tu desarrollo profesional
-          </p>
+          </motion.p>
+
+
         </div>
       </section>
 
       {/* Search and Filters */}
-      <section className="bg-white border-b py-6 md:py-8">
+      <section className="bg-white border-b border-gray-100 py-6 md:py-8 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-            {/* Search Bar */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Buscar cursos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#2d7a5f] focus:outline-none"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="relative">
-              <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full md:w-64 pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#2d7a5f] focus:outline-none appearance-none bg-white cursor-pointer"
-              >
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Search bar */}
+          <div className="relative max-w-2xl mb-5">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2d7a5f]/50 h-5 w-5" />
+            <input
+              type="text"
+              placeholder="Buscar cursos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-[#f5f3e8] border-2 border-transparent rounded-xl text-[#2d7a5f] placeholder-[#2d7a5f]/40 font-medium focus:border-[#a4c639] focus:bg-white focus:outline-none transition-all duration-200"
+            />
           </div>
 
-          {/* Results Count */}
-          <div className="mt-4 text-sm text-gray-600">
-            Mostrando {filteredCourses.length} {filteredCourses.length === 1 ? 'curso' : 'cursos'}
+          {/* Pill category filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-[#2d7a5f]/50 mr-1">
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Filtrar
+            </span>
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition-all duration-200 cursor-pointer ${
+                  selectedCategory === category.id
+                    ? 'bg-[#a4c639] border-[#a4c639] text-white shadow-md shadow-[#a4c639]/30'
+                    : 'bg-white border-gray-200 text-[#2d7a5f] hover:border-[#a4c639] hover:text-[#a4c639]'
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+
+            {/* Results count */}
+            <span className="ml-auto text-sm text-gray-400 font-medium">
+              {filteredCourses.length} {filteredCourses.length === 1 ? 'curso' : 'cursos'}
+            </span>
           </div>
         </div>
       </section>

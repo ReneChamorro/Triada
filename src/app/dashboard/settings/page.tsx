@@ -22,35 +22,44 @@ export default async function SettingsPage() {
   const hasPasswordAuth = user.identities?.some((i) => i.provider === 'email') ?? false
 
   return (
-    <div className="min-h-screen bg-[#e8e4d0]">
+    <div className="min-h-screen bg-[#f9f8f4]">
       <DashboardHeader profile={profile} />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744] mb-8">
-          Configuración de Cuenta
-        </h1>
+      {/* Header strip */}
+      <div className="bg-[#2d7a5f] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 relative">
+          <p className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest mb-2">Tu cuenta</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white">Configuración</h1>
+          <p className="mt-1 text-white/50 text-sm">Gestiona tu información personal y preferencias</p>
+        </div>
+      </div>
 
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-6">
         {/* Profile Info */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-bold text-[#1a5744] mb-4">Información Personal</h2>
-          <div className="space-y-3 text-sm md:text-base">
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-500">Nombre</span>
-              <span className="font-medium text-gray-900">{profile?.full_name || 'Sin nombre'}</span>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <span className="w-1 h-5 rounded-full bg-[#a4c639] inline-block" />
+            <h2 className="text-base font-bold text-[#2d7a5f]">Información Personal</h2>
+          </div>
+          <div className="px-6 py-4 divide-y divide-gray-50">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm text-gray-400 font-medium">Nombre</span>
+              <span className="text-sm font-semibold text-gray-900">{profile?.full_name || 'Sin nombre'}</span>
             </div>
-            <div className="flex justify-between py-2 border-b border-gray-100">
-              <span className="text-gray-500">Email</span>
-              <span className="font-medium text-gray-900">{user.email}</span>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm text-gray-400 font-medium">Email</span>
+              <span className="text-sm font-semibold text-gray-900">{user.email}</span>
             </div>
             {profile?.phone && (
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-500">Teléfono</span>
-                <span className="font-medium text-gray-900">{profile.phone}</span>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-sm text-gray-400 font-medium">Teléfono</span>
+                <span className="text-sm font-semibold text-gray-900">{profile.phone}</span>
               </div>
             )}
-            <div className="flex justify-between py-2">
-              <span className="text-gray-500">Miembro desde</span>
-              <span className="font-medium text-gray-900">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm text-gray-400 font-medium">Miembro desde</span>
+              <span className="text-sm font-semibold text-gray-900">
                 {new Date(profile?.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
               </span>
             </div>

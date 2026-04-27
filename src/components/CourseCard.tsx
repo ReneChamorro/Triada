@@ -92,7 +92,7 @@ export default function CourseCard({
   return (
     <>
       {/* Card */}
-      <div className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer" onClick={() => setIsOpen(true)}>
+      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm ring-1 ring-black/5 hover:shadow-xl hover:ring-[#a4c639]/30 card-hover cursor-pointer transition-all duration-300 border-t-[3px] border-[#a4c639]/40 hover:border-[#a4c639]" onClick={() => setIsOpen(true)}>
         {thumbnail_url ? (
           <div className="aspect-video relative overflow-hidden bg-white">
             <img
@@ -102,22 +102,27 @@ export default function CourseCard({
             />
           </div>
         ) : (
-          <div className="aspect-video bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
+          <div className="aspect-video bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] flex items-center justify-center">
             {Icon ? <Icon className="h-16 w-16 text-white" /> : <BookOpen className="h-16 w-16 text-white" />}
           </div>
         )}
         <div className="p-4 md:p-6">
-          <h3 className="text-lg md:text-xl font-bold text-[#1a5744] mb-2 md:mb-3 group-hover:text-[#2d7a5f] transition-colors line-clamp-2">
+          <h3 className="text-lg md:text-xl font-bold text-[#2d7a5f] mb-1.5 group-hover:text-[#a4c639] transition-colors line-clamp-2">
             {title}
           </h3>
+          {category && (
+            <span className="inline-block text-xs font-semibold text-[#a4c639] bg-[#a4c639]/10 px-2.5 py-0.5 rounded-full mb-2 capitalize">
+              {category}
+            </span>
+          )}
           <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
             {short_description || description}
           </p>
           <div className="flex items-center justify-between">
-            <span className="text-xl md:text-2xl font-bold text-[#2d7a5f]">
+            <span className="text-xl md:text-2xl font-bold text-[#a4c639]">
               {fmtPrice}
             </span>
-            <span className="text-[#2d7a5f] font-medium group-hover:underline flex items-center">
+            <span className="text-[#a4c639] font-medium group-hover:underline flex items-center">
               Ver más
               <ArrowRight className="ml-1 h-4 w-4" />
             </span>
@@ -152,7 +157,7 @@ export default function CourseCard({
                       <img src={thumbnail_url} alt={title} className="h-32 md:h-40 object-contain" />
                     </div>
                   ) : (
-                    <div className="h-40 bg-gradient-to-br from-[#2d7a5f] to-[#a4c639] flex items-center justify-center">
+                    <div className="h-40 bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] flex items-center justify-center">
                       {Icon ? <Icon className="h-16 w-16 text-white" /> : <BookOpen className="h-16 w-16 text-white" />}
                     </div>
                   )}
@@ -169,7 +174,7 @@ export default function CourseCard({
 
                 {/* Content */}
                 <div className="overflow-y-auto flex-1 p-6 md:p-8">
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#1a5744] mb-2">{title}</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-[#2d7a5f] mb-2">{title}</h2>
 
                   {duration_minutes && (
                     <div className="flex items-center text-gray-500 text-sm mb-4">
@@ -190,22 +195,22 @@ export default function CourseCard({
 
                   <div className="space-y-2 text-sm text-gray-600 mb-6">
                     <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-[#a4c639] mr-2 flex-shrink-0" />
                       <span>Acceso de por vida</span>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-[#a4c639] mr-2 flex-shrink-0" />
                       <span>Certificado de finalización</span>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-[#a4c639] mr-2 flex-shrink-0" />
                       <span>Contenido protegido</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="border-t bg-gray-50 p-6">
+                <div className="border-t border-[#e8e4d0] bg-[#e8e4d0]/20 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <span className="text-3xl font-bold text-gray-900">{fmtPrice}</span>
@@ -218,7 +223,7 @@ export default function CourseCard({
                   ) : hasAccess ? (
                     <Link
                       href={`/courses/${courseId}/learn`}
-                      className="w-full bg-green-600 text-white hover:bg-green-700 px-6 py-3 rounded-lg font-semibold text-center block transition-colors"
+                      className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-xl font-semibold text-center block transition-colors"
                     >
                       Ir al Curso
                     </Link>
