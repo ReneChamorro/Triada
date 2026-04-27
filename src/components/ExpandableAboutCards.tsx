@@ -165,13 +165,13 @@ export function ExpandableAboutCards() {
         ) : null}
       </AnimatePresence>
       
-      {/* Single Button */}
-      <button 
+      {/* Single Button — hidden for now */}
+      {/* <button 
         onClick={() => setIsOpen(true)}
         className="inline-block bg-[#e8e4d0] text-[#1a5744] hover:bg-white px-8 md:px-8 py-3 md:py-3 rounded-full text-lg md:text-lg font-bold transition-colors shadow-lg cursor-pointer"
       >
         Ver Más
-      </button>
+      </button> */}
     </>
   );
 }

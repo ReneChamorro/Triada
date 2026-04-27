@@ -24,6 +24,8 @@ interface AboutSection {
   description_secondary: string | null
   image_url: string | null
   button_text: string
+  hero_tagline: string | null
+  hero_subtitle: string | null
 }
 
 export default function LandingSettingsPage() {
@@ -273,6 +275,43 @@ export default function LandingSettingsPage() {
             Agregar Característica
           </button>
         </div>
+
+        {/* Hero Section */}
+        {aboutSection && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-[#1a5744] mb-4">Sección Hero (Página Principal)</h2>
+            <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-200">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                    Frase destacada (tagline)
+                  </label>
+                  <input
+                    type="text"
+                    value={aboutSection.hero_tagline || ''}
+                    onChange={(e) => updateAboutSection({ hero_tagline: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                    placeholder="Ej: Ciencia. Formación. Aplicación."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Aparece en verde debajo del título principal.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#1a5744] mb-2">
+                    Subtítulo del hero
+                  </label>
+                  <textarea
+                    value={aboutSection.hero_subtitle || ''}
+                    onChange={(e) => updateAboutSection({ hero_subtitle: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                    placeholder="Ej: Docencia basada en evidencia e investigación aplicada..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Texto descriptivo debajo de la frase destacada.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* About Section */}
         {aboutSection && (

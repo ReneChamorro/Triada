@@ -41,6 +41,8 @@ interface AboutSection {
   description_secondary: string | null
   image_url: string | null
   button_text: string
+  hero_tagline: string | null
+  hero_subtitle: string | null
 }
 
 export default function HomePage() {
@@ -138,35 +140,48 @@ export default function HomePage() {
               Plataforma Educativa Profesional
             </motion.div>
 
-            {/* Heading */}
+            {/* Heading — tagline as the big title */}
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#2d7a5f] mb-6 leading-[1.08] tracking-tight"
             >
-              Transforma tu{' '}
-              <span className="relative inline-block">
-                <span className="text-gradient-green">Carrera</span>
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.5, delay: 0.55 }}
-                  className="absolute -bottom-1 left-0 right-0 h-1 bg-[#a4c639] rounded-full origin-left"
-                />
-              </span>
-              <br className="hidden sm:block" />
-              {' '}Profesional
+              {(aboutSection?.hero_tagline ?? 'Ciencia. Formación. Aplicación.')
+                .split('.')
+                .filter(Boolean)
+                .map((word, i, arr) => (
+                  <span key={i}>
+                    <span className={i === 1 ? 'relative inline-block' : ''}>
+                      {i === 1 ? (
+                        <>
+                          <span className="text-gradient-green">{word.trim()}</span>
+                          <motion.span
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.5, delay: 0.55 }}
+                            className="absolute -bottom-1 left-0 right-0 h-1 bg-[#a4c639] rounded-full origin-left"
+                          />
+                        </>
+                      ) : (
+                        word.trim()
+                      )}
+                    </span>
+                    {i < arr.length - 1 && '.'}
+                    {i < arr.length - 1 && <br className="hidden sm:block" />}
+                  </span>
+                ))}
+              .
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.22 }}
+              transition={{ duration: 0.6, delay: 0.28 }}
               className="text-lg md:text-xl text-[#2d7a5f]/70 mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Accede a cursos de alta calidad diseñados por expertos. Aprende a tu ritmo y obtén certificación reconocida internacionalmente.
+              {aboutSection?.hero_subtitle ?? 'Docencia basada en evidencia e investigación aplicada para transformar la práctica profesional'}
             </motion.p>
 
             {/* CTAs */}
