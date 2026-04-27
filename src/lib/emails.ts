@@ -1,8 +1,9 @@
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
-// Temporary: Using Resend's dev domain until triadave.com is verified
-const FROM = 'Triada <noreply@triadave.com>'
+// Use RESEND_FROM_EMAIL env var. Until triadave.com is verified in Resend,
+// set it to 'onboarding@resend.dev' (Resend's shared domain, no verification needed).
+const FROM = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
 export async function sendApprovalEmail(
   to: string,

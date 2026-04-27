@@ -150,7 +150,7 @@ export default function AdminPurchasesPage() {
 
       // Send approval email via API
       try {
-        await fetch('/api/admin/send-email', {
+        const emailRes = await fetch('/api/admin/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -162,8 +162,13 @@ export default function AdminPurchasesPage() {
             courseId: purchase.course_id,
           }),
         })
-      } catch {
-        // Email failure shouldn't block the approval
+        if (!emailRes.ok) {
+          logger.error('[ApprovePurchase] Email API returned:', emailRes.status)
+          alert(`⚠️ Compra aprobada, pero el email de confirmación no pudo enviarse a ${purchase.profiles.email}. Notifica al estudiante manualmente.`)
+        }
+      } catch (emailErr) {
+        logger.error('[ApprovePurchase] Email fetch failed:', emailErr)
+        alert(`⚠️ Compra aprobada, pero el email de confirmación no pudo enviarse a ${purchase.profiles.email}. Notifica al estudiante manualmente.`)
       }
 
       // Log admin action
@@ -233,7 +238,7 @@ export default function AdminPurchasesPage() {
 
       // Send rejection email
       try {
-        await fetch('/api/admin/send-email', {
+        const emailRes = await fetch('/api/admin/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -245,8 +250,13 @@ export default function AdminPurchasesPage() {
             reason,
           }),
         })
-      } catch {
-        // Email failure shouldn't block the rejection
+        if (!emailRes.ok) {
+          logger.error('[RejectPurchase] Email API returned:', emailRes.status)
+          alert(`⚠️ Compra rechazada, pero el email de notificación no pudo enviarse a ${purchase.profiles.email}. Notifica al estudiante manualmente.`)
+        }
+      } catch (emailErr) {
+        logger.error('[RejectPurchase] Email fetch failed:', emailErr)
+        alert(`⚠️ Compra rechazada, pero el email de notificación no pudo enviarse a ${purchase.profiles.email}. Notifica al estudiante manualmente.`)
       }
 
       // Log admin action

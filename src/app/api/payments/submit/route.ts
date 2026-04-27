@@ -6,7 +6,8 @@ import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from '@/lib/rate-lim
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').filter(Boolean)
+const FROM = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'triadaglobal2026@gmail.com').split(',').map(e => e.trim()).filter(Boolean)
 
 export async function POST(request: NextRequest) {
   try {
@@ -136,10 +137,9 @@ export async function POST(request: NextRequest) {
       paypal_manual: 'PayPal (manual)',
     }
 
-    if (ADMIN_EMAILS.length > 0) {
-      try {
-        await resend.emails.send({
-          from: 'Triada <noreply@triadave.com>',
+    try {
+      await resend.emails.send({
+          from: FROM,
           to: ADMIN_EMAILS,
           subject: `💰 Nuevo pago pendiente — ${course.title}`,
           html: `
@@ -168,9 +168,8 @@ export async function POST(request: NextRequest) {
             </div>
           `.trim(),
         })
-      } catch (emailErr) {
-        logger.error('[PaymentSubmit] Email error:', emailErr)
-      }
+    } catch (emailErr) {
+      logger.error('[PaymentSubmit] Email error:', emailErr)
     }
 
     return NextResponse.json({ success: true }, { headers: getRateLimitHeaders(rl) })
