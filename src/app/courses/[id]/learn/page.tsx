@@ -1,4 +1,6 @@
-'use client';
+'use client'
+
+import CourseProgressBar from '@/components/CourseProgressBar'
 import { logger } from '@/lib/logger'
 
 import { useState, useEffect } from 'react';
@@ -116,7 +118,14 @@ export default function LearnCoursePage() {
         .from('courses')
         .select('*')
         .eq('id', courseId)
+        .eq('status', 'published')
         .single();
+
+      if (!courseData) {
+        // Course is draft or deleted — redirect away
+        router.push('/my-courses');
+        return;
+      }
       
       if (courseData) setCourse(courseData);
 
@@ -389,15 +398,7 @@ export default function LearnCoursePage() {
             </button>
           </div>
           <h2 className="text-white font-bold text-sm line-clamp-2 mb-3">{course?.title}</h2>
-          <div>
-            <div className="flex justify-between text-xs mb-1.5">
-              <span className="text-white/60">Progreso</span>
-              <span className="font-bold text-[#a4c639]">{calculateProgress()}%</span>
-            </div>
-            <div className="w-full bg-white/20 rounded-full h-1.5">
-              <div className="bg-[#a4c639] h-1.5 rounded-full transition-all duration-300" style={{ width: `${calculateProgress()}%` }} />
-            </div>
-          </div>
+          <CourseProgressBar percentage={calculateProgress()} variant="dark" />
         </div>
 
         {/* Module List */}

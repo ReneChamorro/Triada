@@ -21,9 +21,10 @@ export default async function MyCoursesPage() {
 
   const { data: userCourses } = await supabase
     .from('user_courses')
-    .select('*, courses(*)')
+    .select('*, courses!inner(*)')
     .eq('user_id', user.id)
-    .order('access_granted_at', { ascending: false })
+    .eq('courses.status', 'published')
+    .order('enrolled_at', { ascending: false })
 
   return (
     <div className="min-h-screen bg-[#f9f8f4]">
@@ -86,7 +87,7 @@ export default async function MyCoursesPage() {
                         <span>{uc.courses.duration_minutes} min</span>
                       </div>
                     )}
-                    <span>Adquirido: {formatDate(uc.access_granted_at)}</span>
+                    <span>Inscrito: {formatDate(uc.enrolled_at)}</span>
                   </div>
 
                   <Link href={`/courses/${uc.courses.id}/learn`}

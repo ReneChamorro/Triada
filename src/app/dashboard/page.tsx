@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { BookOpen, Mail, Calendar } from 'lucide-react'
+import { BookOpen, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import StatsCard from '@/components/StatsCard'
+import CourseProgressBar from '@/components/CourseProgressBar'
 import Footer from '@/components/Footer'
 import DashboardHeader from '@/components/DashboardHeader'
 
@@ -22,8 +22,9 @@ export default async function DashboardPage() {
 
   const { data: userCourses, count: coursesCount } = await supabase
     .from('user_courses')
-    .select('*, courses(*)', { count: 'exact' })
+    .select('*, courses!inner(*)', { count: 'exact' })
     .eq('user_id', user.id)
+    .eq('courses.status', 'published')
     .order('enrolled_at', { ascending: false })
     .limit(3)
 
@@ -39,7 +40,7 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 relative">
           <p className="text-[#a4c639] text-sm font-semibold uppercase tracking-widest mb-2">Tu espacio de aprendizaje</p>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-            Hola, <span className="text-[#a4c639]">{profile?.full_name?.split(' ')[0] || 'Estudiante'}</span> 👋
+            Hola, <span className="text-[#a4c639]">{profile?.full_name?.split(' ')[0] || 'Estudiante'}</span>
           </h1>
           <p className="mt-2 text-white/60 text-base md:text-lg">Continúa donde lo dejaste y sigue creciendo.</p>
         </div>
@@ -48,28 +49,40 @@ export default async function DashboardPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Stats Cards */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-10 md:mb-14">
-          <StatsCard
-            icon={BookOpen}
-            title="Mis Cursos"
-            value={coursesCount || 0}
-            subtitle="Cursos inscritos"
-            bgColor="bg-[#a4c639]"
-          />
-          <StatsCard
-            icon={Mail}
-            title="Email"
-            value={user.email?.split('@')[0] || 'Usuario'}
-            subtitle={user.email || ''}
-            bgColor="bg-[#2d7a5f]"
-          />
-          <StatsCard
-            icon={Calendar}
-            title="Miembro desde"
-            value={new Date(profile?.created_at).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}
-            subtitle="Fecha de registro"
-            bgColor="bg-[#1a5744]"
-          />
+        <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mb-10 md:mb-14">
+          {/* Mis Cursos */}
+          <div className="bg-white rounded-2xl p-6 border-l-4 border-[#a4c639] shadow-sm hover:shadow-md card-hover transition-all flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#a4c639] rounded-xl flex items-center justify-center shrink-0">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Mis Cursos</p>
+                <p className="text-3xl font-extrabold text-[#2d7a5f]">{coursesCount || 0}</p>
+                <p className="text-xs text-gray-400">Cursos inscritos</p>
+              </div>
+            </div>
+            <Link
+              href="/my-courses"
+              className="w-full text-center bg-[#a4c639] hover:bg-[#2d7a5f] text-white font-semibold rounded-xl px-4 py-2.5 transition-all text-sm shadow-sm shadow-[#a4c639]/20"
+            >
+              Ir a mis cursos
+            </Link>
+          </div>
+
+          {/* Email */}
+          <div className="bg-white rounded-2xl p-6 border-l-4 border-[#a4c639] shadow-sm hover:shadow-md card-hover transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#2d7a5f] rounded-xl flex items-center justify-center shrink-0">
+                <Mail className="h-6 w-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Email</p>
+                <p className="text-xl font-extrabold text-[#2d7a5f] truncate">{user.email?.split('@')[0] || 'Usuario'}</p>
+                <p className="text-xs text-gray-400 truncate">{user.email || ''}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Cursos Section */}
@@ -115,16 +128,7 @@ export default async function DashboardPage() {
                     <p className="text-sm text-gray-500 mb-4 line-clamp-2">
                       {uc.courses.short_description || 'Continúa aprendiendo'}
                     </p>
-                    {/* Progress bar */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400">Progreso</span>
-                        <span className="text-xs font-bold text-[#a4c639]">{uc.progress_percentage || 0}%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#a4c639] rounded-full transition-all" style={{ width: `${uc.progress_percentage || 0}%` }} />
-                      </div>
-                    </div>
+                    <CourseProgressBar percentage={uc.progress_percentage || 0} />
                   </div>
                 </Link>
               ))}
