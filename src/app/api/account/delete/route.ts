@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function DELETE(request: NextRequest) {
   // CSRF: verify Origin matches the application domain
@@ -17,6 +18,12 @@ export async function DELETE(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+  }
+
+  // Rate limit: max 3 deletion attempts per day per user
+  const rl = await checkRateLimit(`account-delete:${user.id}`, RATE_LIMITS.accountDelete)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Demasiados intentos. Intenta mañana.' }, { status: 429 })
   }
 
   const body = await request.json()

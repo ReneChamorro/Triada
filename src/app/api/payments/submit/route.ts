@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Rate limit
-    const rl = checkRateLimit(`payment:${user.id}`, RATE_LIMITS.paymentSubmit)
+    const rl = await checkRateLimit(`payment:${user.id}`, RATE_LIMITS.paymentSubmit)
     if (!rl.allowed) {
       return NextResponse.json(
         { error: 'Demasiados intentos. Intenta más tarde.' },

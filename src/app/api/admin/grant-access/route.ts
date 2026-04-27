@@ -1,8 +1,9 @@
 import { logger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { grantAccessSchema, formatZodErrors } from '@/lib/validations'
 import { sendApprovalEmail } from '@/lib/emails'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
   try {
@@ -22,6 +23,12 @@ export async function POST(request: Request) {
     const { data: { user: adminUser } } = await supabase.auth.getUser()
     if (!adminUser) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
+    // Rate limit per admin user
+    const rl = await checkRateLimit(`grant-access:${adminUser.id}`, RATE_LIMITS.grantAccess)
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Demasiadas solicitudes. Intenta más tarde.' }, { status: 429 })
     }
 
     const { data: adminProfile } = await supabase

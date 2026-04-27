@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -29,7 +30,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com",
+              "script-src 'self' 'unsafe-inline' https://accounts.google.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://ujolhgcuruujuzccslot.supabase.co https://*.googleusercontent.com https://*.ytimg.com https://image.mux.com",
               "font-src 'self' https://fonts.gstatic.com",
@@ -48,4 +49,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry org and project set via SENTRY_ORG and SENTRY_PROJECT env vars
+  silent: true,
+  // Disable source map upload unless SENTRY_AUTH_TOKEN is set
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+  // Disable auto-instrumentation that may conflict with App Router
+  autoInstrumentServerFunctions: false,
+  autoInstrumentMiddleware: false,
+});

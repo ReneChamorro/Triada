@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   // CSRF: verify Origin matches the application domain
@@ -10,6 +11,13 @@ export async function POST(request: NextRequest) {
   const requestOrigin = origin ?? (referer ? new URL(referer).origin : null)
   if (!requestOrigin || !allowedOrigins.has(requestOrigin)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  }
+
+  // Rate limit by IP to prevent signout flooding
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  const rl = await checkRateLimit(`signout:${ip}`, RATE_LIMITS.signout)
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Demasiadas solicitudes.' }, { status: 429 })
   }
 
   const supabase = await createClient()
