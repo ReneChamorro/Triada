@@ -104,9 +104,17 @@ export default function Footer() {
           <p className="text-sm text-white/40">
             &copy; {year} Triada Global. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#a4c639] animate-pulse-dot" />
-            <span className="text-xs text-white/35 font-medium">Plataforma activa</span>
+          <div className="flex items-center gap-4">
+            <Link href="/privacidad" className="text-xs text-white/40 hover:text-white/70 transition-colors">
+              Política de Privacidad
+            </Link>
+            <Link href="/terminos" className="text-xs text-white/40 hover:text-white/70 transition-colors">
+              Términos y Condiciones
+            </Link>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-[#a4c639] animate-pulse-dot" />
+              <span className="text-xs text-white/35 font-medium">Plataforma activa</span>
+            </div>
           </div>
         </div>
       </div>
