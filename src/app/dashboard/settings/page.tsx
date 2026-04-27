@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import DashboardHeader from '@/components/DashboardHeader'
 import Footer from '@/components/Footer'
 import AccountActions from '@/components/AccountActions'
+import EditProfileForm from '@/components/EditProfileForm'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -43,10 +44,7 @@ export default async function SettingsPage() {
             <h2 className="text-base font-bold text-[#2d7a5f]">Información Personal</h2>
           </div>
           <div className="px-6 py-4 divide-y divide-gray-50">
-            <div className="flex justify-between items-center py-3">
-              <span className="text-sm text-gray-400 font-medium">Nombre</span>
-              <span className="text-sm font-semibold text-gray-900">{profile?.full_name || 'Sin nombre'}</span>
-            </div>
+            <EditProfileForm userId={user.id} initialName={profile?.full_name ?? null} />
             <div className="flex justify-between items-center py-3">
               <span className="text-sm text-gray-400 font-medium">Email</span>
               <span className="text-sm font-semibold text-gray-900">{user.email}</span>
