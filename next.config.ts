@@ -5,16 +5,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.triadave.com' }],
-        destination: 'https://triadave.com/:path*',
-        permanent: true,
-      },
-    ]
-  },
   images: {
     remotePatterns: [
       {
