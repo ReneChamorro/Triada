@@ -105,10 +105,10 @@ export default function Footer() {
             &copy; {year} Triada Global. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-4">
-            <Link href="/privacidad" className="text-xs text-white/40 hover:text-white/70 transition-colors">
+            <Link href="/privacidad" className="text-xs text-white/70 hover:text-white transition-colors underline underline-offset-2">
               Política de Privacidad
             </Link>
-            <Link href="/terminos" className="text-xs text-white/40 hover:text-white/70 transition-colors">
+            <Link href="/terminos" className="text-xs text-white/70 hover:text-white transition-colors underline underline-offset-2">
               Términos y Condiciones
             </Link>
             <div className="flex items-center gap-1.5">

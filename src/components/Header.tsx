@@ -54,6 +54,7 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
   const navLinks = [
     { href: '/', label: 'Inicio', page: 'home' as const },
     { href: '/courses', label: 'Cursos', page: 'courses' as const },
+    { href: '/privacidad', label: 'Privacidad', page: undefined as any },
   ]
 
   return (
