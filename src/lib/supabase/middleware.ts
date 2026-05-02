@@ -1,9 +1,35 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+function buildCSP(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://accounts.google.com`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: blob: https://ujolhgcuruujuzccslot.supabase.co https://*.googleusercontent.com https://*.ytimg.com https://image.mux.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.mux.com https://direct-uploads.oci-us-phoenix-1-vop1.production.mux.com https://api.mux.com",
+    "frame-src 'self' https://www.youtube.com https://youtube.com https://accounts.google.com",
+    "media-src 'self' blob: https://ujolhgcuruujuzccslot.supabase.co https://stream.mux.com",
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ')
+}
+
 export async function updateSession(request: NextRequest) {
+  // Generate a per-request nonce for CSP (eliminates 'unsafe-inline' in script-src)
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+  const csp = buildCSP(nonce)
+
+  // Forward nonce in request headers so Next.js App Router uses it on its own
+  // generated <script> tags automatically (reads 'x-nonce' by convention)
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-nonce', nonce)
+
   let supabaseResponse = NextResponse.next({
-    request,
+    request: { headers: requestHeaders },
   })
 
   const supabase = createServerClient(
@@ -89,6 +115,9 @@ export async function updateSession(request: NextRequest) {
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
+
+  // Set dynamic CSP with nonce on the response
+  supabaseResponse.headers.set('Content-Security-Policy', csp)
 
   return supabaseResponse
 }

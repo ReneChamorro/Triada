@@ -34,6 +34,20 @@ export default function CheckoutPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   // Honeypot field
   const [honeypot, setHoneypot] = useState('')
+  const [bsRates, setBsRates] = useState<{ oficial: number | null; paralelo: number | null }>({ oficial: null, paralelo: null })
+
+  useEffect(() => {
+    fetch('/api/dolar')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (Array.isArray(data)) {
+          const oficial = data.find((d: any) => d.fuente === 'oficial')?.promedio ?? null
+          const paralelo = data.find((d: any) => d.fuente === 'paralelo')?.promedio ?? null
+          setBsRates({ oficial, paralelo })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -193,6 +207,11 @@ export default function CheckoutPage() {
     )
   }
 
+  const bsAmount = bsRates.oficial != null && course ? course.price * bsRates.oficial : null
+  const fmtBs = bsAmount != null
+    ? `Bs. ${new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(bsAmount)}`
+    : null
+
   const paymentInstructions: Record<PaymentMethod, React.ReactNode> = {
     zelle: (
       <div className="space-y-2 text-sm">
@@ -245,7 +264,12 @@ export default function CheckoutPage() {
               <div className="border-t border-gray-100 pt-4 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500 font-medium">Total a pagar</span>
-                  <span className="text-2xl font-extrabold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
+                  <div className="text-right">
+                    <span className="text-2xl font-extrabold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
+                    {fmtBs && (
+                      <p className="text-xs text-gray-400 mt-0.5">≈ {fmtBs} <span className="text-gray-300">(BCV)</span></p>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="mt-4 bg-[#a4c639]/10 rounded-xl p-3 border border-[#a4c639]/20">
@@ -294,7 +318,16 @@ export default function CheckoutPage() {
                   <h3 className="font-bold text-[#2d7a5f]">Realiza tu pago</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-4">
-                  Envía <span className="font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span> a:
+                  Envía{' '}
+                  {paymentMethod === 'pago_movil' && fmtBs ? (
+                    <>
+                      <span className="font-bold text-[#a4c639]">{fmtBs}</span>
+                      <span className="text-gray-400 text-xs ml-1">(≈ {formatPrice(course.price, course.currency)} · tasa BCV oficial)</span>
+                    </>
+                  ) : (
+                    <span className="font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
+                  )}{' '}
+                  a:
                 </p>
                 <div className="bg-[#f5f3e8] rounded-xl p-4 border border-gray-200">
                   {paymentInstructions[paymentMethod]}
