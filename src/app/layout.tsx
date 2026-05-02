@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import SessionTimeoutProvider from "@/components/SessionTimeoutProvider";
 import CookieConsent from "@/components/CookieConsent";
@@ -58,11 +59,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Reading headers makes this layout dynamically rendered, which causes
+  // Next.js to read the x-nonce set by middleware and automatically inject
+  // it into all inline streaming scripts it generates (self.__next_f.push).
+  await headers()
+
   return (
     <html lang="es">
       <head>
