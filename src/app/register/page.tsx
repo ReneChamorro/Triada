@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { registerSchema, formatZodErrors } from '@/lib/validations'
-import { GraduationCap, BookOpen, Award, Loader2, Eye, EyeOff } from 'lucide-react'
+import { GraduationCap, BookOpen, Award, Loader2 } from 'lucide-react'
 
 function getAuthErrorMessage(error: string): string {
   const errorMap: Record<string, string> = {
@@ -40,8 +40,6 @@ function RegisterForm() {
     : '/dashboard'
 
   const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', name: '', lastname: '', phone: '' })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -177,27 +175,13 @@ function RegisterForm() {
 
             <div>
               <label htmlFor="password" className={labelClass}>Contrasena</label>
-              <div className="relative">
-                <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" required value={formData.password} onChange={handleChange} className={`${inputClass} pr-12`} placeholder="••••••••" />
-                <button type="button" onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  tabIndex={-1} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
+              <input id="password" name="password" type="password" autoComplete="new-password" required value={formData.password} onChange={handleChange} className={inputClass} placeholder="••••••••" />
               <p className="text-xs text-gray-400 mt-1.5">Minimo 12 caracteres, una mayuscula, un numero y un simbolo</p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className={labelClass}>Confirmar Contrasena</label>
-              <div className="relative">
-                <input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" required value={formData.confirmPassword} onChange={handleChange} className={`${inputClass} pr-12`} placeholder="••••••••" />
-                <button type="button" onClick={() => setShowConfirmPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  tabIndex={-1} aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
+              <input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" required value={formData.confirmPassword} onChange={handleChange} className={inputClass} placeholder="••••••••" />
             </div>
 
             <button type="submit" disabled={loading}

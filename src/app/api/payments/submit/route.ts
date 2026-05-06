@@ -147,10 +147,27 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // Email to admins
       await resend.emails.send({
           from: FROM,
           to: ADMIN_EMAILS,
+          replyTo: user.email!,
           subject: `Nuevo pago pendiente — ${course.title}`,
+          text: `
+NUEVO PAGO PENDIENTE
+
+Estudiante: ${profile?.full_name || user.email || ''}
+Email: ${user.email || ''}
+Curso: ${course.title}
+Monto: ${course.price} ${course.currency || 'USD'}
+Método: ${methodLabels[paymentMethod] || paymentMethod}
+
+Código de referencia: ${referenceCode}
+${notes ? `\nNotas: ${notes}` : ''}
+
+Revisar en Panel Admin:
+${process.env.NEXT_PUBLIC_APP_URL}/admin/purchases
+          `.trim(),
           html: `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
               <div style="background:#a4c639;color:white;padding:20px;border-radius:8px 8px 0 0">
@@ -177,6 +194,55 @@ export async function POST(request: NextRequest) {
             </div>
           `.trim(),
         })
+
+      // Email confirmation to student
+      await resend.emails.send({
+        from: FROM,
+        to: user.email!,
+        replyTo: ADMIN_EMAILS[0],
+        subject: `Comprobante recibido — ${course.title}`,
+        text: `
+¡COMPROBANTE RECIBIDO!
+
+Hola ${profile?.full_name || ''},
+
+Hemos recibido tu comprobante de pago para el curso:
+
+${course.title}
+Monto: ${course.price} ${course.currency || 'USD'}
+
+Nuestro equipo está verificando tu pago. Una vez confirmado, recibirás un correo de confirmación y tendrás acceso inmediato al curso.
+
+Este proceso puede tomar entre 1-24 horas hábiles. Te notificaremos tan pronto como sea aprobado.
+
+Si tienes alguna pregunta, responde a este correo o contáctanos.
+
+© 2026 Triada Global. Todos los derechos reservados.
+        `.trim(),
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <div style="background:#2d7a5f;color:white;padding:20px;border-radius:8px 8px 0 0">
+              <h1 style="margin:0">¡Comprobante recibido!</h1>
+            </div>
+            <div style="background:#f9f9f9;padding:30px;border:1px solid #ddd">
+              <p>Hola <strong>${escapeHtml(profile?.full_name || '')}</strong>,</p>
+              <p>Hemos recibido tu comprobante de pago para el curso:</p>
+              <div style="background:#fff;padding:20px;margin:20px 0;border-left:4px solid #a4c639;border-radius:4px">
+                <h2 style="margin:0 0 10px 0;color:#2d7a5f;font-size:20px">${escapeHtml(course.title)}</h2>
+                <p style="margin:0;color:#666">Monto: ${course.price} ${escapeHtml(course.currency || 'USD')}</p>
+              </div>
+              <p>Nuestro equipo está verificando tu pago. Una vez confirmado, recibirás un correo de confirmación y tendrás acceso inmediato al curso.</p>
+              <p style="color:#666;font-size:14px;margin-top:30px">Este proceso puede tomar entre <strong>1-24 horas hábiles</strong>. Te notificaremos tan pronto como sea aprobado.</p>
+              <div style="border-top:1px solid #ddd;margin-top:30px;padding-top:20px">
+                <p style="margin:0;color:#999;font-size:12px">Si tienes alguna pregunta, responde a este correo o contáctanos.</p>
+              </div>
+            </div>
+            <div style="text-align:center;padding:20px;color:#999;font-size:12px">
+              <p style="margin:0">© 2026 Triada Global. Todos los derechos reservados.</p>
+            </div>
+          </div>
+        `.trim(),
+      })
     } catch (emailErr) {
       logger.error('[PaymentSubmit] Email error:', emailErr)
     }

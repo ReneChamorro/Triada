@@ -19,11 +19,27 @@ export async function sendApprovalEmail(
   courseId: string
 ) {
   const courseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/courses/${courseId}/learn`
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'triadaglobal2026@gmail.com').split(',').map(e => e.trim()).filter(Boolean)
 
   await resend.emails.send({
     from: FROM,
     to,
+    replyTo: ADMIN_EMAILS[0],
     subject: `Acceso al curso aprobado — ${courseName}`,
+    text: `
+TU PAGO HA SIDO APROBADO
+
+Hola ${studentName},
+
+Tu pago para el curso "${courseName}" ha sido verificado y aprobado.
+
+Ya tienes acceso completo al curso. ¡Comienza a aprender ahora!
+
+Accede al curso aquí:
+${courseUrl}
+
+Triada — Plataforma de Aprendizaje en Línea
+    `.trim(),
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
         <div style="background:#a4c639;color:white;padding:20px;border-radius:8px 8px 0 0">
@@ -54,10 +70,29 @@ export async function sendRejectionEmail(
   courseName: string,
   reason?: string
 ) {
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'triadaglobal2026@gmail.com').split(',').map(e => e.trim()).filter(Boolean)
+
   await resend.emails.send({
     from: FROM,
     to,
+    replyTo: ADMIN_EMAILS[0],
     subject: `Pago no verificado — ${courseName}`,
+    text: `
+PAGO NO VERIFICADO
+
+Hola ${studentName},
+
+Lamentamos informarte que no pudimos verificar tu pago para el curso "${courseName}".
+
+${reason ? `Motivo: ${reason}\n\n` : ''}Si crees que esto es un error, puedes:
+- Reenviar tu comprobante realizando una nueva compra
+- Contactarnos por email para más asistencia
+
+Ver cursos:
+${process.env.NEXT_PUBLIC_APP_URL}/courses
+
+Triada — Plataforma de Aprendizaje en Línea
+    `.trim(),
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
         <div style="background:#dc2626;color:white;padding:20px;border-radius:8px 8px 0 0">
