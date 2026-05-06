@@ -80,12 +80,18 @@ export async function checkRateLimit(
     return checkInMemory(key, config)
   }
 
-  const limiter = getUpstashLimiter(config)
-  const { success, remaining, reset } = await limiter.limit(key)
-  return {
-    allowed: success,
-    remaining,
-    resetAt: reset,
+  try {
+    const limiter = getUpstashLimiter(config)
+    const { success, remaining, reset } = await limiter.limit(key)
+    return {
+      allowed: success,
+      remaining,
+      resetAt: reset,
+    }
+  } catch (error) {
+    // Fallback to in-memory if Upstash fails (network issues, etc.)
+    console.warn('[RateLimit] Upstash error, falling back to in-memory:', error)
+    return checkInMemory(key, config)
   }
 }
 
