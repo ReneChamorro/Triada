@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: courses } = await supabase
       .from('courses')
       .select('id, updated_at')
-      .eq('is_published', true)
+      .eq('status', 'published')
 
     const coursePages: MetadataRoute.Sitemap = courses?.map((course) => ({
       url: `${baseUrl}/courses/${course.id}`,

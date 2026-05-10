@@ -45,23 +45,24 @@ export default function CourseCard({
       try {
         const supabase = createClient()
         const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
-        if (authError) throw authError
-        setUser(currentUser)
-
-        if (currentUser) {
-          const { data: userCourse, error: courseError } = await supabase
-            .from('user_courses')
-            .select('id')
-            .eq('user_id', currentUser.id)
-            .eq('course_id', courseId)
-            .maybeSingle()
-          if (courseError) throw courseError
-          setHasAccess(!!userCourse)
+        // authError here is expected when the user has no session — don't throw
+        if (!authError) {
+          setUser(currentUser)
+          if (currentUser) {
+            const { data: userCourse } = await supabase
+              .from('user_courses')
+              .select('id')
+              .eq('user_id', currentUser.id)
+              .eq('course_id', courseId)
+              .maybeSingle()
+            setHasAccess(!!userCourse)
+          }
         }
       } catch (error) {
         logger.error('Auth check failed:', error)
         setUser(null)
-        setHasAccess(false)      } finally {
+        setHasAccess(false)
+      } finally {
         setAuthChecked(true)
       }
     }
