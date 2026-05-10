@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { GraduationCap, BookOpen, Award, Loader2 } from 'lucide-react'
+import { GraduationCap, BookOpen, Award, Loader2, Eye, EyeOff } from 'lucide-react'
 
 function getAuthErrorMessage(error: string): string {
   const errorMap: Record<string, string> = {
@@ -43,6 +43,7 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleGoogleSignIn = async () => {
     const supabase = createClient()
@@ -160,10 +161,15 @@ function LoginForm() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">Contrasena</label>
-              <input id="password" name="password" type="password" autoComplete="current-password" required value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#f5f3e8] border-2 border-transparent rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#a4c639] focus:bg-white focus:outline-none transition-all"
-                placeholder="••••••••" />
+              <div className="relative">
+                <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-12 bg-[#f5f3e8] border-2 border-transparent rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#a4c639] focus:bg-white focus:outline-none transition-all"
+                  placeholder="••••••••" />
+                <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" disabled={loading}
