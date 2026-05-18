@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
@@ -57,6 +57,11 @@ export const metadata: Metadata = {
   verification: {
     google: 'nMi_taN_DUkA25A4OTK3dfjo2MsHNiFI1qZIkCqH6H0',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default async function RootLayout({

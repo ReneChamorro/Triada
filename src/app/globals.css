@@ -40,6 +40,9 @@ body {
 }
 
 /* ─── Custom Scrollbar ──────────────────────────── */
+/* Firefox */
+html { scrollbar-width: thin; scrollbar-color: #2d7a5f #f4f2ea; }
+/* Chrome / Edge / Safari */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f4f2ea; }
 ::-webkit-scrollbar-thumb { background: #2d7a5f; border-radius: 3px; }
