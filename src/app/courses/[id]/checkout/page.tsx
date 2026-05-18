@@ -121,6 +121,7 @@ export default function CheckoutPage() {
       return
     }
 
+    if (receiptPreview) URL.revokeObjectURL(receiptPreview)
     setReceiptFile(file)
     setReceiptPreview(URL.createObjectURL(file))
     setError('')
