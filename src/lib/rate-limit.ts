@@ -6,9 +6,14 @@ import { Redis } from '@upstash/redis'
 // invocations). Falls back to a local in-memory store for local development
 // when UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN are not set.
 
+// Strip accidental surrounding quotes — prevents UrlError if env vars are
+// accidentally set with quotes (e.g. "https://..." instead of https://...)
+const upstashUrl = process.env.UPSTASH_REDIS_REST_URL?.trim().replace(/^"|"$/g, '')
+const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim().replace(/^"|"$/g, '')
+
 const hasUpstash =
-  !!process.env.UPSTASH_REDIS_REST_URL &&
-  !!process.env.UPSTASH_REDIS_REST_TOKEN
+  !!upstashUrl && upstashUrl.startsWith('https://') &&
+  !!upstashToken
 
 interface RateLimitConfig {
   /** Max requests in the window */
@@ -36,13 +41,22 @@ interface RateLimitResult {
 // ─── Upstash limiter cache (one Ratelimit instance per config key) ──────────
 const upstashLimiters = new Map<string, Ratelimit>()
 
+// Lazy singleton — avoids calling Redis.fromEnv() which reads process.env directly
+let redisClient: Redis | null = null
+function getRedisClient(): Redis {
+  if (!redisClient) {
+    redisClient = new Redis({ url: upstashUrl!, token: upstashToken! })
+  }
+  return redisClient
+}
+
 function getUpstashLimiter(config: RateLimitConfig): Ratelimit {
   const cacheKey = `${config.limit}:${config.windowSeconds}`
   if (!upstashLimiters.has(cacheKey)) {
     upstashLimiters.set(
       cacheKey,
       new Ratelimit({
-        redis: Redis.fromEnv(),
+        redis: getRedisClient(),
         limiter: Ratelimit.slidingWindow(config.limit, `${config.windowSeconds} s`),
         analytics: false,
       })
