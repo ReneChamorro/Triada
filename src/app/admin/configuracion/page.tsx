@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Settings, CheckCircle, XCircle, Video, Mail, Database } from 'lucide-react'
+import { motion } from 'motion/react'
 
 interface ConfigStatus {
   muxConfigured: boolean
@@ -42,7 +43,6 @@ export default function ConfiguracionPage() {
         return
       }
 
-      // Fetch config status from API
       const res = await fetch('/api/admin/config-status')
       if (res.ok) {
         setConfig(await res.json())
@@ -56,106 +56,115 @@ export default function ConfiguracionPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#a4c639]"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 rounded-full border-[3px] border-[#a4c639] border-r-transparent animate-spin" />
       </div>
     )
   }
 
-  const StatusIcon = ({ ok }: { ok: boolean }) =>
-    ok
-      ? <CheckCircle className="w-5 h-5 text-green-500" />
-      : <XCircle className="w-5 h-5 text-red-500" />
+  const items = [
+    {
+      icon: Video,
+      title: 'Mux Video',
+      desc: config?.muxConfigured
+        ? 'MUX_TOKEN_ID y MUX_TOKEN_SECRET configurados'
+        : 'Variables de entorno faltantes',
+      ok: config?.muxConfigured ?? false,
+      warning: !config?.muxConfigured
+        ? 'Agrega MUX_TOKEN_ID y MUX_TOKEN_SECRET en las variables de entorno de Vercel para habilitar la subida de videos.'
+        : null,
+    },
+    {
+      icon: Database,
+      title: 'Supabase',
+      desc: 'Base de datos y autenticación',
+      ok: config?.supabaseConfigured ?? false,
+      warning: null,
+    },
+    {
+      icon: Mail,
+      title: 'Email (Resend)',
+      desc: 'Envío de correos transaccionales',
+      ok: config?.emailConfigured ?? false,
+      warning: !config?.emailConfigured
+        ? 'Agrega RESEND_API_KEY en las variables de entorno para habilitar el envío de emails.'
+        : null,
+    },
+  ]
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744] flex items-center gap-3">
-          <Settings className="w-8 h-8" />
+      {/* Page header */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="mb-8"
+      >
+        <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+          Sistema
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
           Configuración
         </h1>
-        <p className="text-gray-600 mt-2">
-          Estado de las integraciones y variables de entorno de la aplicación.
+        <p className="text-[#1a5744]/50 mt-1 text-sm">
+          Estado de las integraciones y variables de entorno.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="space-y-4">
-        {/* Mux */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Video className="w-6 h-6 text-[#1a5744]" />
-              <div>
-                <h2 className="font-semibold text-gray-900">Mux Video</h2>
-                <p className="text-sm text-gray-500">
-                  Streaming y subida de videos ({config?.muxConfigured ? 'MUX_TOKEN_ID y MUX_TOKEN_SECRET configurados' : 'Variables de entorno faltantes'})
-                </p>
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <motion.div
+            key={item.title}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.08 + i * 0.07 }}
+            className="bg-white rounded-[1.5rem] border border-[#e8e4d0] p-6"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 bg-[#e8e4d0] rounded-xl flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-5 h-5 text-[#1a5744]" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-[#1a5744] text-sm">{item.title}</h2>
+                  <p className="text-xs text-[#1a5744]/50 mt-0.5">{item.desc}</p>
+                </div>
               </div>
+              {item.ok
+                ? <CheckCircle className="w-5 h-5 text-[#a4c639] flex-shrink-0" />
+                : <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              }
             </div>
-            <StatusIcon ok={config?.muxConfigured ?? false} />
-          </div>
-          {!config?.muxConfigured && (
-            <div className="mt-4 p-3 bg-red-50 rounded text-sm text-red-700">
-              Agrega <code className="font-mono bg-red-100 px-1 rounded">MUX_TOKEN_ID</code> y{' '}
-              <code className="font-mono bg-red-100 px-1 rounded">MUX_TOKEN_SECRET</code> en las
-              variables de entorno de Vercel para habilitar la subida de videos.
-            </div>
-          )}
-        </div>
-
-        {/* Supabase */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Database className="w-6 h-6 text-[#1a5744]" />
-              <div>
-                <h2 className="font-semibold text-gray-900">Supabase</h2>
-                <p className="text-sm text-gray-500">
-                  Base de datos y autenticación
-                </p>
+            {item.warning && (
+              <div className="mt-4 px-4 py-3 bg-[#e8e4d0] rounded-xl text-sm text-[#1a5744]/70">
+                {item.warning}
               </div>
-            </div>
-            <StatusIcon ok={config?.supabaseConfigured ?? false} />
-          </div>
-        </div>
+            )}
+          </motion.div>
+        ))}
 
-        {/* Email */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Mail className="w-6 h-6 text-[#1a5744]" />
-              <div>
-                <h2 className="font-semibold text-gray-900">Email (Resend)</h2>
-                <p className="text-sm text-gray-500">
-                  Envío de correos transaccionales
-                </p>
-              </div>
-            </div>
-            <StatusIcon ok={config?.emailConfigured ?? false} />
-          </div>
-          {!config?.emailConfigured && (
-            <div className="mt-4 p-3 bg-yellow-50 rounded text-sm text-yellow-700">
-              Agrega <code className="font-mono bg-yellow-100 px-1 rounded">RESEND_API_KEY</code> en
-              las variables de entorno para habilitar el envío de emails.
-            </div>
-          )}
-        </div>
-
-        {/* App URL */}
         {config?.appUrl && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center gap-3">
-              <Settings className="w-6 h-6 text-[#1a5744]" />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.29 }}
+            className="bg-white rounded-[1.5rem] border border-[#e8e4d0] p-6"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 bg-[#e8e4d0] rounded-xl flex items-center justify-center flex-shrink-0">
+                <Settings className="w-5 h-5 text-[#1a5744]" />
+              </div>
               <div>
-                <h2 className="font-semibold text-gray-900">URL de la aplicación</h2>
-                <p className="text-sm text-gray-500 font-mono">{config.appUrl}</p>
+                <h2 className="font-bold text-[#1a5744] text-sm">URL de la aplicación</h2>
+                <p className="text-xs text-[#1a5744]/50 font-mono mt-0.5">{config.appUrl}</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
-      <p className="text-xs text-gray-400 mt-6 text-center">
+      <p className="text-xs text-[#1a5744]/30 mt-8 text-center">
         Para cambiar las variables de entorno, accede al panel de Vercel → tu proyecto → Settings → Environment Variables.
       </p>
     </div>

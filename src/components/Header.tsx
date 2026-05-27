@@ -69,44 +69,61 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
           <div className="flex items-center justify-between h-16 md:h-20">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center shrink-0">
-              <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
-                <Image
-                  src="/logos/Triada-logo-mono-green.png"
-                  alt="Triada Logo"
-                  width={180}
-                  height={60}
-                  priority
-                  className="h-10 md:h-12 w-auto"
-                />
-              </motion.div>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Link href="/" className="flex items-center shrink-0">
+                <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
+                  <Image
+                    src="/logos/Triada-logo-mono-green.png"
+                    alt="Triada Logo"
+                    width={180}
+                    height={60}
+                    priority
+                    className="h-10 md:h-12 w-auto"
+                  />
+                </motion.div>
+              </Link>
+            </motion.div>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map(({ href, label, page }) => (
-                <Link
+              {navLinks.map(({ href, label, page }, i) => (
+                <motion.div
                   key={href}
-                  href={href}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                    currentPage === page
-                      ? 'text-[#2d7a5f]'
-                      : 'text-gray-600 hover:text-[#2d7a5f] hover:bg-[#2d7a5f]/5'
-                  }`}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: 0.15 + i * 0.08 }}
                 >
-                  {label}
-                  {currentPage === page && (
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute inset-x-3 bottom-0.5 h-0.5 rounded-full bg-[#a4c639]"
-                    />
-                  )}
-                </Link>
+                  <Link
+                    href={href}
+                    className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                      currentPage === page
+                        ? 'text-[#2d7a5f]'
+                        : 'text-gray-600 hover:text-[#2d7a5f] hover:bg-[#2d7a5f]/5'
+                    }`}
+                  >
+                    {label}
+                    {currentPage === page && (
+                      <motion.span
+                        layoutId="nav-underline"
+                        className="absolute inset-x-3 bottom-0.5 h-0.5 rounded-full bg-[#a4c639]"
+                      />
+                    )}
+                  </Link>
+                </motion.div>
               ))}
             </nav>
 
             {/* Desktop Auth */}
-            <div className="hidden md:flex items-center gap-2">
+            <motion.div
+              className="hidden md:flex items-center gap-2"
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
               {!loading && (
                 user ? (
                   <div className="flex items-center gap-1.5">
@@ -152,7 +169,7 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
                   </div>
                 )
               )}
-            </div>
+            </motion.div>
 
             {/* Mobile Hamburger */}
             <button

@@ -4,8 +4,9 @@ import { logger } from '@/lib/logger'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowLeft, Upload, Save, Plus, Trash2, Loader2, MoveUp, MoveDown } from 'lucide-react'
+import { ArrowLeft, Upload, Plus, Trash2, Loader2, MoveUp, MoveDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { motion } from 'motion/react'
 
 interface Feature {
   id: string
@@ -239,48 +240,60 @@ export default function LandingSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5E6D3]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#a4c639]" />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 rounded-full border-[3px] border-[#a4c639] border-r-transparent animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F5E6D3] p-6">
+    <div>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        {/* Page header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-8 flex items-center justify-between"
+        >
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+              className="p-2 hover:bg-[#e8e4d0] rounded-xl transition-colors"
             >
-              <ArrowLeft className="h-6 w-6 text-[#1a5744]" />
+              <ArrowLeft className="h-5 w-5 text-[#1a5744]" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-[#1a5744]">
-                Configurar Landing Page
+              <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-1">
+                Contenido
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+                Landing Page
               </h1>
-              <p className="text-gray-700 mt-1">
-                Gestiona las características que aparecen en la página principal
-              </p>
             </div>
           </div>
-          
+
           <button
             onClick={addFeature}
-            className="flex items-center gap-2 bg-[#a4c639] text-white px-6 py-3 rounded-2xl font-bold hover:bg-[#8fb030] transition-colors shadow-lg"
+            className="flex items-center gap-2 bg-[#a4c639] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-4 w-4" />
             Agregar Característica
           </button>
-        </div>
+        </motion.div>
 
         {/* Hero Section */}
         {aboutSection && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#1a5744] mb-4">Sección Hero (Página Principal)</h2>
-            <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-200">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.08 }}
+            className="mb-8"
+          >
+            <h2 className="text-xs font-bold text-[#1a5744]/50 uppercase tracking-widest mb-4">
+              Sección Hero
+            </h2>
+            <div className="bg-white rounded-[1.5rem] border border-[#e8e4d0] p-6">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-bold text-[#1a5744] mb-2">
@@ -290,7 +303,7 @@ export default function LandingSettingsPage() {
                     type="text"
                     value={aboutSection.hero_tagline || ''}
                     onChange={(e) => updateAboutSection({ hero_tagline: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none"
                     placeholder="Ej: Ciencia. Formación. Aplicación."
                   />
                   <p className="text-xs text-gray-500 mt-1">Aparece en verde debajo del título principal.</p>
@@ -303,29 +316,36 @@ export default function LandingSettingsPage() {
                     value={aboutSection.hero_subtitle || ''}
                     onChange={(e) => updateAboutSection({ hero_subtitle: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none resize-none"
                     placeholder="Ej: Docencia basada en evidencia e investigación aplicada..."
                   />
                   <p className="text-xs text-gray-500 mt-1">Texto descriptivo debajo de la frase destacada.</p>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* About Section */}
         {aboutSection && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#1a5744] mb-4">Sección "Sobre Nosotros"</h2>
-            
-            <div className="bg-white rounded-3xl shadow-xl p-6 border-2 border-gray-200">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.14 }}
+            className="mb-8"
+          >
+            <h2 className="text-xs font-bold text-[#1a5744]/50 uppercase tracking-widest mb-4">
+              Sobre Nosotros
+            </h2>
+
+            <div className="bg-white rounded-[1.5rem] border border-[#e8e4d0] p-6">
               <div className="grid md:grid-cols-[300px_1fr] gap-6">
                 {/* Image Upload */}
                 <div>
                   <label className="block text-sm font-bold text-[#1a5744] mb-2">
                     Imagen Principal
                   </label>
-                  <div className="aspect-square bg-[#F5E6D3] rounded-2xl flex items-center justify-center overflow-hidden relative group">
+                  <div className="aspect-square bg-[#f5f3e8] rounded-2xl flex items-center justify-center overflow-hidden relative group">
                     {aboutSection.image_url ? (
                       <>
                         <Image
@@ -384,7 +404,7 @@ export default function LandingSettingsPage() {
                       type="text"
                       value={aboutSection.title}
                       onChange={(e) => updateAboutSection({ title: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none"
                       placeholder="Ej: Sobre Nosotros"
                     />
                   </div>
@@ -397,7 +417,7 @@ export default function LandingSettingsPage() {
                       type="text"
                       value={aboutSection.subtitle || ''}
                       onChange={(e) => updateAboutSection({ subtitle: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none"
                       placeholder="Ej: Triada Global"
                     />
                   </div>
@@ -410,7 +430,7 @@ export default function LandingSettingsPage() {
                       value={aboutSection.description}
                       onChange={(e) => updateAboutSection({ description: e.target.value })}
                       rows={4}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none resize-none"
                       placeholder="Primera descripción..."
                     />
                   </div>
@@ -423,7 +443,7 @@ export default function LandingSettingsPage() {
                       value={aboutSection.description_secondary || ''}
                       onChange={(e) => updateAboutSection({ description_secondary: e.target.value })}
                       rows={4}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none resize-none"
                       placeholder="Segunda descripción..."
                     />
                   </div>
@@ -436,25 +456,30 @@ export default function LandingSettingsPage() {
                       type="text"
                       value={aboutSection.button_text}
                       onChange={(e) => updateAboutSection({ button_text: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none"
                       placeholder="Ej: Ver Más"
                     />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        <h2 className="text-2xl font-bold text-[#1a5744] mb-4">Características de la Landing</h2>
+        <h2 className="text-xs font-bold text-[#1a5744]/50 uppercase tracking-widest mb-4 mt-8">
+          Características de la Landing
+        </h2>
 
         {/* Features List */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {features.map((feature, index) => (
-            <div
+            <motion.div
               key={feature.id}
-              className={`bg-white rounded-3xl shadow-xl p-6 border-2 ${
-                feature.is_highlighted ? 'border-[#a4c639] ring-4 ring-[#a4c639]/20' : 'border-gray-200'
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.18 + index * 0.06 }}
+              className={`bg-white rounded-[1.5rem] p-6 border ${
+                feature.is_highlighted ? 'border-[#a4c639] ring-2 ring-[#a4c639]/20' : 'border-[#e8e4d0]'
               }`}
             >
               <div className="grid md:grid-cols-[200px_1fr] gap-6">
@@ -463,7 +488,7 @@ export default function LandingSettingsPage() {
                   <label className="block text-sm font-bold text-[#1a5744] mb-2">
                     Imagen/Ícono
                   </label>
-                  <div className="aspect-square bg-[#F5E6D3] rounded-2xl flex items-center justify-center overflow-hidden relative group">
+                  <div className="aspect-square bg-[#f5f3e8] rounded-2xl flex items-center justify-center overflow-hidden relative group">
                     {feature.icon_url ? (
                       <>
                         <Image
@@ -522,7 +547,7 @@ export default function LandingSettingsPage() {
                       type="text"
                       value={feature.title}
                       onChange={(e) => updateFeature(feature.id, { title: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none"
                     />
                   </div>
 
@@ -534,7 +559,7 @@ export default function LandingSettingsPage() {
                       value={feature.description}
                       onChange={(e) => updateFeature(feature.id, { description: e.target.value })}
                       rows={3}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#a4c639] focus:outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#e8e4d0] focus:border-[#a4c639] focus:outline-none resize-none"
                     />
                   </div>
 
@@ -553,43 +578,43 @@ export default function LandingSettingsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 pt-4 border-t border-[#e8e4d0]">
                     <button
                       onClick={() => moveFeature(feature.id, 'up')}
                       disabled={index === 0}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
+                      className="p-2 hover:bg-[#e8e4d0] rounded-xl transition-colors disabled:opacity-30"
                     >
-                      <MoveUp className="h-5 w-5 text-gray-600" />
+                      <MoveUp className="h-5 w-5 text-[#1a5744]/50" />
                     </button>
                     <button
                       onClick={() => moveFeature(feature.id, 'down')}
                       disabled={index === features.length - 1}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-30"
+                      className="p-2 hover:bg-[#e8e4d0] rounded-xl transition-colors disabled:opacity-30"
                     >
-                      <MoveDown className="h-5 w-5 text-gray-600" />
+                      <MoveDown className="h-5 w-5 text-[#1a5744]/50" />
                     </button>
                     <div className="flex-1" />
                     <button
                       onClick={() => deleteFeature(feature.id)}
-                      className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                      className="p-2 hover:bg-red-50 text-red-600 rounded-xl transition-colors"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {features.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-3xl shadow-xl">
-            <p className="text-gray-500 mb-4">No hay características configuradas</p>
+          <div className="text-center py-16 bg-white rounded-[1.5rem] border border-[#e8e4d0]">
+            <p className="text-[#1a5744]/40 font-semibold text-sm mb-4">No hay características configuradas</p>
             <button
               onClick={addFeature}
-              className="inline-flex items-center gap-2 bg-[#a4c639] text-white px-6 py-3 rounded-2xl font-bold hover:bg-[#8fb030] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#a4c639] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-4 w-4" />
               Agregar Primera Característica
             </button>
           </div>

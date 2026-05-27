@@ -1,251 +1,279 @@
 'use client'
-import { logger } from '@/lib/logger';
-
-import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import { useRouter } from 'next/navigation';
-import { 
-  BookOpen, 
-  DollarSign
-} from 'lucide-react';
+import { logger } from '@/lib/logger'
+import { useEffect, useState } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import { useRouter } from 'next/navigation'
+import { motion } from 'motion/react'
+import {
+  BookOpen, DollarSign, ArrowRight,
+  Users, LayoutDashboard, Shield,
+} from 'lucide-react'
 
 interface DashboardStats {
-  totalCourses: number;
-  totalRevenue: number;
+  totalCourses: number
+  totalRevenue: number
 }
 
 interface RecentCourse {
-  id: string;
-  title: string;
-  enrolled_count: number;
-  created_at: string;
+  id: string
+  title: string
+  enrolled_count: number
+  created_at: string
 }
 
+const QUICK_ACTIONS = [
+  {
+    label: 'Crear Curso',
+    desc: 'Nuevo contenido a la plataforma',
+    icon: BookOpen,
+    href: '/admin/courses/new',
+    bg: 'bg-[#e8e4d0]',
+    iconBg: 'bg-[#1a5744]',
+    iconColor: 'text-[#a4c639]',
+    textColor: 'text-[#1a5744]',
+  },
+  {
+    label: 'Gestionar Usuarios',
+    desc: 'Ver y administrar estudiantes',
+    icon: Users,
+    href: '/admin/usuarios',
+    bg: 'bg-[#2d7a5f]',
+    iconBg: 'bg-[#a4c639]',
+    iconColor: 'text-[#1a5744]',
+    textColor: 'text-[#e8e4d0]',
+  },
+  {
+    label: 'Landing Page',
+    desc: 'Editar página principal',
+    icon: LayoutDashboard,
+    href: '/admin/landing',
+    bg: 'bg-[#1a5744]',
+    iconBg: 'bg-[#a4c639]',
+    iconColor: 'text-[#1a5744]',
+    textColor: 'text-[#e8e4d0]',
+  },
+  {
+    label: 'Otorgar Acceso',
+    desc: 'Acceso manual a cursos',
+    icon: Shield,
+    href: '/admin/grant-access',
+    bg: 'bg-[#a4c639]',
+    iconBg: 'bg-[#1a5744]/15',
+    iconColor: 'text-[#1a5744]',
+    textColor: 'text-[#1a5744]',
+  },
+]
+
 export default function AdminDashboard() {
-  const router = useRouter();
+  const router = useRouter()
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalCourses: 0,
-    totalRevenue: 0,
-  });
-  const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([]);
+  )
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<DashboardStats>({ totalCourses: 0, totalRevenue: 0 })
+  const [recentCourses, setRecentCourses] = useState<RecentCourse[]>([])
 
-  useEffect(() => {
-    checkUser();
-  }, []);
+  useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
 
-      // Check if user is admin or teacher
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+        .from('profiles').select('role').eq('id', user.id).single()
 
-      // Only allow admin and teacher roles
-      const allowedRoles = ['admin', 'teacher'];
-      if (!profile || !allowedRoles.includes(profile.role)) {
-        router.push('/');
-        return;
+      if (!profile || !['admin', 'teacher'].includes(profile.role)) {
+        router.push('/'); return
       }
-      // Load dashboard data
-      await loadDashboardData();
+      await loadDashboardData()
     } catch (error) {
-      logger.error('Error checking user:', error);
-      router.push('/login');
+      logger.error('Error checking user:', error)
+      router.push('/login')
     }
   }
 
   async function loadDashboardData() {
     try {
-      // Get total courses
       const { count: coursesCount } = await supabase
-        .from('courses')
-        .select('*', { count: 'exact', head: true });
+        .from('courses').select('*', { count: 'exact', head: true })
 
-      // Get total revenue
       const { data: enrollments } = await supabase
-        .from('enrollments')
-        .select('courses(price)')
-        .eq('payment_status', 'completed');
+        .from('enrollments').select('courses(price)').eq('payment_status', 'completed')
 
-      const totalRevenue = enrollments?.reduce((sum: number, enrollment: any) => {
-        return sum + (enrollment.courses?.price || 0);
-      }, 0) || 0;
+      const totalRevenue = enrollments?.reduce((sum: number, e: any) =>
+        sum + (e.courses?.price || 0), 0) || 0
 
-      // Get recent courses
       const { data: courses } = await supabase
         .from('courses')
         .select('id, title, enrolled_count, created_at')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(5)
 
-      setStats({
-        totalCourses: coursesCount || 0,
-        totalRevenue: totalRevenue,
-      });
-
-      setRecentCourses(courses || []);
+      setStats({ totalCourses: coursesCount || 0, totalRevenue })
+      setRecentCourses(courses || [])
     } catch (error) {
-      logger.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#a4c639]"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 rounded-full border-[3px] border-[#a4c639] border-r-transparent animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
     <div>
+      {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Bienvenido al panel de administración</p>
+        <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+          Panel de Control
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+          Dashboard
+        </h1>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Total Courses */}
-        <div className="bg-white rounded-3xl shadow-lg p-6 border-l-4 border-[#a4c639] hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Total Cursos</p>
-              <p className="text-3xl font-bold text-[#1a5744] mt-2">{stats.totalCourses}</p>
-            </div>
-            <div className="bg-[#a4c639]/10 p-3 rounded-full">
-              <BookOpen className="w-8 h-8 text-[#a4c639]" />
-            </div>
+      {/* â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="bg-[#1a5744] rounded-[1.5rem] p-6 flex items-center gap-5"
+        >
+          <div className="w-16 h-16 bg-[#a4c639] rounded-[20px] flex items-center justify-center flex-shrink-0">
+            <BookOpen className="h-8 w-8 text-[#1a5744]" />
           </div>
-        </div>
+          <div>
+            <p className="text-xs font-semibold text-[#e8e4d0]/60 uppercase tracking-widest mb-1">
+              Total Cursos
+            </p>
+            <p className="text-4xl font-black text-[#e8e4d0] tracking-tighter leading-none">
+              {stats.totalCourses}
+            </p>
+          </div>
+        </motion.div>
 
-        {/* Total Revenue */}
-        <div className="bg-white rounded-3xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Ingresos Totales</p>
-              <p className="text-3xl font-bold text-[#1a5744] mt-2">
-                ${stats.totalRevenue.toLocaleString()}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.08 }}
+          className="bg-[#a4c639] rounded-[1.5rem] p-6 flex items-center gap-5"
+        >
+          <div className="w-16 h-16 bg-[#1a5744]/15 rounded-[20px] flex items-center justify-center flex-shrink-0">
+            <DollarSign className="h-8 w-8 text-[#1a5744]" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-[#1a5744]/60 uppercase tracking-widest mb-1">
+              Ingresos Totales
+            </p>
+            <p className="text-4xl font-black text-[#1a5744] tracking-tighter leading-none">
+              ${stats.totalRevenue.toLocaleString()}
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* â”€â”€ Quick Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="mb-8">
+        <h2 className="text-xs font-bold text-[#1a5744]/50 uppercase tracking-widest mb-4">
+          Acciones Rápidas
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {QUICK_ACTIONS.map((action, i) => (
+            <motion.button
+              key={action.label}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35, delay: 0.1 + i * 0.06 }}
+              whileHover={{ y: -3, transition: { type: 'spring', stiffness: 400, damping: 22 } }}
+              onClick={() => router.push(action.href)}
+              className={`${action.bg} rounded-[1.5rem] p-5 text-left group transition-shadow hover:shadow-lg`}
+            >
+              <div className={`w-11 h-11 ${action.iconBg} rounded-xl flex items-center justify-center mb-3`}>
+                <action.icon className={`h-5 w-5 ${action.iconColor}`} />
+              </div>
+              <p className={`text-sm font-black ${action.textColor} tracking-tight mb-0.5`}>
+                {action.label}
               </p>
-            </div>
-            <div className="bg-green-50 p-3 rounded-full">
-              <DollarSign className="w-8 h-8 text-green-500" />
-            </div>
-          </div>
+              <p className={`text-xs ${action.textColor} opacity-50 leading-tight`}>
+                {action.desc}
+              </p>
+              <ArrowRight className={`h-3.5 w-3.5 ${action.textColor} opacity-30 mt-2
+                group-hover:translate-x-0.5 group-hover:opacity-60 transition-all`} />
+            </motion.button>
+          ))}
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-[#a4c639] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h3 className="text-xl font-bold mb-2 text-gray-900">Crear Nuevo Curso</h3>
-          <p className="mb-4 text-gray-800">Agrega un nuevo curso a la plataforma</p>
-          <button
-            onClick={() => router.push('/admin/courses/new')}
-            className="bg-[#F5E6D3] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#e8d4bb] transition-colors"
-          >
-            Crear Curso
-          </button>
-        </div>
+      {/* â”€â”€ Recent Courses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div>
+        <h2 className="text-xs font-bold text-[#1a5744]/50 uppercase tracking-widest mb-4">
+          Cursos Recientes
+        </h2>
 
-        <div className="bg-[#F5E6D3] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h3 className="text-xl font-bold mb-2 text-gray-900">Gestionar Usuarios</h3>
-          <p className="mb-4 text-gray-800">Ver y administrar estudiantes</p>
-          <button
-            onClick={() => router.push('/admin/usuarios')}
-            className="bg-[#a4c639] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#8ba832] transition-colors"
-          >
-            Ver Usuarios
-          </button>
-        </div>
-
-        <div className="bg-[#1a5744] rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h3 className="text-xl font-bold mb-2 text-white">Landing Page</h3>
-          <p className="mb-4 text-white/90">Editar página principal</p>
-          <button
-            onClick={() => router.push('/admin/landing')}
-            className="bg-[#a4c639] text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-[#8ba832] transition-colors"
-          >
-            Configurar
-          </button>
-        </div>
-
-        <div className="bg-orange-500 rounded-3xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h3 className="text-xl font-bold mb-2 text-white">Otorgar Acceso</h3>
-          <p className="mb-4 text-white/90">Acceso manual a cursos</p>
-          <button
-            onClick={() => router.push('/admin/grant-access')}
-            className="bg-white text-orange-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Gestionar
-          </button>
-        </div>
-      </div>
-
-      {/* Recent Courses */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-[#1a5744]">Cursos Recientes</h2>
-        </div>
-        <div className="p-6">
+        <div className="bg-white rounded-[1.5rem] border border-[#e8e4d0] overflow-hidden">
           {recentCourses.length === 0 ? (
-            <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No hay cursos creados aún</p>
+            <div className="text-center py-16 px-6">
+              <div className="w-16 h-16 bg-[#a4c639]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="h-8 w-8 text-[#a4c639]" />
+              </div>
+              <p className="text-[#1a5744]/38 font-bold mb-4 text-sm">No hay cursos creados aún</p>
               <button
                 onClick={() => router.push('/admin/courses/new')}
-                className="bg-[#a4c639] text-white px-6 py-2 rounded-lg hover:bg-[#2d7a5f] transition-colors"
+                className="bg-[#a4c639] text-white px-6 py-2.5 rounded-full text-sm font-bold
+                           hover:bg-[#2d7a5f] transition-colors"
               >
                 Crear Primer Curso
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {recentCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-[#a4c639] transition-colors cursor-pointer"
-                  onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="bg-[#a4c639]/10 p-2 rounded-lg">
-                      <BookOpen className="w-5 h-5 text-[#a4c639]" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-[#1a5744]">{course.title}</h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(course.created_at).toLocaleDateString('es-MX')}
-                      </p>
-                    </div>
+            recentCourses.map((course, i) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 0.15 + i * 0.06 }}
+                onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
+                className={`flex items-center justify-between px-6 py-4 cursor-pointer
+                  hover:bg-[#f5f3e8] transition-colors group
+                  ${i < recentCourses.length - 1 ? 'border-b border-[#e8e4d0]' : ''}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#a4c639]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="h-5 w-5 text-[#a4c639]" />
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Estudiantes</p>
-                      <p className="font-semibold text-[#1a5744]">{course.enrolled_count}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#1a5744] group-hover:text-[#2d7a5f] transition-colors leading-tight">
+                      {course.title}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {new Date(course.created_at).toLocaleDateString('es-MX')}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">Estudiantes</p>
+                    <p className="text-sm font-black text-[#1a5744]">{course.enrolled_count}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-[#a4c639]
+                                         group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </motion.div>
+            ))
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }
+
+
