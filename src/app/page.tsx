@@ -12,6 +12,7 @@ import { ExpandableAboutCards } from '@/components/ExpandableAboutCards'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CourseCard from '@/components/CourseCard'
+import BrandMotif from '@/components/BrandMotif'
 import { createClient } from '@/lib/supabase/client'
 
 interface Course {
@@ -105,7 +106,7 @@ export default function HomePage() {
       {/* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section
         ref={heroRef}
-        className="relative overflow-hidden bg-white min-h-[92vh] flex items-center"
+        className="relative overflow-hidden bg-white min-h-[92vh] flex items-center bg-grain"
       >
         {/* Background ovals â€” gentle float, no morphing */}
         <motion.div
@@ -142,7 +143,7 @@ export default function HomePage() {
 
           {/* Heading â€” each word staggers in independently */}
           <h1
-            className="font-black tracking-tighter leading-[0.9] mb-8"
+            className="font-serif font-black tracking-tight leading-[0.92] mb-8"
             style={{ fontSize: 'clamp(3.4rem, 8vw, 7.2rem)' }}
           >
             {taglineParts.map((part, i) => (
@@ -167,7 +168,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.26 }}
-            className="text-[#2d7a5f]/65 text-lg md:text-xl max-w-xl leading-relaxed mb-11"
+            className="text-[#2d7a5f] text-xl md:text-2xl max-w-2xl leading-relaxed mb-11"
           >
             {aboutSection?.hero_subtitle ??
               'Docencia basada en evidencia e investigación aplicada para transformar la práctica profesional'}
@@ -184,17 +185,17 @@ export default function HomePage() {
               href="/courses"
               className="group inline-flex items-center gap-2.5 bg-[#a4c639] text-white
                          font-bold text-sm px-8 py-3.5 rounded-full
-                         hover:bg-[#2d7a5f] transition-colors duration-200
+                         hover:bg-[#2d7a5f] transition-colors duration-300 ease-(--ease-brand)
                          shadow-[0_4px_24px_0_rgba(164,198,57,0.28)]"
             >
               Ver Cursos
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300 ease-(--ease-brand)" />
             </Link>
             <Link
               href="/register"
               className="inline-flex items-center gap-2 border-2 border-[#2d7a5f]/18
                          text-[#2d7a5f] font-semibold text-sm px-8 py-3.5 rounded-full
-                         hover:border-[#2d7a5f]/35 hover:bg-[#2d7a5f]/4 transition-all"
+                         hover:border-[#2d7a5f]/35 hover:bg-[#2d7a5f]/4 transition-all duration-300 ease-(--ease-brand)"
             >
               Crear cuenta gratis
             </Link>
@@ -212,7 +213,7 @@ export default function HomePage() {
               { Icon: Star, label: 'Expertos Certificados' },
               { Icon: GraduationCap, label: 'A tu propio ritmo' },
             ].map(({ Icon, label }) => (
-              <span key={label} className="flex items-center gap-2 text-sm text-[#2d7a5f]/55">
+              <span key={label} className="flex items-center gap-2 text-sm font-medium text-[#2d7a5f]/80">
                 <Icon className="h-4 w-4 text-[#a4c639]" />
                 {label}
               </span>
@@ -254,12 +255,12 @@ export default function HomePage() {
               <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-3">
                 ¿Por qué elegirnos?
               </span>
-              <h2 className="font-black tracking-tighter text-[#1a5744] leading-none"
+              <h2 className="font-serif font-black tracking-tight text-[#1a5744] leading-none"
                   style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)' }}>
                 Educación<br />de excelencia.
               </h2>
             </div>
-            <p className="hidden md:block text-sm text-[#1a5744]/38 max-w-[200px] text-right leading-relaxed">
+            <p className="hidden md:block text-base text-[#1a5744]/65 max-w-[220px] text-right leading-relaxed">
               Diseñado para profesionales que buscan rigor científico y aplicación práctica.
             </p>
           </motion.div>
@@ -381,6 +382,12 @@ export default function HomePage() {
                         translate-x-1/3 pointer-events-none" />
         <div className="absolute bottom-0 -left-20 w-72 h-88 bg-[#a4c639]/8 rounded-full pointer-events-none" />
 
+        {/* Psychology motif - growth/branching, subtle backdrop accent */}
+        <BrandMotif
+          variant="growth"
+          className="absolute -bottom-16 -right-16 w-[26rem] h-[26rem] text-[#a4c639]/[0.09] hidden lg:block"
+        />
+
         <div ref={aboutRef} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
 
@@ -407,7 +414,7 @@ export default function HomePage() {
                 </div>
                 <div className="absolute -bottom-4 -right-4 bg-[#a4c639] text-[#1a5744] font-black
                                 text-xs font-bold px-5 py-2.5 rounded-full shadow-lg uppercase tracking-widest">
-                  Docencia Â· Investigación Â· Innovación
+                  Docencia · Investigación · Innovación
                 </div>
               </div>
             </motion.div>
@@ -422,11 +429,11 @@ export default function HomePage() {
               <span className="inline-block text-[#a4c639] text-xs font-bold uppercase tracking-widest mb-4">
                 Sobre Triada
               </span>
-              <h2 className="font-black tracking-tighter text-[#e8e4d0] mb-6 leading-none"
+              <h2 className="font-serif font-black tracking-tight text-[#e8e4d0] mb-6 leading-none"
                   style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}>
                 {aboutSection?.title || 'Sobre Nosotros'}
               </h2>
-              <div className="space-y-4 text-[#e8e4d0]/68 text-base leading-relaxed mb-8">
+              <div className="space-y-4 text-[#e8e4d0]/85 text-lg leading-relaxed mb-8">
                 <p>
                   {aboutSection?.subtitle && (
                     <span className="font-bold text-[#a4c639]">{aboutSection.subtitle} </span>
@@ -460,7 +467,7 @@ export default function HomePage() {
               <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-3">
                 Aprende con los mejores
               </span>
-              <h2 className="font-black tracking-tighter text-[#1a5744] leading-none"
+              <h2 className="font-serif font-black tracking-tight text-[#1a5744] leading-none"
                   style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)' }}>
                 Cursos<br />Destacados.
               </h2>

@@ -93,7 +93,11 @@ export default function CourseCard({
   return (
     <>
       {/* Card */}
-      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm ring-1 ring-black/5 hover:shadow-xl hover:ring-[#a4c639]/30 card-hover cursor-pointer transition-all duration-300 border-t-[3px] border-[#a4c639]/40 hover:border-[#a4c639]" onClick={() => setIsOpen(true)}>
+      <motion.div
+        whileHover={{ y: -6, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+        className="group bg-white rounded-[1.5rem] overflow-hidden border border-[#e8e4d0] hover:border-[#a4c639]/40 cursor-pointer transition-colors duration-300 ease-(--ease-brand)"
+        onClick={() => setIsOpen(true)}
+      >
         {thumbnail_url ? (
           <div className="aspect-video relative overflow-hidden bg-white">
             <img
@@ -103,33 +107,34 @@ export default function CourseCard({
             />
           </div>
         ) : (
-          <div className="aspect-video bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] flex items-center justify-center">
-            {Icon ? <Icon className="h-16 w-16 text-white" /> : <BookOpen className="h-16 w-16 text-white" />}
+          <div className="aspect-video bg-[#1a5744] flex items-center justify-center relative overflow-hidden">
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#2d7a5f] rounded-full opacity-60 pointer-events-none" />
+            {Icon ? <Icon className="h-14 w-14 text-[#a4c639] relative z-10" /> : <BookOpen className="h-14 w-14 text-[#a4c639] relative z-10" />}
           </div>
         )}
         <div className="p-4 md:p-6">
-          <h3 className="text-lg md:text-xl font-bold text-[#2d7a5f] mb-1.5 group-hover:text-[#a4c639] transition-colors line-clamp-2">
+          <h3 className="font-serif text-lg md:text-xl font-bold text-[#1a5744] mb-1.5 group-hover:text-[#2d7a5f] transition-colors duration-300 ease-(--ease-brand) line-clamp-2">
             {title}
           </h3>
           {category && (
-            <span className="inline-block text-xs font-semibold text-[#a4c639] bg-[#a4c639]/10 px-2.5 py-0.5 rounded-full mb-2 capitalize">
+            <span className="inline-block text-xs font-semibold text-[#1a5744] bg-[#a4c639]/20 px-2.5 py-0.5 rounded-full mb-2 capitalize">
               {category}
             </span>
           )}
-          <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
+          <p className="text-sm md:text-base text-[#1a5744]/70 mb-3 md:mb-4 line-clamp-2">
             {short_description || description}
           </p>
           <div className="flex items-center justify-between">
-            <span className="text-xl md:text-2xl font-bold text-[#a4c639]">
+            <span className="text-xl md:text-2xl font-bold text-[#1a5744]">
               {fmtPrice}
             </span>
-            <span className="text-[#a4c639] font-medium group-hover:underline flex items-center">
+            <span className="text-[#a4c639] font-semibold flex items-center gap-1">
               Ver más
-              <ArrowRight className="ml-1 h-4 w-4" />
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300 ease-(--ease-brand)" />
             </span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Expanded Modal */}
       <AnimatePresence>
@@ -149,22 +154,24 @@ export default function CourseCard({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-2xl overflow-hidden shadow-2xl"
+                className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-[1.5rem] overflow-hidden shadow-2xl"
               >
                 {/* Image Header */}
                 <div className="relative">
                   {thumbnail_url ? (
-                    <div className="bg-white p-8 flex items-center justify-center border-b">
+                    <div className="bg-white p-8 flex items-center justify-center border-b border-[#e8e4d0]">
                       <img src={thumbnail_url} alt={title} className="h-32 md:h-40 object-contain" />
                     </div>
                   ) : (
-                    <div className="h-40 bg-gradient-to-br from-[#a4c639] to-[#2d7a5f] flex items-center justify-center">
-                      {Icon ? <Icon className="h-16 w-16 text-white" /> : <BookOpen className="h-16 w-16 text-white" />}
+                    <div className="h-40 bg-[#1a5744] flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-[#2d7a5f] rounded-full opacity-60 pointer-events-none" />
+                      <div className="absolute top-4 left-10 w-16 h-28 bg-[#a4c639]/15 rounded-full pointer-events-none" />
+                      {Icon ? <Icon className="h-14 w-14 text-[#a4c639] relative z-10" /> : <BookOpen className="h-14 w-14 text-[#a4c639] relative z-10" />}
                     </div>
                   )}
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="absolute top-3 right-3 bg-white/90 hover:bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-md transition-colors"
+                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-[#1a5744] rounded-full h-8 w-8 flex items-center justify-center shadow-md transition-colors duration-300 ease-(--ease-brand)"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 6l-12 12" />
@@ -175,16 +182,16 @@ export default function CourseCard({
 
                 {/* Content */}
                 <div className="overflow-y-auto flex-1 p-6 md:p-8">
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2d7a5f] mb-2">{title}</h2>
+                  <h2 className="font-serif text-2xl md:text-3xl font-bold text-[#1a5744] mb-2">{title}</h2>
 
                   {duration_minutes && (
-                    <div className="flex items-center text-gray-500 text-sm mb-4">
+                    <div className="flex items-center text-[#1a5744]/55 text-sm mb-4">
                       <Clock className="h-4 w-4 mr-1" />
                       <span>{duration_minutes} minutos de contenido</span>
                     </div>
                   )}
 
-                  <div className="prose max-w-none text-gray-700 text-sm md:text-base mb-6">
+                  <div className="prose max-w-none text-[#1a5744]/75 text-sm md:text-base mb-6">
                     {description ? (
                       description.split('\n').map((paragraph: string, index: number) => (
                         <p key={index} className="mb-3">{paragraph}</p>
@@ -194,7 +201,7 @@ export default function CourseCard({
                     )}
                   </div>
 
-                  <div className="space-y-2 text-sm text-gray-600 mb-6">
+                  <div className="space-y-2 text-sm text-[#1a5744]/70 mb-6">
                     <div className="flex items-center">
                       <CheckCircle className="h-4 w-4 text-[#a4c639] mr-2 flex-shrink-0" />
                       <span>Acceso de por vida</span>
@@ -211,27 +218,27 @@ export default function CourseCard({
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-[#e8e4d0] bg-[#e8e4d0]/20 p-6">
+                <div className="border-t border-[#e8e4d0] bg-[#f5f3e8] p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <span className="text-3xl font-bold text-gray-900">{fmtPrice}</span>
-                      <p className="text-sm text-gray-500">Pago único • Acceso de por vida</p>
+                      <span className="text-3xl font-bold text-[#1a5744]">{fmtPrice}</span>
+                      <p className="text-sm text-[#1a5744]/55">Pago único · Acceso de por vida</p>
                     </div>
                   </div>
 
                   {!authChecked ? (
-                    <div className="h-12 bg-gray-200 rounded-lg animate-pulse" />
+                    <div className="h-12 bg-[#e8e4d0] rounded-xl animate-pulse" />
                   ) : hasAccess ? (
                     <Link
                       href={`/courses/${courseId}/learn`}
-                      className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-xl font-semibold text-center block transition-colors"
+                      className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-xl font-semibold text-center block transition-colors duration-300 ease-(--ease-brand)"
                     >
                       Ir al Curso
                     </Link>
                   ) : user ? (
                     <Link
                       href={`/courses/${courseId}/checkout`}
-                      className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-semibold text-center block transition-colors"
+                      className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-xl font-semibold text-center block transition-colors duration-300 ease-(--ease-brand)"
                     >
                       Comprar Ahora
                     </Link>
@@ -239,13 +246,13 @@ export default function CourseCard({
                     <div className="space-y-3">
                       <Link
                         href={`/register?redirect=/courses/${courseId}/checkout`}
-                        className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-lg font-semibold text-center block transition-colors"
+                        className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-xl font-semibold text-center block transition-colors duration-300 ease-(--ease-brand)"
                       >
                         Registrarse para Comprar
                       </Link>
                       <Link
                         href={`/login?redirect=/courses/${courseId}/checkout`}
-                        className="w-full bg-white text-[#2d7a5f] border-2 border-[#2d7a5f] hover:bg-[#e8e4d0] px-6 py-3 rounded-lg font-semibold text-center block transition-colors"
+                        className="w-full bg-white text-[#1a5744] border-2 border-[#1a5744]/20 hover:border-[#1a5744]/40 hover:bg-[#1a5744]/5 px-6 py-3 rounded-xl font-semibold text-center block transition-colors duration-300 ease-(--ease-brand)"
                       >
                         Ya tengo cuenta
                       </Link>

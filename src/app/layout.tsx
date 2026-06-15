@@ -1,11 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import SessionTimeoutProvider from "@/components/SessionTimeoutProvider";
 import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Editorial serif for display headings — warm, academic character for a
+// psychology-focused, 40+ professional audience. Self-hosted by next/font.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://triadave.com'),
@@ -79,7 +88,7 @@ export default async function RootLayout({
       <head>
         <link rel="canonical" href="https://triadave.com" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${fraunces.variable}`}>
         <SessionTimeoutProvider>{children}</SessionTimeoutProvider>
         <CookieConsent />
       </body>
