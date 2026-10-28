@@ -89,7 +89,7 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
       <a href="#main" className="skip-link">Saltar al contenido</a>
 
       <header
-        className={`sticky top-0 z-50 bg-[#e8e4d0] border-b transition-[border-color] duration-300 ${
+        className={`sticky top-0 z-50 bg-white md:bg-[#e8e4d0] border-b transition-[border-color] duration-300 ${
           scrolled ? 'border-[#1a5744]/20' : 'border-transparent'
         }`}
       >
