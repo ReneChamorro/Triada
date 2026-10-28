@@ -35,7 +35,7 @@ export function ExpandableAboutCards() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm h-full w-full z-[100]"
+            className="fixed inset-0 bg-black/60 h-full w-full z-[100]"
           />
         )}
       </AnimatePresence>
@@ -47,31 +47,36 @@ export function ExpandableAboutCards() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.05 } }}
-              className="flex absolute top-4 right-4 items-center justify-center bg-white rounded-full h-10 w-10 z-10 hover:bg-[#e8e4d0] transition-colors duration-300 ease-(--ease-brand)"
+              className="flex absolute top-4 right-4 items-center justify-center bg-white rounded-full h-11 w-11 z-10 hover:bg-[#e8e4d0] transition-colors duration-300 ease-(--ease-brand)"
               onClick={() => setIsOpen(false)}
+              aria-label="Cerrar"
+              type="button"
             >
               <CloseIcon />
             </motion.button>
             <motion.div
               layoutId={`about-card-${id}`}
               ref={ref}
-              initial={{ opacity: 0, scale: 0.9 }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`about-title-${id}`}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="w-full max-w-3xl h-full md:h-auto md:max-h-[90vh] flex flex-col bg-white rounded-[1.5rem] overflow-hidden shadow-2xl"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-3xl h-full md:h-auto md:max-h-[90dvh] flex flex-col bg-white rounded-[1.5rem] overflow-hidden shadow-2xl"
             >
               {/* Header */}
               <div className="sticky top-0 bg-[#1a5744] p-6 relative overflow-hidden">
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#2d7a5f] rounded-full opacity-60 pointer-events-none" />
-                <h2 className="font-serif text-3xl font-bold text-[#e8e4d0] relative z-10">Sobre Triada Global</h2>
-                <p className="text-[#e8e4d0]/75 mt-2 relative z-10">Docencia, Investigación e Innovación</p>
+                <h2 id={`about-title-${id}`} className="font-serif text-3xl font-semibold text-[#e8e4d0] relative z-10">Sobre Triada Global</h2>
+                <p className="text-[#e8e4d0]/90 mt-2 relative z-10">Docencia, Investigación e Innovación</p>
               </div>
 
               {/* Content */}
               <div className="overflow-y-auto p-8 space-y-6">
                 {/* Historia */}
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-[#1a5744] mb-3">Nuestra Historia</h3>
+                  <h3 className="font-serif text-2xl font-semibold text-[#1a5744] mb-3">Nuestra Historia</h3>
                   <p className="text-[#1a5744]/75 leading-relaxed">
                     Triada Global nace de la pasión por la educación de calidad y la necesidad de democratizar el acceso al conocimiento profesional. Fundada por un equipo de educadores y expertos en diversas disciplinas, nuestra plataforma se ha convertido en un referente para profesionales que buscan actualizar sus competencias y certificarse en áreas de alta demanda.
                   </p>
@@ -79,7 +84,7 @@ export function ExpandableAboutCards() {
 
                 {/* Misión */}
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-[#1a5744] mb-3">Nuestra Misión</h3>
+                  <h3 className="font-serif text-2xl font-semibold text-[#1a5744] mb-3">Nuestra Misión</h3>
                   <p className="text-[#1a5744]/75 leading-relaxed">
                     Transformar la educación profesional mediante metodologías innovadoras, contenido de excelencia y tecnología de vanguardia. Buscamos empoderar a profesionales de todo el mundo para que alcancen sus metas y contribuyan positivamente a sus comunidades.
                   </p>
@@ -87,7 +92,7 @@ export function ExpandableAboutCards() {
 
                 {/* Visión */}
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-[#1a5744] mb-3">Nuestra Visión</h3>
+                  <h3 className="font-serif text-2xl font-semibold text-[#1a5744] mb-3">Nuestra Visión</h3>
                   <p className="text-[#1a5744]/75 leading-relaxed">
                     Ser la plataforma líder en educación profesional en América Latina, reconocida por la calidad de nuestros programas, el compromiso con nuestros estudiantes y el impacto positivo que generamos en el desarrollo profesional de miles de personas.
                   </p>
@@ -95,7 +100,7 @@ export function ExpandableAboutCards() {
 
                 {/* Valores */}
                 <div className="bg-[#e8e4d0] rounded-[1.5rem] p-6">
-                  <h3 className="font-serif text-2xl font-bold text-[#1a5744] mb-4">Nuestros Valores</h3>
+                  <h3 className="font-serif text-2xl font-semibold text-[#1a5744] mb-4">Nuestros Valores</h3>
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <span className="text-[#a4c639] font-bold mr-2">✓</span>
@@ -130,7 +135,7 @@ export function ExpandableAboutCards() {
 
                 {/* Stats */}
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-[#1a5744] mb-3">¿Por qué elegirnos?</h3>
+                  <h3 className="font-serif text-2xl font-semibold text-[#1a5744] mb-3">¿Por qué elegirnos?</h3>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-[#1a5744] text-[#e8e4d0] p-5 rounded-[1.5rem]">
                       <div className="text-3xl font-bold text-[#a4c639] mb-1">500+</div>
@@ -156,7 +161,7 @@ export function ExpandableAboutCards() {
               <div className="bg-[#f5f3e8] p-6">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-full bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-6 py-3 rounded-xl font-semibold transition-colors duration-300 ease-(--ease-brand)"
+                  className="w-full bg-[#1a5744] text-white hover:bg-[#2d7a5f] active:scale-[0.98] px-6 min-h-12 rounded-xl font-semibold [transition:transform_150ms_var(--ease-out),background-color_300ms_var(--ease-brand)]"
                 >
                   Cerrar
                 </button>

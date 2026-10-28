@@ -34,7 +34,7 @@ export default function CookieConsent() {
         </div>
         <button
           onClick={accept}
-          className="shrink-0 bg-[#a4c639] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#2d7a5f] transition-colors text-sm"
+          className="shrink-0 bg-[#1a5744] text-white px-6 min-h-11 rounded-lg font-medium hover:bg-[#2d7a5f] transition-colors text-sm"
         >
           Aceptar
         </button>

@@ -10,6 +10,16 @@ const updateRoleSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // CSRF: verify Origin matches the application domain
+    const origin = request.headers.get('origin')
+    const referer = request.headers.get('referer')
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+    const allowedOrigins = new Set([appUrl, 'http://localhost:3000'].filter(Boolean))
+    const requestOrigin = origin ?? (referer ? new URL(referer).origin : null)
+    if (!requestOrigin || !allowedOrigins.has(requestOrigin)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
+
     const supabase = await createClient()
 
     // 1. Verify the requester is authenticated and is an admin

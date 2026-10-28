@@ -9,7 +9,7 @@ import { Upload, X, Save } from 'lucide-react';
 interface Instructor {
   id: string;
   full_name: string;
-  role: string;
+  role?: string;
 }
 
 export default function NewCoursePage() {
@@ -40,9 +40,8 @@ export default function NewCoursePage() {
   useEffect(() => {
     async function loadInstructors() {
       const { data } = await supabase
-        .from('profiles')
-        .select('id, full_name, role')
-        .in('role', ['admin', 'teacher'])
+        .from('public_instructors')
+        .select('id, full_name')
         .order('full_name');
       
       if (data) {
@@ -222,7 +221,7 @@ export default function NewCoursePage() {
               <option value="">Seleccionar instructor...</option>
               {instructors.map((instructor) => (
                 <option key={instructor.id} value={instructor.id}>
-                  {instructor.full_name} ({instructor.role})
+                  {instructor.full_name}
                 </option>
               ))}
             </select>

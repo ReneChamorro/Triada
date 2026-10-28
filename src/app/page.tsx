@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import {
-  BookOpen, GraduationCap, Users, Award,
-  ArrowRight, CheckCircle2, Star, ChevronDown,
-} from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
-import { motion, useInView, useScroll, useTransform } from 'motion/react'
+import { BookOpen, GraduationCap, Users, Award, ArrowRight } from 'lucide-react'
+import { useState, useEffect, type ReactNode } from 'react'
+import { motion } from 'motion/react'
+
+// Emil Kowalski's "strong" ease-out — built-in CSS easings lack punch.
+const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1]
 import { ExpandableAboutCards } from '@/components/ExpandableAboutCards'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -49,22 +49,27 @@ interface AboutSection {
   hero_subtitle: string | null
 }
 
+// Below-the-fold reveal: opacity only, once. Hero renders immediately so the
+// first paint already has its content; reduced-motion users get the same fade
+// (it carries no movement).
+function FadeIn({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ duration: 0.4, ease: EASE_OUT }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 export default function HomePage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [features, setFeatures] = useState<LandingFeature[]>([])
   const [aboutSection, setAboutSection] = useState<AboutSection | null>(null)
-
-  const heroRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0])
-  const heroContentY = useTransform(scrollYProgress, [0, 1], ['0%', '14%'])
-
-  const featuresRef = useRef<HTMLDivElement>(null)
-  const aboutRef = useRef<HTMLDivElement>(null)
-  const coursesRef = useRef<HTMLDivElement>(null)
-  const featuresInView = useInView(featuresRef, { once: true, margin: '-80px' })
-  const aboutInView = useInView(aboutRef, { once: true, margin: '-80px' })
-  const coursesInView = useInView(coursesRef, { once: true, margin: '-80px' })
 
   useEffect(() => {
     async function fetchData() {
@@ -94,409 +99,320 @@ export default function HomePage() {
     fetchData()
   }, [])
 
-  const taglineParts = (aboutSection?.hero_tagline ?? 'Ciencia. Formación. Aplicación.')
+  // Headline = tagline with its last word highlighted (works for both
+  // "Ciencia. Formación. Aplicación." and a plain space-separated string).
+  const taglineWords = (aboutSection?.hero_tagline ?? 'Ciencia. Formación. Aplicación.')
     .split('.')
     .filter(Boolean)
     .map((w) => w.trim())
+    .join(' ')
+    .split(/\s+/)
+  const tagline = {
+    head: taglineWords.slice(0, -1).join(' '),
+    last: `${taglineWords[taglineWords.length - 1]}.`,
+  }
 
   return (
     <div className="min-h-screen bg-white">
       <Header currentPage="home" />
 
-      {/* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden bg-white min-h-[92vh] flex items-center bg-grain"
-      >
-        {/* Background ovals â€” gentle float, no morphing */}
-        <motion.div
-          animate={{ y: [0, -18, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-32 -right-40 w-[640px] h-[420px] bg-[#a4c639]/[0.07]
-                     rounded-full rotate-[-18deg] pointer-events-none"
-        />
-        <motion.div
-          animate={{ y: [0, 16, 0] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 1.8 }}
-          className="absolute -bottom-24 -left-32 w-[560px] h-[380px] bg-[#2d7a5f]/[0.06]
-                     rounded-full rotate-[12deg] pointer-events-none"
-        />
+      <main id="main">
+        {/* ── HERO ─────────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden bg-white">
+          {/* One static lime wash behind the brand panel. */}
+          <div className="absolute -top-24 -right-24 md:-top-32 md:-right-32 w-72 h-72 md:w-[36rem] md:h-[36rem] rounded-full bg-[#a4c639]/15 pointer-events-none" />
 
-        <motion.div
-          style={{ y: heroContentY, opacity: heroOpacity }}
-          className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8
-                     pt-12 pb-20 md:pt-16 md:pb-28 flex flex-col items-center text-center"
-        >
-          {/* Eyebrow â€” editorial lines, no pill */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center gap-4 mb-10"
-          >
-            <span className="h-px w-10 bg-[#a4c639]" />
-            <span className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest">
-              Educación Científica Aplicada
-            </span>
-            <span className="h-px w-10 bg-[#a4c639]" />
-          </motion.div>
-
-          {/* Heading â€” each word staggers in independently */}
-          <h1
-            className="font-serif font-black tracking-tight leading-[0.92] mb-8"
-            style={{ fontSize: 'clamp(3.4rem, 8vw, 7.2rem)' }}
-          >
-            {taglineParts.map((part, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, y: 28 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.1 + i * 0.15 }}
-                className="block"
-              >
-                {i === 1 ? (
-                  <span className="text-[#a4c639]">{part}.</span>
-                ) : (
-                  <span className="text-[#2d7a5f]">{part}.</span>
-                )}
-              </motion.span>
-            ))}
-          </h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.26 }}
-            className="text-[#2d7a5f] text-xl md:text-2xl max-w-2xl leading-relaxed mb-11"
-          >
-            {aboutSection?.hero_subtitle ??
-              'Docencia basada en evidencia e investigación aplicada para transformar la práctica profesional'}
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.36 }}
-            className="flex flex-col sm:flex-row items-center gap-3 mb-14"
-          >
-            <Link
-              href="/courses"
-              className="group inline-flex items-center gap-2.5 bg-[#a4c639] text-white
-                         font-bold text-sm px-8 py-3.5 rounded-full
-                         hover:bg-[#2d7a5f] transition-colors duration-300 ease-(--ease-brand)
-                         shadow-[0_4px_24px_0_rgba(164,198,57,0.28)]"
-            >
-              Ver Cursos
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300 ease-(--ease-brand)" />
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 border-2 border-[#2d7a5f]/18
-                         text-[#2d7a5f] font-semibold text-sm px-8 py-3.5 rounded-full
-                         hover:border-[#2d7a5f]/35 hover:bg-[#2d7a5f]/4 transition-all duration-300 ease-(--ease-brand)"
-            >
-              Crear cuenta gratis
-            </Link>
-          </motion.div>
-
-          {/* Trust badges â€” inline, minimal */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.52 }}
-            className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3"
-          >
-            {[
-              { Icon: CheckCircle2, label: 'Certificación Internacional' },
-              { Icon: Star, label: 'Expertos Certificados' },
-              { Icon: GraduationCap, label: 'A tu propio ritmo' },
-            ].map(({ Icon, label }) => (
-              <span key={label} className="flex items-center gap-2 text-sm font-medium text-[#2d7a5f]/80">
-                <Icon className="h-4 w-4 text-[#a4c639]" />
-                {label}
-              </span>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.8 }}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5
-                     text-[#2d7a5f]/30"
-        >
-          <span className="text-xs font-medium uppercase tracking-widest">Explorar</span>
-          <motion.div
-            animate={{ y: [0, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-          >
-            <ChevronDown className="h-4 w-4" />
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* â”€â”€ FEATURES: Bento Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <section className="bg-white py-20 md:py-28">
-        <div ref={featuresRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Editorial header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="flex flex-col md:flex-row md:items-end justify-between
-                       mb-10 pb-6 border-b-2 border-[#1a5744]/6"
+          <div
+            className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20
+                       min-h-[calc(100svh-4rem)] md:min-h-[calc(100svh-5rem)]
+                       grid md:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center"
           >
             <div>
-              <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-3">
+              <p className="rise flex items-center gap-3 text-[#2d7a5f] text-xs font-bold uppercase tracking-widest mb-6">
+                <span className="h-0.5 w-8 bg-[#a4c639]" aria-hidden="true" />
+                Educación Científica Aplicada
+              </p>
+
+              <h1
+                className="rise font-serif font-semibold tracking-[-0.02em] leading-[1.08] text-[#1a5744] mb-6"
+                style={{ fontSize: 'clamp(2.2rem, 5.2vw, 4.75rem)', ['--d' as string]: '60ms' }}
+              >
+                {tagline.head}{' '}
+                <span className="underline decoration-[#a4c639] decoration-[0.07em] underline-offset-[0.16em]">
+                  {tagline.last}
+                </span>
+              </h1>
+
+              <p
+                className="rise text-[#2d7a5f] text-lg md:text-xl max-w-xl leading-relaxed mb-9"
+                style={{ ['--d' as string]: '140ms' }}
+              >
+                {aboutSection?.hero_subtitle ??
+                  'Docencia basada en evidencia e investigación aplicada para transformar la práctica profesional'}
+              </p>
+
+              <div
+                className="rise flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+                style={{ ['--d' as string]: '220ms' }}
+              >
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center justify-center gap-2.5 min-h-12 px-8 rounded-xl
+                             bg-[#1a5744] text-white font-semibold text-sm
+                             hover:bg-[#2d7a5f] active:scale-[0.97]
+                             [transition:transform_150ms_var(--ease-out),background-color_300ms_var(--ease-brand)]"
+                >
+                  Ver Cursos
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center min-h-12 px-8 rounded-xl
+                             border-2 border-[#1a5744]/30 text-[#1a5744] font-semibold text-sm
+                             hover:border-[#1a5744]/60 hover:bg-[#1a5744]/5 active:scale-[0.97]
+                             [transition:transform_150ms_var(--ease-out),border-color_300ms_var(--ease-brand),background-color_300ms_var(--ease-brand)]"
+                >
+                  Crear cuenta gratis
+                </Link>
+              </div>
+            </div>
+
+            {/* Brand panel: logo + the growth/network line-art already used site-wide. */}
+            <div className="rise relative hidden md:block" style={{ ['--d' as string]: '180ms' }} aria-hidden="true">
+              <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-[1.5rem] bg-[#a4c639]" />
+              <div className="relative aspect-[4/5] max-h-[34rem] w-full rounded-[1.5rem] bg-[#1a5744] overflow-hidden flex items-center justify-center">
+                <BrandMotif variant="network" className="absolute inset-0 w-full h-full text-[#a4c639]/25" />
+                <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-[#2d7a5f]/60" />
+                <Image
+                  src="/logos/Triada-logo-dark-mode.png"
+                  alt=""
+                  width={360}
+                  height={120}
+                  priority
+                  className="relative w-3/5 h-auto"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURES ─────────────────────────────────────────────────────── */}
+        <section className="bg-white py-20 md:py-28">
+          <FadeIn className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-10 max-w-2xl">
+              <span className="flex items-center gap-3 text-[#2d7a5f] text-xs font-bold uppercase tracking-widest mb-3">
+                <span className="h-0.5 w-8 bg-[#a4c639]" aria-hidden="true" />
                 ¿Por qué elegirnos?
               </span>
-              <h2 className="font-serif font-black tracking-tight text-[#1a5744] leading-none"
-                  style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)' }}>
-                Educación<br />de excelencia.
+              <h2
+                className="font-serif font-semibold tracking-[-0.02em] text-[#1a5744] leading-[1.1] mb-4"
+                style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}
+              >
+                Educación de excelencia.
               </h2>
+              <p className="text-base md:text-lg text-[#2d7a5f] leading-relaxed">
+                Diseñado para profesionales que buscan rigor científico y aplicación práctica.
+              </p>
             </div>
-            <p className="hidden md:block text-base text-[#1a5744]/65 max-w-[220px] text-right leading-relaxed">
-              Diseñado para profesionales que buscan rigor científico y aplicación práctica.
-            </p>
-          </motion.div>
 
-          {/* Bento layout: 2-col-wide Ã— 2-row-tall card + 2 side cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4
-                          lg:grid-rows-2 lg:h-[400px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:grid-rows-2 lg:min-h-[25rem]">
 
-            {/* CARD A â€” hero (2 cols Ã— 2 rows) */}
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: 0.06 }}
-              whileHover={{ y: -5, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
-              className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-[#1a5744] rounded-[2.5rem]
-                         p-8 relative overflow-hidden flex flex-col justify-between
-                         min-h-[260px] lg:min-h-0 group cursor-pointer"
-            >
-              {/* Oval accents */}
-              <div className="absolute -bottom-10 -right-10 w-44 h-72 bg-[#2d7a5f] rounded-full opacity-65 pointer-events-none" />
-              <div className="absolute top-6 right-10 w-16 h-28 bg-[#a4c639]/18 rounded-full pointer-events-none" />
-
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-[#a4c639] rounded-[20px] flex items-center justify-center mb-6">
+              {/* A — dark green, 2 cols × 2 rows */}
+              <div className="sm:col-span-2 lg:col-span-2 lg:row-span-2 bg-[#1a5744] rounded-[1.5rem]
+                              relative overflow-hidden p-8 lg:p-10 flex flex-col justify-center gap-6 min-h-[16rem] lg:min-h-0">
+                <BrandMotif
+                  variant="balance"
+                  className="absolute -bottom-10 -right-10 w-72 h-72 text-[#a4c639]/25"
+                />
+                <div className="relative w-14 h-14 bg-[#a4c639] rounded-xl flex items-center justify-center">
                   {features[0]?.icon_url ? (
-                    <div className="relative w-9 h-9">
-                      <Image src={features[0].icon_url} alt={features[0].title} fill className="object-contain" />
+                    <div className="relative w-8 h-8">
+                      <Image src={features[0].icon_url} alt="" fill className="object-contain" />
                     </div>
                   ) : (
-                    <Award className="h-8 w-8 text-[#1a5744]" />
+                    <Award className="h-7 w-7 text-[#1a5744]" aria-hidden="true" />
                   )}
                 </div>
-                <h3 className="text-xl md:text-2xl font-black text-[#e8e4d0] tracking-tight mb-3 leading-tight">
-                  {features[0]?.title ?? 'Certificación Internacional'}
-                </h3>
-                <p className="text-[#e8e4d0]/58 text-sm leading-relaxed max-w-[280px]">
-                  {features[0]?.description ??
-                    'Programas con reconocimiento internacional para impulsar tu desarrollo profesional.'}
-                </p>
+                <div className="relative">
+                  <h3 className="text-2xl md:text-3xl font-semibold text-[#e8e4d0] tracking-tight mb-4 leading-tight">
+                    {features[0]?.title ?? 'Certificación Internacional'}
+                  </h3>
+                  <p className="text-[#e8e4d0]/90 text-base md:text-lg leading-relaxed max-w-[30rem]">
+                    {features[0]?.description ??
+                      'Programas con reconocimiento internacional para impulsar tu desarrollo profesional.'}
+                  </p>
+                </div>
               </div>
 
-              <div className="relative z-10 mt-4">
-                <span className="inline-block bg-[#a4c639] text-[#1a5744] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
-                  Destacado
-                </span>
-              </div>
-            </motion.div>
-
-            {/* CARD B â€” beige wide (2 cols Ã— 1 row) */}
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: 0.16 }}
-              whileHover={{ y: -4, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
-              className="sm:col-span-2 lg:col-span-2 bg-[#e8e4d0] rounded-[2.5rem] p-7
-                         relative overflow-hidden flex items-center gap-5 min-h-[150px] cursor-pointer"
-            >
-              {/* Oval accent */}
-              <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-20 h-36 bg-[#a4c639]/14 rounded-full pointer-events-none" />
-
-              <div className="w-16 h-16 bg-[#1a5744] rounded-[20px] flex items-center justify-center flex-shrink-0">
-                {features[1]?.icon_url ? (
-                  <div className="relative w-9 h-9">
-                    <Image src={features[1].icon_url} alt={features[1].title} fill className="object-contain" />
-                  </div>
-                ) : (
-                  <Users className="h-8 w-8 text-[#a4c639]" />
-                )}
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-lg font-black text-[#1a5744] tracking-tight mb-1 leading-tight">
-                  {features[1]?.title ?? 'Comunidad de Expertos'}
-                </h3>
-                <p className="text-[#1a5744]/52 text-sm leading-relaxed">
-                  {features[1]?.description ?? 'Conéctate con una red de profesionales y expertos del área.'}
-                </p>
-              </div>
-            </motion.div>
-
-            {/* CARD C â€” lime accent (2 cols Ã— 1 row) */}
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: 0.26 }}
-              whileHover={{ y: -4, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
-              className="sm:col-span-2 lg:col-span-2 bg-[#a4c639] rounded-[2.5rem] p-7
-                         relative overflow-hidden flex items-center gap-5 min-h-[150px] cursor-pointer"
-            >
-              {/* Oval accent */}
-              <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-20 h-36 bg-[#1a5744]/10 rounded-full pointer-events-none" />
-
-              <div className="w-16 h-16 bg-[#1a5744]/18 rounded-[20px] flex items-center justify-center flex-shrink-0">
-                {features[2]?.icon_url ? (
-                  <div className="relative w-9 h-9">
-                    <Image src={features[2].icon_url} alt={features[2].title} fill className="object-contain" />
-                  </div>
-                ) : (
-                  <BookOpen className="h-8 w-8 text-[#1a5744]" />
-                )}
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-lg font-black text-[#1a5744] tracking-tight mb-1 leading-tight">
-                  {features[2]?.title ?? 'Contenido Basado en Evidencia'}
-                </h3>
-                <p className="text-[#1a5744]/62 text-sm leading-relaxed">
-                  {features[2]?.description ??
-                    'Todo el contenido está respaldado por la última investigación científica.'}
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* â”€â”€ ABOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <section className="relative bg-[#1a5744] overflow-hidden py-20 md:py-28">
-        {/* Oval decorations */}
-        <div className="absolute -top-40 right-0 w-96 h-[36rem] bg-[#2d7a5f]/40 rounded-full
-                        translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 -left-20 w-72 h-88 bg-[#a4c639]/8 rounded-full pointer-events-none" />
-
-        {/* Psychology motif - growth/branching, subtle backdrop accent */}
-        <BrandMotif
-          variant="growth"
-          className="absolute -bottom-16 -right-16 w-[26rem] h-[26rem] text-[#a4c639]/[0.09] hidden lg:block"
-        />
-
-        <div ref={aboutRef} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
-
-            {/* Image */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={aboutInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.65 }}
-              className="order-2 md:order-1"
-            >
-              <div className="relative">
-                <div className="relative rounded-[3rem] overflow-hidden ring-4 ring-[#a4c639]/28
-                                aspect-square flex items-center justify-center bg-[#2d7a5f]/35">
-                  {aboutSection?.image_url ? (
-                    <Image
-                      src={aboutSection.image_url}
-                      alt={aboutSection.title}
-                      fill
-                      className="object-contain p-8"
-                    />
+              {/* B — beige */}
+              <div className="sm:col-span-2 lg:col-span-2 bg-[#e8e4d0] rounded-[1.5rem] p-7
+                              flex items-center gap-5 min-h-[9.5rem]">
+                <div className="w-14 h-14 bg-[#1a5744] rounded-xl flex items-center justify-center shrink-0">
+                  {features[1]?.icon_url ? (
+                    <div className="relative w-8 h-8">
+                      <Image src={features[1].icon_url} alt="" fill className="object-contain" />
+                    </div>
                   ) : (
-                    <GraduationCap className="h-28 w-28 text-[#a4c639]" />
+                    <Users className="h-7 w-7 text-[#a4c639]" aria-hidden="true" />
                   )}
                 </div>
-                <div className="absolute -bottom-4 -right-4 bg-[#a4c639] text-[#1a5744] font-black
-                                text-xs font-bold px-5 py-2.5 rounded-full shadow-lg uppercase tracking-widest">
-                  Docencia · Investigación · Innovación
+                <div>
+                  <h3 className="text-lg font-semibold text-[#1a5744] tracking-tight mb-1 leading-tight">
+                    {features[1]?.title ?? 'Comunidad de Expertos'}
+                  </h3>
+                  <p className="text-[#1a5744] text-base leading-relaxed">
+                    {features[1]?.description ?? 'Conéctate con una red de profesionales y expertos del área.'}
+                  </p>
                 </div>
               </div>
-            </motion.div>
 
-            {/* Text */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={aboutInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.65, delay: 0.1 }}
-              className="order-1 md:order-2"
-            >
-              <span className="inline-block text-[#a4c639] text-xs font-bold uppercase tracking-widest mb-4">
-                Sobre Triada
-              </span>
-              <h2 className="font-serif font-black tracking-tight text-[#e8e4d0] mb-6 leading-none"
-                  style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}>
-                {aboutSection?.title || 'Sobre Nosotros'}
-              </h2>
-              <div className="space-y-4 text-[#e8e4d0]/85 text-lg leading-relaxed mb-8">
-                <p>
+              {/* C — lime (near-black copy: dark green on lime is only 4.3:1) */}
+              <div className="sm:col-span-2 lg:col-span-2 bg-[#a4c639] rounded-[1.5rem] p-7
+                              flex items-center gap-5 min-h-[9.5rem]">
+                <div className="w-14 h-14 bg-[#1a5744] rounded-xl flex items-center justify-center shrink-0">
+                  {features[2]?.icon_url ? (
+                    <div className="relative w-8 h-8">
+                      <Image src={features[2].icon_url} alt="" fill className="object-contain" />
+                    </div>
+                  ) : (
+                    <BookOpen className="h-7 w-7 text-[#a4c639]" aria-hidden="true" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#1a5744] tracking-tight mb-1 leading-tight">
+                    {features[2]?.title ?? 'Contenido Basado en Evidencia'}
+                  </h3>
+                  <p className="text-[#1a1a1a] text-base leading-relaxed">
+                    {features[2]?.description ??
+                      'Todo el contenido está respaldado por la última investigación científica.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+        </section>
+
+        {/* ── ABOUT ────────────────────────────────────────────────────────── */}
+        <section id="about" className="on-dark relative bg-[#1a5744] overflow-hidden py-20 md:py-28">
+          <div className="absolute -top-40 right-0 w-96 h-[36rem] bg-[#2d7a5f]/40 rounded-full
+                          translate-x-1/3 pointer-events-none" />
+
+          {/* Psychology motif - growth/branching, subtle backdrop accent */}
+          <BrandMotif
+            variant="growth"
+            className="absolute -bottom-16 -right-16 w-[26rem] h-[26rem] text-[#a4c639]/[0.09] hidden lg:block"
+          />
+
+          <FadeIn className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-[1.15fr_0.85fr] gap-12 md:gap-16 items-center">
+
+              <div>
+                <span className="flex items-center gap-3 text-[#e8e4d0] text-xs font-bold uppercase tracking-widest mb-4">
+                  <span className="h-0.5 w-8 bg-[#a4c639]" aria-hidden="true" />
+                  Sobre Triada
+                </span>
+                <h2
+                  className="font-serif font-semibold tracking-[-0.02em] text-[#e8e4d0] mb-6 leading-[1.1]"
+                  style={{ fontSize: 'clamp(1.9rem, 4vw, 3.25rem)' }}
+                >
+                  {aboutSection?.title || 'Sobre Nosotros'}
+                </h2>
+                <p className="text-[#e8e4d0] text-base md:text-lg leading-relaxed max-w-xl">
                   {aboutSection?.subtitle && (
-                    <span className="font-bold text-[#a4c639]">{aboutSection.subtitle} </span>
+                    <span className="font-bold text-white">{aboutSection.subtitle} </span>
                   )}
                   {aboutSection?.description ||
                     'es una plataforma educativa dedicada a la excelencia académica.'}
                 </p>
                 {aboutSection?.description_secondary && (
-                  <p>{aboutSection.description_secondary}</p>
+                  <details className="group mt-4 max-w-xl">
+                    <summary className="inline-flex items-center gap-1.5 min-h-11 cursor-pointer list-none text-sm font-semibold text-[#a4c639] hover:text-white transition-colors [&::-webkit-details-marker]:hidden">
+                      <span className="group-open:hidden">Leer más</span>
+                      <span className="hidden group-open:inline">Leer menos</span>
+                      <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-(--ease-out) group-open:rotate-90" aria-hidden="true" />
+                    </summary>
+                    <p className="mt-2 text-[#e8e4d0]/90 text-base leading-relaxed">
+                      {aboutSection.description_secondary}
+                    </p>
+                  </details>
                 )}
+                <ExpandableAboutCards />
               </div>
-              <ExpandableAboutCards />
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
-      {/* â”€â”€ FEATURED COURSES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <section className="bg-[#e8e4d0] py-20 md:py-28">
-        <div ref={coursesRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Editorial header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={coursesInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="flex flex-col md:flex-row md:items-end justify-between
-                       mb-10 pb-6 border-b-2 border-[#1a5744]/8"
-          >
-            <div>
-              <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-3">
-                Aprende con los mejores
-              </span>
-              <h2 className="font-serif font-black tracking-tight text-[#1a5744] leading-none"
-                  style={{ fontSize: 'clamp(2.4rem, 5vw, 4rem)' }}>
-                Cursos<br />Destacados.
-              </h2>
+              <div className="w-full max-w-sm mx-auto md:max-w-none">
+                <div className="relative">
+                  <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-[1.5rem] bg-[#a4c639]/60" aria-hidden="true" />
+                  <div className="relative rounded-[1.5rem] overflow-hidden aspect-[4/3] flex items-center justify-center bg-[#e8e4d0]">
+                    {aboutSection?.image_url ? (
+                      <Image
+                        src={aboutSection.image_url}
+                        alt={aboutSection.title}
+                        fill
+                        className="object-contain p-8"
+                      />
+                    ) : (
+                      <GraduationCap className="h-28 w-28 text-[#1a5744]" aria-hidden="true" />
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-            <Link
-              href="/courses"
-              className="group hidden md:inline-flex items-center gap-2 text-sm font-semibold text-[#1a5744] uppercase tracking-widest hover:text-[#2d7a5f] transition-colors"
-            >
-              Ver todos
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
 
-          <div className={`grid gap-6 ${
-            courses.length === 1
-              ? 'grid-cols-1 max-w-md mx-auto'
-              : courses.length === 2
-              ? 'grid-cols-1 sm:grid-cols-2 max-w-3xl mx-auto'
-              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-          }`}>
-            {courses && courses.length > 0 ? (
-              courses.slice(0, 3).map((course, i) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, y: 28 }}
-                  animate={coursesInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
+            <ul className="grid sm:grid-cols-3 gap-6 mt-14">
+              {[
+                { title: 'Docencia', text: 'Programas con rigor clínico y práctica supervisada.' },
+                { title: 'Investigación', text: 'Contenido respaldado por evidencia científica.' },
+                { title: 'Innovación', text: 'Formación en línea a tu propio ritmo.' },
+              ].map((pillar) => (
+                <li key={pillar.title} className="border-t-2 border-[#a4c639] pt-4">
+                  <h3 className="text-base md:text-lg font-semibold text-[#e8e4d0]">{pillar.title}</h3>
+                  <p className="mt-1 text-sm md:text-base text-[#e8e4d0]/90 leading-relaxed">{pillar.text}</p>
+                </li>
+              ))}
+            </ul>
+          </FadeIn>
+        </section>
+
+        {/* ── FEATURED COURSES ─────────────────────────────────────────────── */}
+        <section className="bg-[#e8e4d0] py-20 md:py-28">
+          <FadeIn className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4
+                            mb-10 pb-6 border-b border-[#1a5744]/15">
+              <div>
+                <span className="flex items-center gap-3 text-[#1a5744] text-xs font-bold uppercase tracking-widest mb-3">
+                  <span className="h-0.5 w-8 bg-[#1a5744]" aria-hidden="true" />
+                  Aprende con los mejores
+                </span>
+                <h2
+                  className="font-serif font-semibold tracking-[-0.01em] text-[#1a5744] leading-[1.1]"
+                  style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}
                 >
+                  Cursos<br />Destacados.
+                </h2>
+              </div>
+              <Link
+                href="/courses"
+                className="hidden md:inline-flex items-center gap-2 min-h-11 text-sm font-semibold text-[#1a5744]
+                           bg-white border border-[#1a5744]/20 px-5 rounded-xl
+                           hover:border-[#1a5744]/40 hover:bg-[#1a5744]/5 active:scale-[0.97]
+                           [transition:transform_150ms_var(--ease-out),border-color_300ms_var(--ease-brand),background-color_300ms_var(--ease-brand)]"
+              >
+                Ver todos los cursos
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className={`grid gap-6 ${
+              courses.length === 1
+                ? 'grid-cols-1 max-w-md mx-auto'
+                : courses.length === 2
+                ? 'grid-cols-1 sm:grid-cols-2 max-w-3xl mx-auto'
+                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+            }`}>
+              {courses.length > 0 ? (
+                courses.slice(0, 3).map((course) => (
                   <CourseCard
+                    key={course.id}
                     id={course.id}
                     title={course.title}
                     description={course.description || course.short_description || ''}
@@ -508,40 +424,34 @@ export default function HomePage() {
                     category={course.category}
                     duration_minutes={course.duration_minutes}
                   />
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-16">
-                <div className="w-16 h-16 rounded-3xl bg-[#1a5744]/10 flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="h-8 w-8 text-[#1a5744]" />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-16">
+                  <div className="w-16 h-16 rounded-3xl bg-[#1a5744]/10 flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="h-8 w-8 text-[#1a5744]" aria-hidden="true" />
+                  </div>
+                  <p className="text-[#1a5744] font-semibold">No hay cursos destacados disponibles</p>
                 </div>
-                <p className="text-[#1a5744]/45 font-semibold">No hay cursos destacados disponibles</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Mobile CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={coursesInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="text-center mt-12 md:hidden"
-          >
-            <Link
-              href="/courses"
-              className="group inline-flex items-center gap-2.5 px-8 py-4 bg-[#1a5744] text-[#e8e4d0]
-                         font-semibold text-sm rounded-full
-                         hover:bg-[#2d7a5f] transition-colors"
-            >
-              Ver todos los cursos
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+            <div className="text-center mt-12 md:hidden">
+              <Link
+                href="/courses"
+                className="inline-flex items-center justify-center gap-2.5 min-h-12 px-8 bg-[#1a5744] text-white
+                           font-semibold text-sm rounded-xl
+                           hover:bg-[#2d7a5f] active:scale-[0.97]
+                           [transition:transform_150ms_var(--ease-out),background-color_300ms_var(--ease-brand)]"
+              >
+                Ver todos los cursos
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </FadeIn>
+        </section>
+      </main>
 
       <Footer />
     </div>
   )
 }
-

@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { grantAccessSchema, formatZodErrors } from '@/lib/validations'
 import { sendApprovalEmail } from '@/lib/emails'
@@ -7,6 +7,16 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
   try {
+    // CSRF: verify Origin matches the application domain
+    const origin = request.headers.get('origin')
+    const referer = request.headers.get('referer')
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+    const allowedOrigins = new Set([appUrl, 'http://localhost:3000'].filter(Boolean))
+    const requestOrigin = origin ?? (referer ? new URL(referer).origin : null)
+    if (!requestOrigin || !allowedOrigins.has(requestOrigin)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
+
     const body = await request.json()
     const parsed = grantAccessSchema.safeParse(body)
     if (!parsed.success) {
@@ -56,8 +66,10 @@ export async function POST(request: Request) {
       }, { status: 400 })
     }
 
-    // Grant access
-    const { data: enrollment, error: enrollError } = await supabase
+    // Grant access via the service client (admin already verified above).
+    // Enrollment writes must bypass RLS so students cannot self-enroll.
+    const serviceClient = createServiceClient()
+    const { data: enrollment, error: enrollError } = await serviceClient
       .from('user_courses')
       .insert({
         user_id: userId,

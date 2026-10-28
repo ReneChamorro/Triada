@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Test tooling & specs follow different conventions (mock factories, `any`).
+    "test/**",
+    "**/*.{test,spec}.{ts,tsx}",
+    "vitest.config.mts",
   ]),
 ]);
 

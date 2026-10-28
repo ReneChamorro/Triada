@@ -1,16 +1,19 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Menu, X, ChevronRight, GraduationCap, LayoutDashboard, LogOut, Settings, BookOpen } from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
+import { Menu, X, ChevronRight, LayoutDashboard, LogOut, Settings, BookOpen, Home, Info, Mail } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 
 interface HeaderProps {
   currentPage?: 'home' | 'courses'
 }
+
+// Drawer curve (iOS-like, from Ionic): fast start, soft landing.
+const EASE_DRAWER: [number, number, number, number] = [0.32, 0.72, 0, 1]
 
 export default function Header({ currentPage = 'home' }: HeaderProps) {
   const router = useRouter()
@@ -19,6 +22,9 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
   const [loading, setLoading] = useState(true)
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const reduce = useReducedMotion()
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const drawerCloseRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     async function loadUser() {
@@ -44,6 +50,23 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Drawer: lock page scroll, close on Escape, move focus in and hand it back.
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const button = menuButtonRef.current
+    document.body.style.overflow = 'hidden'
+    drawerCloseRef.current?.focus()
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMobileMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKeyDown)
+      button?.focus()
+    }
+  }, [mobileMenuOpen])
+
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -51,162 +74,119 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
     router.refresh()
   }
 
-  const navLinks = [
-    { href: '/', label: 'Inicio', page: 'home' as const },
-    { href: '/courses', label: 'Cursos', page: 'courses' as const },
+  const navLinks: { href: string; label: string; page?: 'home' | 'courses'; Icon: typeof Home }[] = [
+    { href: '/', label: 'Inicio', page: 'home', Icon: Home },
+    { href: '/#about', label: 'Sobre nosotros', Icon: Info },
+    { href: '/courses', label: 'Cursos', page: 'courses', Icon: BookOpen },
+    { href: 'mailto:info@triadaglobal.com', label: 'Contacto', Icon: Mail },
   ]
+
+  const textLink =
+    'flex items-center gap-1.5 px-4 min-h-11 rounded-lg text-sm font-medium text-[#1a5744] hover:bg-[#1a5744]/10 transition-colors'
 
   return (
     <>
+      <a href="#main" className="skip-link">Saltar al contenido</a>
+
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/90 backdrop-blur-xl shadow-md shadow-black/5 border-b border-gray-100/80'
-            : 'bg-white/98'
+        className={`sticky top-0 z-50 bg-[#e8e4d0] border-b transition-[border-color] duration-300 ${
+          scrolled ? 'border-[#1a5744]/20' : 'border-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
 
-            {/* Logo */}
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Link href="/" className="flex items-center shrink-0">
-                <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
-                  <Image
-                    src="/logos/Triada-logo-mono-green.png"
-                    alt="Triada Logo"
-                    width={180}
-                    height={60}
-                    priority
-                    className="h-10 md:h-12 w-auto"
-                  />
-                </motion.div>
-              </Link>
-            </motion.div>
+            <Link href="/" className="flex items-center shrink-0" aria-label="Triada, inicio">
+              <Image
+                src="/logos/Triada-logo-mono-green.png"
+                alt=""
+                width={180}
+                height={60}
+                priority
+                className="h-10 md:h-12 w-auto"
+              />
+            </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map(({ href, label, page }, i) => (
-                <motion.div
+            <nav aria-label="Principal" className="hidden md:flex items-center gap-1">
+              {navLinks.map(({ href, label, page }) => (
+                <Link
                   key={href}
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: 0.15 + i * 0.08 }}
+                  href={href}
+                  aria-current={page && currentPage === page ? 'page' : undefined}
+                  className={`relative px-4 min-h-11 inline-flex items-center rounded-lg text-sm font-medium transition-colors duration-200 ${
+                    page && currentPage === page
+                      ? 'text-[#1a5744] font-semibold'
+                      : 'text-[#1a5744]/85 hover:text-[#1a5744] hover:bg-[#1a5744]/10'
+                  }`}
                 >
-                  <Link
-                    href={href}
-                    className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                      currentPage === page
-                        ? 'text-[#2d7a5f]'
-                        : 'text-gray-600 hover:text-[#2d7a5f] hover:bg-[#2d7a5f]/5'
-                    }`}
-                  >
-                    {label}
-                    {currentPage === page && (
-                      <motion.span
-                        layoutId="nav-underline"
-                        className="absolute inset-x-3 bottom-0.5 h-0.5 rounded-full bg-[#a4c639]"
-                      />
-                    )}
-                  </Link>
-                </motion.div>
+                  {label}
+                  {page && currentPage === page && (
+                    <motion.span
+                      layoutId="nav-underline"
+                      className="absolute inset-x-3 bottom-1 h-0.5 rounded-full bg-[#1a5744]"
+                    />
+                  )}
+                </Link>
               ))}
             </nav>
 
-            {/* Desktop Auth */}
-            <motion.div
-              className="hidden md:flex items-center gap-2"
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
+            <div className="hidden md:flex items-center gap-2">
               {!loading && (
                 user ? (
                   <div className="flex items-center gap-1.5">
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-[#2d7a5f] hover:bg-[#2d7a5f]/5 transition-colors"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
+                    <Link href="/dashboard" className={textLink}>
+                      <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
                       Mi Dashboard
                     </Link>
                     {(profile?.role === 'admin' || profile?.role === 'teacher') && (
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-[#2d7a5f] hover:bg-[#2d7a5f]/5 transition-colors"
-                      >
-                        <Settings className="h-4 w-4" />
+                      <Link href="/admin" className={textLink}>
+                        <Settings className="h-4 w-4" aria-hidden="true" />
                         Admin
                       </Link>
                     )}
-                    <div className="w-px h-5 bg-gray-200 mx-1" />
+                    <div className="w-px h-5 bg-[#1a5744]/25 mx-1" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-all"
+                      className="flex items-center gap-1.5 px-4 min-h-11 rounded-lg text-sm font-medium text-[#1a5744] hover:text-red-700 hover:bg-red-50 border border-[#1a5744]/30 hover:border-red-300 transition-colors"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
                       Salir
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Link
-                      href="/register"
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-[#2d7a5f] border border-gray-200 hover:border-[#2d7a5f]/40 transition-all"
-                    >
-                      Registrarse
-                    </Link>
-                    <Link
                       href="/login"
-                      className="px-5 py-2 rounded-lg text-sm font-semibold bg-[#a4c639] text-white hover:bg-[#2d7a5f] shadow-sm hover:shadow-md transition-all duration-200"
+                      className="inline-flex items-center px-4 min-h-11 rounded-lg text-sm font-semibold text-[#1a5744] hover:bg-[#1a5744]/10 active:scale-[0.97] [transition:transform_150ms_var(--ease-out),background-color_200ms]"
                     >
                       Iniciar Sesion
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="inline-flex items-center px-5 min-h-11 rounded-lg text-sm font-semibold bg-[#1a5744] text-white hover:bg-[#2d7a5f] active:scale-[0.97] [transition:transform_150ms_var(--ease-out),background-color_200ms]"
+                    >
+                      Registrarse
                     </Link>
                   </div>
                 )
               )}
-            </motion.div>
+            </div>
 
-            {/* Mobile Hamburger */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
+              ref={menuButtonRef}
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden h-11 w-11 -mr-2 inline-flex items-center justify-center rounded-xl text-[#1a5744] hover:bg-[#1a5744]/10 transition-colors"
+              aria-label="Abrir menú"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-drawer"
               type="button"
             >
-              <AnimatePresence mode="wait" initial={false}>
-                {mobileMenuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <X className="h-6 w-6" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="open"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <Menu className="h-6 w-6" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <Menu className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
@@ -216,122 +196,117 @@ export default function Header({ currentPage = 'home' }: HeaderProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              className="md:hidden fixed inset-0 z-40 bg-black/40"
               onClick={() => setMobileMenuOpen(false)}
             />
 
             <motion.aside
               key="drawer"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-              className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-72 bg-white shadow-2xl overflow-y-auto"
+              id="mobile-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menú"
+              initial={reduce ? { opacity: 0 } : { x: '100%' }}
+              animate={reduce ? { opacity: 1 } : { x: 0 }}
+              exit={reduce ? { opacity: 0 } : { x: '100%' }}
+              transition={{ duration: 0.25, ease: EASE_DRAWER }}
+              className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[min(18rem,85vw)] bg-white shadow-2xl overflow-y-auto pb-[env(safe-area-inset-bottom)]"
             >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#a4c639] flex items-center justify-center">
-                    <GraduationCap className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="font-bold text-[#2d7a5f] text-sm">TRIADA</span>
-                </div>
+              <div className="flex items-center justify-between pl-6 pr-3 h-16 border-b border-gray-100">
+                <Image
+                  src="/logos/Triada-logo-mono-green.png"
+                  alt="Triada"
+                  width={180}
+                  height={60}
+                  className="h-9 w-auto"
+                />
                 <button
+                  ref={drawerCloseRef}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="h-11 w-11 inline-flex items-center justify-center rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  aria-label="Cerrar menú"
+                  type="button"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
 
-              <div className="p-5 space-y-1">
-                {navLinks.map(({ href, label, page }, i) => (
-                  <motion.div
+              <nav aria-label="Principal" className="p-5 space-y-1">
+                {navLinks.map(({ href, label, page, Icon }) => (
+                  <Link
                     key={href}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.06 + 0.05 }}
+                    href={href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-current={page && currentPage === page ? 'page' : undefined}
+                    className={`flex items-center justify-between px-4 min-h-12 rounded-xl font-medium transition-colors ${
+                      page && currentPage === page
+                        ? 'bg-[#e8e4d0] text-[#1a5744]'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-[#2d7a5f]'
+                    }`}
                   >
-                    <Link
-                      href={href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all ${
-                        currentPage === page
-                          ? 'bg-[#2d7a5f]/10 text-[#2d7a5f]'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-[#2d7a5f]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {page === 'courses'
-                          ? <BookOpen className="h-4 w-4" />
-                          : <GraduationCap className="h-4 w-4" />}
-                        {label}
-                      </div>
-                      <ChevronRight className={`h-4 w-4 transition-opacity ${currentPage === page ? 'opacity-100' : 'opacity-30'}`} />
-                    </Link>
-                  </motion.div>
+                    <div className="flex items-center gap-3">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      {label}
+                    </div>
+                    <ChevronRight
+                      className={`h-4 w-4 ${page && currentPage === page ? 'opacity-100' : 'opacity-40'}`}
+                      aria-hidden="true"
+                    />
+                  </Link>
                 ))}
 
                 <div className="my-4 border-t border-gray-100" />
 
                 {!loading && (
                   user ? (
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.18 }}
-                      className="space-y-1"
-                    >
+                    <div className="space-y-1">
                       <Link
                         href="/dashboard"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-[#2d7a5f] font-medium transition-all"
+                        className="flex items-center gap-3 px-4 min-h-12 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-[#2d7a5f] font-medium transition-colors"
                       >
-                        <LayoutDashboard className="h-4 w-4" />
+                        <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
                         Mi Dashboard
                       </Link>
                       {(profile?.role === 'admin' || profile?.role === 'teacher') && (
                         <Link
                           href="/admin"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-[#2d7a5f] font-medium transition-all"
+                          className="flex items-center gap-3 px-4 min-h-12 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-[#2d7a5f] font-medium transition-colors"
                         >
-                          <Settings className="h-4 w-4" />
+                          <Settings className="h-4 w-4" aria-hidden="true" />
                           Admin
                         </Link>
                       )}
                       <button
                         onClick={() => { setMobileMenuOpen(false); handleLogout() }}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 font-medium transition-all"
+                        className="w-full flex items-center gap-3 px-4 min-h-12 rounded-xl text-red-700 hover:bg-red-50 font-medium transition-colors"
+                        type="button"
                       >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-4 w-4" aria-hidden="true" />
                         Cerrar sesion
                       </button>
-                    </motion.div>
+                    </div>
                   ) : (
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.18 }}
-                      className="space-y-2 pt-1"
-                    >
+                    <div className="space-y-2 pt-1">
                       <Link
                         href="/register"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block px-4 py-3 rounded-xl border border-gray-200 text-center font-medium text-gray-700 hover:border-[#2d7a5f] hover:text-[#2d7a5f] transition-all"
+                        className="flex items-center justify-center min-h-12 rounded-xl bg-[#1a5744] text-white font-semibold hover:bg-[#2d7a5f] transition-colors"
                       >
                         Registrarse
                       </Link>
                       <Link
                         href="/login"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block px-4 py-3 rounded-xl bg-[#a4c639] text-white text-center font-semibold hover:bg-[#2d7a5f] transition-all shadow-sm"
+                        className="flex items-center justify-center min-h-12 rounded-xl border border-[#1a5744]/30 font-medium text-[#1a5744] hover:bg-[#1a5744]/5 transition-colors"
                       >
                         Iniciar Sesion
                       </Link>
-                    </motion.div>
+                    </div>
                   )
                 )}
-              </div>
+              </nav>
             </motion.aside>
           </>
         )}

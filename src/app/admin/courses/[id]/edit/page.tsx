@@ -9,7 +9,7 @@ import { Upload, X, Save, ArrowLeft } from 'lucide-react';
 interface Instructor {
   id: string;
   full_name: string;
-  role: string;
+  role?: string;
 }
 
 interface Course {
@@ -91,9 +91,8 @@ export default function EditCoursePage() {
 
       // Load instructors
       const { data: instructorsData } = await supabase
-        .from('profiles')
-        .select('id, full_name, role')
-        .in('role', ['admin', 'teacher'])
+        .from('public_instructors')
+        .select('id, full_name')
         .order('full_name');
       
       if (instructorsData) {
@@ -285,7 +284,7 @@ export default function EditCoursePage() {
               <option value="">Seleccionar instructor...</option>
               {instructors.map((instructor) => (
                 <option key={instructor.id} value={instructor.id}>
-                  {instructor.full_name} ({instructor.role})
+                  {instructor.full_name}
                 </option>
               ))}
             </select>

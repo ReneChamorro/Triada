@@ -1,18 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import SessionTimeoutProvider from "@/components/SessionTimeoutProvider";
 import CookieConsent from "@/components/CookieConsent";
 
-const inter = Inter({ subsets: ["latin"] });
-
-// Editorial serif for display headings — warm, academic character for a
-// psychology-focused, 40+ professional audience. Self-hosted by next/font.
-const fraunces = Fraunces({
+// ── TIPOGRAFÍA ── una sola familia para todo el sitio (cuerpo + títulos).
+// Para probar otra fuente: cambia el import de arriba, esta constante, y
+// `--font-serif` en globals.css (apunta a la misma variable).
+const montserrat = Montserrat({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "900"],
-  variable: "--font-fraunces",
+  variable: "--font-montserrat",
   display: "swap",
 });
 
@@ -88,7 +86,7 @@ export default async function RootLayout({
       <head>
         <link rel="canonical" href="https://triadave.com" />
       </head>
-      <body className={`${inter.className} ${fraunces.variable}`}>
+      <body className={`${montserrat.className} ${montserrat.variable}`}>
         <SessionTimeoutProvider>{children}</SessionTimeoutProvider>
         <CookieConsent />
       </body>
