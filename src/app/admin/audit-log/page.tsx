@@ -72,11 +72,11 @@ export default function AuditLogPage() {
         transition={{ duration: 0.4 }}
         className="mb-8"
       >
-        <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+        <span className="text-[#2d7a5f] text-xs font-bold uppercase tracking-widest block mb-2">
           Seguridad
         </span>
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a5744]">
             Log de Auditoría
           </h1>
           <div className="flex items-center gap-2">

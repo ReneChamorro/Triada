@@ -115,10 +115,10 @@ export default function CoursesPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8"
       >
         <div>
-          <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+          <span className="text-[#2d7a5f] text-xs font-bold uppercase tracking-widest block mb-2">
             Contenido
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a5744]">
             Cursos
           </h1>
           <p className="text-[#1a5744]/50 mt-1 text-sm">
@@ -127,7 +127,7 @@ export default function CoursesPage() {
         </div>
         <button
           onClick={() => router.push('/admin/courses/new')}
-          className="flex items-center gap-2 bg-[#a4c639] text-white px-5 py-2.5
+          className="flex items-center gap-2 bg-[#1a5744] text-white px-5 py-2.5
                      rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -150,7 +150,7 @@ export default function CoursesPage() {
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
               filter === key
                 ? 'bg-[#1a5744] text-white'
                 : 'bg-white border border-[#e8e4d0] text-[#1a5744]/60 hover:border-[#1a5744]/30 hover:text-[#1a5744]'
@@ -172,13 +172,13 @@ export default function CoursesPage() {
           <div className="w-16 h-16 bg-[#a4c639]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <BookOpen className="w-8 h-8 text-[#a4c639]" />
           </div>
-          <h3 className="text-lg font-black text-[#1a5744] tracking-tight mb-2">
+          <h3 className="text-lg font-bold text-[#1a5744] tracking-tight mb-2">
             No hay cursos {filter !== 'all' && `en estado ${filter}`}
           </h3>
           <p className="text-[#1a5744]/40 text-sm mb-6">Comienza creando tu primer curso</p>
           <button
             onClick={() => router.push('/admin/courses/new')}
-            className="bg-[#a4c639] text-white px-6 py-2.5 rounded-full font-bold
+            className="bg-[#1a5744] text-white px-6 py-2.5 rounded-xl font-bold
                        text-sm hover:bg-[#2d7a5f] transition-colors"
           >
             Crear Curso
@@ -213,7 +213,7 @@ export default function CoursesPage() {
                 <div className="flex-1 p-5">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
                     <div>
-                      <h3 className="text-lg font-black text-[#1a5744] tracking-tight mb-1">
+                      <h3 className="text-lg font-bold text-[#1a5744] tracking-tight mb-1">
                         {course.title}
                       </h3>
                       <p className="text-[#1a5744]/50 text-sm line-clamp-2 mb-3">
@@ -236,7 +236,7 @@ export default function CoursesPage() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-2xl font-black text-[#1a5744] tracking-tight leading-none">
+                      <p className="text-2xl font-bold text-[#1a5744] tracking-tight leading-none">
                         ${course.price.toLocaleString()}
                       </p>
                       <p className="text-xs text-[#1a5744]/40 mt-1">
@@ -249,7 +249,7 @@ export default function CoursesPage() {
                   <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-[#e8e4d0]">
                     <button
                       onClick={() => router.push(`/admin/courses/${course.id}/edit`)}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-[#a4c639] text-white
+                      className="flex items-center gap-1.5 px-4 py-2 bg-[#1a5744] text-white
                                  rounded-xl text-sm font-semibold hover:bg-[#2d7a5f] transition-colors"
                     >
                       <Edit2 className="w-3.5 h-3.5" />

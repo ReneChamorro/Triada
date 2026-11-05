@@ -382,7 +382,7 @@ export default function LessonEditorPage() {
                     Error al subir el video. Intenta de nuevo.
                   </div>
                   <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#a4c639] transition-colors">
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <Upload className="w-8 h-8 text-gray-500 mb-2" />
                     <span className="text-gray-600">Reintentar subida</span>
                     <input type="file" className="hidden" accept="video/*" onChange={handleMuxUpload} />
                   </label>
@@ -391,7 +391,7 @@ export default function LessonEditorPage() {
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#a4c639]/50 rounded-lg cursor-pointer hover:border-[#a4c639] transition-colors bg-green-50/30">
                   <Upload className="w-8 h-8 text-[#a4c639] mb-2" />
                   <span className="text-gray-700 font-medium">Subir video a Mux</span>
-                  <span className="text-sm text-gray-400">MP4, MOV, MKV — streaming profesional con analytics</span>
+                  <span className="text-sm text-gray-500">MP4, MOV, MKV — streaming profesional con analytics</span>
                   <input type="file" className="hidden" accept="video/*" onChange={handleMuxUpload} />
                 </label>
               )}
@@ -412,7 +412,7 @@ export default function LessonEditorPage() {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
-              <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-400">o usa YouTube</span></div>
+              <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">o usa YouTube</span></div>
             </div>
 
             {/* YouTube URL */}
@@ -425,7 +425,7 @@ export default function LessonEditorPage() {
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
                 placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
               />
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 Recomendado: Sube tu video a YouTube (puede ser unlisted) y pega aquí la URL.
               </p>
             </div>
@@ -433,7 +433,7 @@ export default function LessonEditorPage() {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
-              <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-400">o sube un archivo</span></div>
+              <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">o sube un archivo</span></div>
             </div>
 
             {/* Direct video upload */}
@@ -449,9 +449,9 @@ export default function LessonEditorPage() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a4c639]" />
                 ) : (
                   <>
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <Upload className="w-8 h-8 text-gray-500 mb-2" />
                     <span className="text-gray-600">Subir video</span>
-                    <span className="text-sm text-gray-400">MP4, MOV hasta 500MB</span>
+                    <span className="text-sm text-gray-500">MP4, MOV hasta 500MB</span>
                     <span className="text-xs text-red-400 mt-1">No recomendado — usa YouTube en su lugar</span>
                   </>
                 )}
@@ -481,9 +481,9 @@ export default function LessonEditorPage() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a4c639]" />
                 ) : (
                   <>
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <Upload className="w-8 h-8 text-gray-500 mb-2" />
                     <span className="text-gray-600">Subir PDF</span>
-                    <span className="text-sm text-gray-400">PDF hasta 50MB</span>
+                    <span className="text-sm text-gray-500">PDF hasta 50MB</span>
                   </>
                 )}
                 <input type="file" accept=".pdf" onChange={handlePDFUpload} className="hidden" disabled={uploadingPDF} />
@@ -531,7 +531,7 @@ export default function LessonEditorPage() {
           <button
             onClick={handleSave}
             disabled={!lessonForm.title || uploadingVideo || uploadingPDF || saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#1a5744] text-white rounded-lg hover:bg-[#2d7a5f] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {saving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

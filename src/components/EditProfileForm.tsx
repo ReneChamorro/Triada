@@ -56,7 +56,7 @@ export default function EditProfileForm({ userId, initialName }: EditProfileForm
   if (!editing) {
     return (
       <div className="flex justify-between items-center py-3">
-        <span className="text-sm text-gray-400 font-medium">Nombre</span>
+        <span className="text-sm text-gray-500 font-medium">Nombre</span>
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-gray-900">
             {initialName || 'Sin nombre'}
@@ -76,7 +76,7 @@ export default function EditProfileForm({ userId, initialName }: EditProfileForm
   return (
     <div className="py-3 space-y-2">
       <div className="flex justify-between items-center">
-        <span className="text-sm text-gray-400 font-medium">Nombre</span>
+        <span className="text-sm text-gray-500 font-medium">Nombre</span>
       </div>
       <div className="flex items-center gap-2">
         <input
@@ -92,7 +92,7 @@ export default function EditProfileForm({ userId, initialName }: EditProfileForm
         <button
           onClick={handleSave}
           disabled={saving}
-          className="p-1.5 rounded-lg bg-[#a4c639] text-white hover:bg-[#2d7a5f] disabled:opacity-50 transition-colors"
+          className="p-1.5 rounded-lg bg-[#1a5744] text-white hover:bg-[#2d7a5f] disabled:opacity-50 transition-colors"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
         </button>

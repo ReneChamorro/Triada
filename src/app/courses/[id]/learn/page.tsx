@@ -489,7 +489,7 @@ export default function LearnCoursePage() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
                       <h2 className="text-xl font-bold text-[#2d7a5f]">{currentLesson.title}</h2>
                       <a href={currentLesson.pdf_url} download target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-[#a4c639] hover:bg-[#2d7a5f] text-white rounded-xl text-sm font-semibold transition-all">
+                        className="flex items-center gap-2 px-4 py-2 bg-[#1a5744] hover:bg-[#2d7a5f] text-white rounded-xl text-sm font-semibold transition-all">
                         <Download className="w-4 h-4" />
                         <span>Descargar PDF</span>
                       </a>
@@ -503,7 +503,7 @@ export default function LearnCoursePage() {
               {currentLesson.content_type === 'text' && (
                 <div className="p-3 sm:p-6 lg:p-8">
                   <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto shadow-sm">
-                    <h2 className="text-2xl font-extrabold text-[#2d7a5f] mb-4">{currentLesson.title}</h2>
+                    <h2 className="text-2xl font-bold text-[#2d7a5f] mb-4">{currentLesson.title}</h2>
                     {currentLesson.description && <p className="text-gray-500 mb-6 text-sm">{currentLesson.description}</p>}
                     <div className="prose max-w-none">
                       <pre className="whitespace-pre-wrap font-sans text-gray-700 text-sm leading-relaxed">{currentLesson.text_content}</pre>
@@ -532,7 +532,7 @@ export default function LearnCoursePage() {
                   <PlayCircle className="w-8 h-8 text-[#a4c639]" />
                 </div>
                 <p className="text-[#2d7a5f] font-bold mb-1">Selecciona una lección</p>
-                <p className="text-gray-400 text-sm">Usa el menú lateral para navegar</p>
+                <p className="text-gray-500 text-sm">Usa el menú lateral para navegar</p>
               </div>
             </div>
           )}
@@ -552,7 +552,7 @@ export default function LearnCoursePage() {
                 className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all font-semibold text-sm ${
                   completedLessons.has(currentLesson.id)
                     ? 'bg-[#2d7a5f] text-white'
-                    : 'bg-[#a4c639] hover:bg-[#2d7a5f] text-white shadow-sm shadow-[#a4c639]/30'
+                    : 'bg-[#1a5744] hover:bg-[#2d7a5f] text-white'
                 }`}>
                 {completedLessons.has(currentLesson.id) ? (
                   <span className="flex items-center gap-1.5">
@@ -569,7 +569,7 @@ export default function LearnCoursePage() {
               </button>
 
               <button onClick={goToNextLesson} disabled={!canGoNext()}
-                className="flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 bg-[#a4c639] hover:bg-[#2d7a5f] text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm">
+                className="flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 bg-[#1a5744] hover:bg-[#2d7a5f] text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm">
                 <span className="hidden sm:inline">Siguiente</span>
                 <ChevronRight className="w-4 h-4" />
               </button>

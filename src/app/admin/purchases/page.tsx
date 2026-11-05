@@ -273,10 +273,10 @@ export default function AdminPurchasesPage() {
         transition={{ duration: 0.4 }}
         className="mb-8"
       >
-        <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+        <span className="text-[#2d7a5f] text-xs font-bold uppercase tracking-widest block mb-2">
           Finanzas
         </span>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a5744]">
           Gestión de Pagos
         </h1>
         <p className="text-[#1a5744]/50 mt-1 text-sm">Revisa y aprueba compras manuales</p>
@@ -323,14 +323,14 @@ export default function AdminPurchasesPage() {
             transition={{ duration: 0.4, delay: s.delay }}
             className={`${s.card} rounded-[1.5rem] p-6 flex items-center gap-5`}
           >
-            <div className={`w-14 h-14 ${s.iconBg} rounded-[18px] flex items-center justify-center flex-shrink-0`}>
+            <div className={`w-14 h-14 ${s.iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}>
               <s.icon className={`h-7 w-7 ${s.iconColor}`} />
             </div>
             <div>
               <p className={`text-xs font-bold uppercase tracking-widest ${s.textColor} opacity-60 mb-1`}>
                 {s.label}
               </p>
-              <p className={`text-4xl font-black tracking-tighter leading-none ${s.textColor}`}>
+              <p className={`text-4xl font-bold tracking-tight leading-none ${s.textColor}`}>
                 {s.value}
               </p>
             </div>
@@ -471,7 +471,7 @@ export default function AdminPurchasesPage() {
                           <button
                             onClick={() => approvePurchase(purchase)}
                             disabled={processing === purchase.id}
-                            className="bg-[#a4c639] text-white hover:bg-[#2d7a5f] px-3 py-1.5 rounded-lg
+                            className="bg-[#1a5744] text-white hover:bg-[#2d7a5f] px-3 py-1.5 rounded-lg
                                        text-xs font-bold disabled:opacity-50 transition-colors"
                           >
                             {processing === purchase.id ? '…' : 'Aprobar'}
@@ -511,7 +511,7 @@ export default function AdminPurchasesPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-[#e8e4d0]">
-              <h3 className="font-black text-[#1a5744] tracking-tight">Comprobante de Pago</h3>
+              <h3 className="font-bold text-[#1a5744] tracking-tight">Comprobante de Pago</h3>
               <button
                 onClick={() => { setReceiptModal(null); setReceiptUrl(null) }}
                 className="text-[#1a5744]/40 hover:text-[#1a5744] transition-colors"

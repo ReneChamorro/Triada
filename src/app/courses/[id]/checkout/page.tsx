@@ -189,13 +189,13 @@ export default function CheckoutPage() {
           <div className="w-16 h-16 bg-[#a4c639]/15 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="h-9 w-9 text-[#a4c639]" />
           </div>
-          <h2 className="text-2xl font-extrabold text-[#2d7a5f] mb-2">¡Comprobante Enviado!</h2>
+          <h2 className="text-2xl font-bold text-[#2d7a5f] mb-2">¡Comprobante Enviado!</h2>
           <p className="text-gray-500 mb-8 text-sm leading-relaxed">
             Tu pago está pendiente de verificación. Te notificaremos por email cuando sea aprobado (usualmente dentro de 24 horas).
           </p>
           <div className="space-y-3">
             <Link href="/my-courses"
-              className="block w-full bg-[#a4c639] hover:bg-[#2d7a5f] text-white px-6 py-3.5 rounded-xl font-bold transition-all shadow-md shadow-[#a4c639]/30">
+              className="block w-full bg-[#1a5744] hover:bg-[#2d7a5f] text-white px-6 py-3.5 rounded-xl font-bold transition-all">
               Ir a Mis Cursos
             </Link>
             <Link href="/courses"
@@ -243,8 +243,8 @@ export default function CheckoutPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="mb-6 md:mb-10">
           <p className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest mb-1">Paso final</p>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[#2d7a5f]">Completar compra</h1>
-          <p className="text-gray-400 text-sm mt-1">Elige tu método de pago y sube tu comprobante</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#2d7a5f]">Completar compra</h1>
+          <p className="text-gray-500 text-sm mt-1">Elige tu método de pago y sube tu comprobante</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
@@ -261,14 +261,14 @@ export default function CheckoutPage() {
                 </div>
               )}
               <h4 className="font-bold text-[#2d7a5f] mb-2 line-clamp-2">{course.title}</h4>
-              {course.description && <p className="text-xs text-gray-400 mb-4 line-clamp-3">{course.description}</p>}
+              {course.description && <p className="text-xs text-gray-500 mb-4 line-clamp-3">{course.description}</p>}
               <div className="border-t border-gray-100 pt-4 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500 font-medium">Total a pagar</span>
                   <div className="text-right">
-                    <span className="text-2xl font-extrabold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
+                    <span className="text-2xl font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
                     {fmtBs && (
-                      <p className="text-xs text-gray-400 mt-0.5">≈ {fmtBs} <span className="text-gray-300">(BCV)</span></p>
+                      <p className="text-xs text-gray-500 mt-0.5">≈ {fmtBs} <span className="text-gray-300">(BCV)</span></p>
                     )}
                   </div>
                 </div>
@@ -292,7 +292,7 @@ export default function CheckoutPage() {
               {/* Step 1: Select method */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="w-6 h-6 rounded-full bg-[#a4c639] text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                  <span className="w-6 h-6 rounded-full bg-[#1a5744] text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
                   <h3 className="font-bold text-[#2d7a5f]">Método de pago</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -315,7 +315,7 @@ export default function CheckoutPage() {
               {/* Step 2: Payment instructions */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="w-6 h-6 rounded-full bg-[#a4c639] text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                  <span className="w-6 h-6 rounded-full bg-[#1a5744] text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
                   <h3 className="font-bold text-[#2d7a5f]">Realiza tu pago</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-4">
@@ -323,7 +323,7 @@ export default function CheckoutPage() {
                   {paymentMethod === 'pago_movil' && fmtBs ? (
                     <>
                       <span className="font-bold text-[#a4c639]">{fmtBs}</span>
-                      <span className="text-gray-400 text-xs ml-1">(≈ {formatPrice(course.price, course.currency)} · tasa BCV oficial)</span>
+                      <span className="text-gray-500 text-xs ml-1">(≈ {formatPrice(course.price, course.currency)} · tasa BCV oficial)</span>
                     </>
                   ) : (
                     <span className="font-bold text-[#a4c639]">{formatPrice(course.price, course.currency)}</span>
@@ -338,10 +338,10 @@ export default function CheckoutPage() {
               {/* Step 3: Upload receipt */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="w-6 h-6 rounded-full bg-[#a4c639] text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                  <span className="w-6 h-6 rounded-full bg-[#1a5744] text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
                   <h3 className="font-bold text-[#2d7a5f]">Sube tu comprobante</h3>
                 </div>
-                <p className="text-xs text-gray-400 mb-4 flex items-start gap-1.5">
+                <p className="text-xs text-gray-500 mb-4 flex items-start gap-1.5">
                   <Lock className="h-3.5 w-3.5 text-[#2d7a5f] shrink-0 mt-0.5" />
                   Tu comprobante se almacena de forma segura y se elimina automáticamente una vez verificado tu pago.
                 </p>
@@ -393,7 +393,7 @@ export default function CheckoutPage() {
                         className="w-full border-2 border-dashed border-gray-200 rounded-xl py-10 flex flex-col items-center justify-center hover:border-[#a4c639] hover:bg-[#a4c639]/5 transition-all">
                         <Upload className="h-8 w-8 text-gray-300 mb-2" />
                         <span className="text-sm text-gray-500 font-medium">Haz clic para subir imagen</span>
-                        <span className="text-xs text-gray-400 mt-1">JPG, PNG o WebP — Máx. 5MB</span>
+                        <span className="text-xs text-gray-500 mt-1">JPG, PNG o WebP — Máx. 5MB</span>
                       </button>
                     )}
                   </div>
@@ -426,7 +426,7 @@ export default function CheckoutPage() {
               </div>
 
               <button type="submit" disabled={processing || !receiptFile || !referenceCode.trim()}
-                className="w-full bg-[#a4c639] hover:bg-[#2d7a5f] text-white py-4 rounded-xl font-bold text-base transition-all shadow-md shadow-[#a4c639]/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                className="w-full bg-[#1a5744] hover:bg-[#2d7a5f] text-white py-4 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 {processing ? (<><Loader2 className="h-5 w-5 animate-spin" />Enviando...</>) : 'Enviar Comprobante de Pago'}
               </button>
 

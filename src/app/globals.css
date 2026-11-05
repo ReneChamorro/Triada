@@ -100,31 +100,6 @@ html { scrollbar-width: thin; scrollbar-color: #2d7a5f #f4f2ea; }
 ::-webkit-scrollbar-thumb { background: #2d7a5f; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #1a5744; }
 
-/* ─── Keyframes (used by login / register) ──────── */
-@keyframes blob {
-  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-  25%       { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-  50%       { border-radius: 50% 60% 30% 60% / 30% 40% 70% 50%; }
-  75%       { border-radius: 60% 40% 60% 30% / 70% 30% 50% 60%; }
-}
-
-.animate-blob            { animation: blob 10s ease-in-out infinite; }
-.animate-blob-2          { animation: blob 10s ease-in-out infinite 3.3s; }
-.animate-blob-3          { animation: blob 10s ease-in-out infinite 6.6s; }
-
-/* ─── Card Hover Lift (StatsCard, my-courses) ───── */
-.card-hover {
-  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
-}
-/* Gate hover behind fine-pointer devices: touch screens fire hover on tap,
-   which would leave cards stuck in their lifted state. */
-@media (hover: hover) and (pointer: fine) {
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -12px rgba(26, 87, 68, 0.18);
-  }
-}
-
 /* ─── Hero entrance ─────────────────────────────── */
 /* Pure CSS (no JS needed to reveal content), runs once on load: short rise +
    fade so the eye lands headline → copy → CTA. Staggered via --d. Reduced
@@ -141,18 +116,11 @@ html { scrollbar-width: thin; scrollbar-color: #2d7a5f #f4f2ea; }
 }
 
 /* ─── Reduced Motion ────────────────────────────── */
-/* Reduced motion means fewer, gentler animations — not none. We kill the
-   ambient looping motion and near-instant any remaining transitions, while
-   leaving opacity/color intact so comprehension cues survive. Framer Motion
-   components additionally honor this via useReducedMotion(). */
+/* Reduced motion means fewer, gentler animations, not none. Transitions become
+   near-instant while opacity/color changes stay so comprehension cues survive.
+   Framer Motion components additionally honor this via useReducedMotion(). */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-
-  .animate-blob,
-  .animate-blob-2,
-  .animate-blob-3 {
-    animation: none !important;
-  }
 
   *,
   *::before,

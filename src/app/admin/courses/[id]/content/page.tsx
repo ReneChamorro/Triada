@@ -244,7 +244,7 @@ export default function CourseContentPage() {
       {/* Add Module Button */}
       <button
         onClick={() => openModuleModal()}
-        className="flex items-center space-x-2 bg-[#a4c639] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5f] transition-colors mb-6"
+        className="flex items-center space-x-2 bg-[#1a5744] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5f] transition-colors mb-6"
       >
         <Plus className="w-5 h-5" />
         <span>Agregar Módulo</span>
@@ -267,7 +267,7 @@ export default function CourseContentPage() {
                     <ChevronRight className="w-5 h-5" />
                   )}
                 </button>
-                <GripVertical className="w-5 h-5 text-gray-400" />
+                <GripVertical className="w-5 h-5 text-gray-500" />
                 <div className="flex-1">
                   <h3 className="font-bold text-[#1a5744]">
                     Módulo {moduleIndex + 1}: {module.title}
@@ -317,7 +317,7 @@ export default function CourseContentPage() {
                       className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100"
                     >
                       <div className="flex items-center space-x-3 flex-1">
-                        <GripVertical className="w-4 h-4 text-gray-400" />
+                        <GripVertical className="w-4 h-4 text-gray-500" />
                         {getContentIcon(lesson.content_type)}
                         <div className="flex-1">
                           <p className="font-medium text-gray-900">
@@ -420,7 +420,7 @@ export default function CourseContentPage() {
               <button
                 onClick={saveModule}
                 disabled={!moduleForm.title}
-                className="flex items-center space-x-2 px-6 py-2 bg-[#a4c639] text-white rounded-lg hover:bg-[#2d7a5f] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-6 py-2 bg-[#1a5744] text-white rounded-lg hover:bg-[#2d7a5f] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save className="w-4 h-4" />
                 <span>Guardar</span>

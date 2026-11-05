@@ -256,9 +256,9 @@ export default function EditCoursePage() {
             </div>
           ) : (
             <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#a4c639] transition-colors">
-              <Upload className="w-12 h-12 text-gray-400 mb-2" />
+              <Upload className="w-12 h-12 text-gray-500 mb-2" />
               <span className="text-gray-600">Click para subir imagen</span>
-              <span className="text-sm text-gray-400 mt-1">PNG, JPG hasta 5MB</span>
+              <span className="text-sm text-gray-500 mt-1">PNG, JPG hasta 5MB</span>
               <input
                 type="file"
                 accept="image/*"
@@ -430,7 +430,7 @@ export default function EditCoursePage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center space-x-2 bg-[#a4c639] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center space-x-2 bg-[#1a5744] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

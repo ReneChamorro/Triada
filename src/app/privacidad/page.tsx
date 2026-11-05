@@ -23,7 +23,7 @@ export default function PrivacidadPage() {
             Volver al inicio
           </Link>
           <p className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest mb-2">Legal</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Política de Privacidad
           </h1>
           <p className="mt-2 text-white/60 text-sm">Última actualización: {lastUpdated}</p>
@@ -46,7 +46,7 @@ export default function PrivacidadPage() {
             <p>
               El responsable del tratamiento de tus datos es <strong>Triada Global</strong>, operando
               a través del sitio <strong>triadave.com</strong>. Puedes contactarnos en{' '}
-              <a href="mailto:info@triadaglobal.com" className="text-[#a4c639] hover:underline">
+              <a href="mailto:info@triadaglobal.com" className="text-[#2d7a5f] underline underline-offset-2 hover:text-[#1a5744]">
                 info@triadaglobal.com
               </a>
               .
@@ -152,7 +152,7 @@ export default function PrivacidadPage() {
             </ul>
             <p>
               Para ejercer cualquiera de estos derechos, escríbenos a{' '}
-              <a href="mailto:info@triadaglobal.com" className="text-[#a4c639] hover:underline">
+              <a href="mailto:info@triadaglobal.com" className="text-[#2d7a5f] underline underline-offset-2 hover:text-[#1a5744]">
                 info@triadaglobal.com
               </a>{' '}
               indicando tu solicitud y adjuntando una prueba de identidad.
@@ -195,7 +195,7 @@ export default function PrivacidadPage() {
             <p>
               Para cualquier consulta sobre esta Política o sobre el tratamiento de tus datos,
               contáctanos en:{' '}
-              <a href="mailto:info@triadaglobal.com" className="text-[#a4c639] hover:underline">
+              <a href="mailto:info@triadaglobal.com" className="text-[#2d7a5f] underline underline-offset-2 hover:text-[#1a5744]">
                 info@triadaglobal.com
               </a>
             </p>
@@ -203,7 +203,7 @@ export default function PrivacidadPage() {
 
           <hr className="my-8 border-gray-100" />
 
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-gray-500 text-center">
             Consulta también nuestros{' '}
             <Link href="/terminos" className="text-[#2d7a5f] hover:underline">
               Términos y Condiciones

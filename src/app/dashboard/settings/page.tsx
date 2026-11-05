@@ -31,7 +31,7 @@ export default async function SettingsPage() {
         <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 relative">
           <p className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest mb-2">Tu cuenta</p>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white">Configuración</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white">Configuración</h1>
           <p className="mt-1 text-white/50 text-sm">Gestiona tu información personal y preferencias</p>
         </div>
       </div>
@@ -46,17 +46,17 @@ export default async function SettingsPage() {
           <div className="px-6 py-4 divide-y divide-gray-50">
             <EditProfileForm userId={user.id} initialName={profile?.full_name ?? null} />
             <div className="flex justify-between items-center py-3">
-              <span className="text-sm text-gray-400 font-medium">Email</span>
+              <span className="text-sm text-gray-500 font-medium">Email</span>
               <span className="text-sm font-semibold text-gray-900">{user.email}</span>
             </div>
             {profile?.phone && (
               <div className="flex justify-between items-center py-3">
-                <span className="text-sm text-gray-400 font-medium">Teléfono</span>
+                <span className="text-sm text-gray-500 font-medium">Teléfono</span>
                 <span className="text-sm font-semibold text-gray-900">{profile.phone}</span>
               </div>
             )}
             <div className="flex justify-between items-center py-3">
-              <span className="text-sm text-gray-400 font-medium">Miembro desde</span>
+              <span className="text-sm text-gray-500 font-medium">Miembro desde</span>
               <span className="text-sm font-semibold text-gray-900">
                 {new Date(profile?.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
               </span>

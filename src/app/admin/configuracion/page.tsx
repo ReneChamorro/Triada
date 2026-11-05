@@ -101,10 +101,10 @@ export default function ConfiguracionPage() {
         transition={{ duration: 0.4 }}
         className="mb-8"
       >
-        <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+        <span className="text-[#2d7a5f] text-xs font-bold uppercase tracking-widest block mb-2">
           Sistema
         </span>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a5744]">
           Configuración
         </h1>
         <p className="text-[#1a5744]/50 mt-1 text-sm">

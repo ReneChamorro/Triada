@@ -264,10 +264,10 @@ export default function LandingSettingsPage() {
               <ArrowLeft className="h-5 w-5 text-[#1a5744]" />
             </button>
             <div>
-              <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-1">
+              <span className="text-[#2d7a5f] text-xs font-bold uppercase tracking-widest block mb-1">
                 Contenido
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a5744]">
                 Landing Page
               </h1>
             </div>
@@ -275,7 +275,7 @@ export default function LandingSettingsPage() {
 
           <button
             onClick={addFeature}
-            className="flex items-center gap-2 bg-[#a4c639] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
+            className="flex items-center gap-2 bg-[#1a5744] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
           >
             <Plus className="h-4 w-4" />
             Agregar Característica
@@ -612,7 +612,7 @@ export default function LandingSettingsPage() {
             <p className="text-[#1a5744]/40 font-semibold text-sm mb-4">No hay características configuradas</p>
             <button
               onClick={addFeature}
-              className="inline-flex items-center gap-2 bg-[#a4c639] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#1a5744] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#2d7a5f] transition-colors"
             >
               <Plus className="h-4 w-4" />
               Agregar Primera Característica

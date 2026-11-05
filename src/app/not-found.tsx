@@ -13,7 +13,7 @@ export default function NotFound() {
           className="mx-auto mb-8"
         />
         
-        <div className="bg-white rounded-3xl shadow-xl p-8 border-2 border-[#a4c639]/20">
+        <div className="bg-white rounded-[1.5rem] shadow-xl p-8 border-2 border-[#a4c639]/20">
           <h1 className="text-6xl font-bold text-[#a4c639] mb-4">404</h1>
           <h2 className="text-2xl font-bold text-[#1a5744] mb-4">
             Página no encontrada
@@ -25,13 +25,13 @@ export default function NotFound() {
           <div className="space-y-3">
             <Link
               href="/"
-              className="block w-full bg-[#a4c639] text-white py-3 px-6 rounded-2xl font-bold hover:bg-[#8fb030] transition-colors"
+              className="block w-full bg-[#1a5744] text-white py-3 px-6 rounded-xl font-bold hover:bg-[#2d7a5f] transition-colors"
             >
               Volver al inicio
             </Link>
             <Link
               href="/courses"
-              className="block w-full bg-[#1a5744] text-white py-3 px-6 rounded-2xl font-bold hover:bg-[#134233] transition-colors"
+              className="block w-full bg-[#1a5744] text-white py-3 px-6 rounded-xl font-bold hover:bg-[#134233] transition-colors"
             >
               Ver cursos
             </Link>

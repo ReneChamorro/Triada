@@ -80,30 +80,25 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex">
       {/* Left branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#2d7a5f] relative overflow-hidden flex-col justify-between p-12">
-        {/* Blobs */}
-        <div className="absolute top-0 left-0 w-80 h-80 bg-[#a4c639]/20 rounded-full blur-3xl animate-blob" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#1a5744]/40 rounded-full blur-3xl animate-blob-2" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#a4c639]/10 rounded-full blur-2xl animate-blob-3" />
-        {/* Dot grid */}
-        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+      <div className="hidden lg:flex lg:w-1/2 bg-[#1a5744] relative overflow-hidden flex-col justify-between p-12">
+        <div className="absolute -top-16 right-0 w-96 h-72 bg-[#2d7a5f]/55 rounded-full translate-x-1/3 pointer-events-none" />
 
         <div className="relative z-10">
           <Link href="/">
-            <Image src="/logos/Triada-logo-mono-green.png" alt="Triada" width={180} height={60} className="h-12 w-auto brightness-0 invert" />
+            <Image src="/logos/Triada-logo-dark-mode.png" alt="Triada" width={180} height={60} className="h-12 w-auto" />
           </Link>
         </div>
 
         <div className="relative z-10 space-y-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#a4c639]/20 border border-[#a4c639]/40 text-[#a4c639] text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-              <GraduationCap className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-3 text-[#e8e4d0] text-xs font-bold uppercase tracking-widest mb-4">
+              <span className="h-0.5 w-8 bg-[#a4c639]" aria-hidden="true" />
               Plataforma Educativa
-            </div>
-            <h2 className="text-4xl font-extrabold text-white leading-tight">
+            </p>
+            <h2 className="text-4xl font-bold text-white leading-tight">
               Bienvenido<br/>de nuevo
             </h2>
-            <p className="mt-3 text-white/60 text-lg">Continua donde lo dejaste y sigue creciendo profesionalmente.</p>
+            <p className="mt-3 text-white/90 text-lg">Continua donde lo dejaste y sigue creciendo profesionalmente.</p>
           </div>
           <div className="space-y-4">
             {[
@@ -111,7 +106,7 @@ function LoginForm() {
               { icon: <Award className="h-5 w-5 text-[#a4c639]" />, text: 'Sigue tu progreso' },
               { icon: <GraduationCap className="h-5 w-5 text-[#a4c639]" />, text: 'Obtén certificaciones' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-white/70 text-sm">
+              <div key={i} className="flex items-center gap-3 text-white/90 text-sm">
                 <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">{item.icon}</div>
                 {item.text}
               </div>
@@ -120,7 +115,7 @@ function LoginForm() {
         </div>
 
         <div className="relative z-10">
-          <p className="text-white/30 text-xs">© 2026 Triada Global. Todos los derechos reservados.</p>
+          <p className="text-white/80 text-xs">© 2026 Triada Global. Todos los derechos reservados.</p>
         </div>
       </div>
 
@@ -133,7 +128,7 @@ function LoginForm() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-[#2d7a5f] mb-2">Iniciar sesion</h1>
+            <h1 className="text-3xl font-bold text-[#2d7a5f] mb-2">Iniciar sesion</h1>
             <p className="text-gray-500">Ingresa tus datos para continuar</p>
           </div>
 
@@ -145,7 +140,7 @@ function LoginForm() {
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100" /></div>
-            <div className="relative flex justify-center text-sm"><span className="px-3 bg-white text-gray-400">O con correo</span></div>
+            <div className="relative flex justify-center text-sm"><span className="px-3 bg-white text-gray-500">O con correo</span></div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
@@ -166,14 +161,14 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 pr-12 bg-[#f5f3e8] border-2 border-transparent rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#a4c639] focus:bg-white focus:outline-none transition-all"
                   placeholder="••••••••" />
-                <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 transition-colors" tabIndex={-1} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-[#a4c639] hover:bg-[#2d7a5f] text-white py-3.5 rounded-xl font-bold text-base shadow-md shadow-[#a4c639]/30 hover:shadow-[#2d7a5f]/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full flex items-center justify-center gap-2 bg-[#1a5744] hover:bg-[#2d7a5f] text-white py-3.5 rounded-xl font-bold text-base hover:shadow-[#2d7a5f]/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Ingresando...' : 'Iniciar sesion'}
             </button>
@@ -181,13 +176,13 @@ function LoginForm() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             ¿No tienes cuenta?{' '}
-            <Link href={`/register${redirect !== '/dashboard' ? `?redirect=${redirect}` : ''}`} className="font-semibold text-[#2d7a5f] hover:text-[#a4c639] transition-colors">
+            <Link href={`/register${redirect !== '/dashboard' ? `?redirect=${redirect}` : ''}`} className="font-semibold text-[#2d7a5f] hover:text-[#1a5744] transition-colors">
               Registrate gratis
             </Link>
           </p>
 
           <div className="mt-4 text-center">
-            <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">← Volver al inicio</Link>
+            <Link href="/" className="text-xs text-gray-500 hover:text-gray-600 transition-colors">← Volver al inicio</Link>
           </div>
         </div>
       </div>

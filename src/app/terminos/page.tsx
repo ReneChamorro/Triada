@@ -23,7 +23,7 @@ export default function TerminosPage() {
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
           </Link>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Términos y Condiciones
           </h1>
           <p className="mt-2 text-white/60 text-sm">Última actualización: {lastUpdated}</p>
@@ -145,7 +145,7 @@ export default function TerminosPage() {
 
           <hr className="my-8 border-gray-100" />
 
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-gray-500 text-center">
             ¿Tienes dudas? Revisa también nuestra{' '}
             <Link href="/privacidad" className="text-[#2d7a5f] hover:underline">
               Política de Privacidad

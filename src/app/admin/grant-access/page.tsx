@@ -127,10 +127,10 @@ export default function GrantAccessPage() {
         transition={{ duration: 0.4 }}
         className="mb-8"
       >
-        <span className="text-[#a4c639] text-xs font-bold uppercase tracking-widest block mb-2">
+        <span className="text-[#2d7a5f] text-xs font-bold uppercase tracking-widest block mb-2">
           Acceso Manual
         </span>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-[#1a5744]">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a5744]">
           Otorgar Acceso
         </h1>
         <p className="text-[#1a5744]/50 mt-1 text-sm">
@@ -277,7 +277,7 @@ export default function GrantAccessPage() {
           <button
             type="submit"
             disabled={processing || !formData.userId || !formData.courseId}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#a4c639] text-white rounded-xl
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#1a5744] text-white rounded-xl
                        text-sm font-bold hover:bg-[#2d7a5f] disabled:opacity-50
                        disabled:cursor-not-allowed transition-all"
           >

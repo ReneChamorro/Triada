@@ -56,6 +56,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#f5f3e8]">
+      <a href="#main" className="skip-link">Saltar al contenido</a>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -69,14 +70,8 @@ export default function AdminLayout({
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 flex flex-col`}>
 
-        {/* Subtle dot texture */}
-        <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(circle, #a4c639 1px, transparent 1px)', backgroundSize: '24px 24px' }}
-        />
-
         {/* Logo */}
-        <div className="relative z-10 px-6 py-5 flex items-center justify-between border-b border-white/8">
+        <div className="relative z-10 px-6 py-5 flex items-center justify-between border-b border-white/15">
           <Link href="/admin" className="flex items-center">
             <Image
               src="/logos/Triada-logo-dark-mode.png"
@@ -88,7 +83,7 @@ export default function AdminLayout({
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            className="lg:hidden h-11 w-11 -mr-2 inline-flex items-center justify-center rounded-lg text-white/85 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Cerrar menú"
           >
             <X className="h-4 w-4" />
@@ -97,7 +92,7 @@ export default function AdminLayout({
 
         {/* Label */}
         <div className="relative z-10 px-6 pt-5 pb-2">
-          <span className="text-[#a4c639] text-xs font-semibold uppercase tracking-widest opacity-60">
+          <span className="text-[#e8e4d0] text-xs font-bold uppercase tracking-widest">
             Navegación
           </span>
         </div>
@@ -111,10 +106,11 @@ export default function AdminLayout({
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 ${
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 min-h-11 rounded-xl transition-colors duration-150 ${
                   isActive
-                    ? 'bg-[#a4c639] text-[#1a5744] shadow-sm'
-                    : 'text-white/65 hover:bg-white/8 hover:text-white'
+                    ? 'bg-[#e8e4d0] text-[#1a5744]'
+                    : 'text-white/90 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <item.icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-[#1a5744]' : ''}`} />
@@ -127,11 +123,12 @@ export default function AdminLayout({
         </nav>
 
         {/* Logout */}
-        <div className="relative z-10 px-3 py-4 border-t border-white/8">
+        <div className="relative z-10 px-3 py-4 border-t border-white/15">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl
-                       text-white/50 hover:bg-white/8 hover:text-white transition-all"
+            type="button"
+            className="flex items-center gap-3 w-full px-4 min-h-11 rounded-xl
+                       text-white/90 hover:bg-white/10 hover:text-white transition-colors"
           >
             {loggingOut ? (
               <div className="w-4 h-4 rounded-full border-2 border-white/50 border-r-transparent animate-spin" />
@@ -146,28 +143,29 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-64 min-h-screen">
+      <div className="lg:ml-64 min-h-screen">
         {/* Top Bar */}
         <header className="bg-white border-b border-[#e8e4d0] sticky top-0 z-10">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-[#1a5744]/60 hover:bg-[#e8e4d0] hover:text-[#1a5744] transition-colors"
+              className="lg:hidden h-11 w-11 -ml-2 inline-flex items-center justify-center rounded-xl text-[#1a5744] hover:bg-[#e8e4d0] transition-colors"
               aria-label="Abrir menú"
+              aria-expanded={sidebarOpen}
             >
               <Menu className="h-5 w-5" />
             </button>
-            <h2 className="text-base font-black tracking-tight text-[#1a5744]">
+            <h2 className="text-base font-semibold tracking-tight text-[#1a5744]">
               {navigation.find(item => item.href === pathname)?.name || 'Panel de Administración'}
             </h2>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-4 sm:p-6 lg:p-8">
+        <main id="main" className="p-4 sm:p-6 lg:p-8">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

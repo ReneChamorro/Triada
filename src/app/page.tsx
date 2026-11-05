@@ -427,7 +427,7 @@ export default function HomePage() {
                 ))
               ) : (
                 <div className="col-span-full text-center py-16">
-                  <div className="w-16 h-16 rounded-3xl bg-[#1a5744]/10 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[#1a5744]/10 flex items-center justify-center mx-auto mb-4">
                     <BookOpen className="h-8 w-8 text-[#1a5744]" aria-hidden="true" />
                   </div>
                   <p className="text-[#1a5744] font-semibold">No hay cursos destacados disponibles</p>

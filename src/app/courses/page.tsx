@@ -168,7 +168,7 @@ export default function CoursesPage() {
               </div>
             ) : (
               <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-3xl bg-[#1a5744]/10 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#1a5744]/10 flex items-center justify-center mx-auto mb-4">
                   <BookOpen className="h-8 w-8 text-[#1a5744]" aria-hidden="true" />
                 </div>
                 <h3 className="text-xl font-serif font-semibold text-[#1a5744] mb-2">

@@ -18,7 +18,7 @@ export default function SessionTimeoutProvider({ children }: { children: React.R
             </p>
             <button
               onClick={dismissWarning}
-              className="w-full bg-[#a4c639] text-white py-2.5 rounded-lg font-semibold hover:bg-[#8ba832] transition-colors"
+              className="w-full bg-[#1a5744] text-white py-2.5 rounded-lg font-semibold hover:bg-[#2d7a5f] transition-colors"
             >
               Continuar sesión
             </button>
