@@ -20,6 +20,12 @@ export default async function MyCoursesPage() {
     .eq('courses.status', 'published')
     .order('enrolled_at', { ascending: false })
 
+  const { data: ownReviews } = await supabase
+    .from('course_reviews')
+    .select('course_id')
+    .eq('user_id', user.id)
+  const reviewedCourseIds = new Set((ownReviews ?? []).map((r) => r.course_id))
+
   return (
     <div className="min-h-screen bg-[#f5f3e8]">
       <Header currentPage="courses" />
@@ -102,6 +108,12 @@ export default async function MyCoursesPage() {
                       className="w-full bg-[#1a5744] hover:bg-[#2d7a5f] text-white px-4 min-h-11 flex items-center justify-center rounded-xl font-semibold text-sm active:scale-[0.98] [transition:transform_150ms_var(--ease-out),background-color_300ms_var(--ease-brand)]"
                     >
                       {uc.progress_percentage > 0 ? 'Continuar' : 'Comenzar'}
+                    </Link>
+                    <Link
+                      href={`/courses/${uc.courses.id}/resena`}
+                      className="mt-2 w-full text-[#1a5744] border-2 border-[#1a5744]/20 hover:border-[#1a5744]/50 hover:bg-[#1a5744]/5 px-4 min-h-11 flex items-center justify-center rounded-xl font-semibold text-sm active:scale-[0.98] [transition:transform_150ms_var(--ease-out),border-color_300ms_var(--ease-brand),background-color_300ms_var(--ease-brand)]"
+                    >
+                      {reviewedCourseIds.has(uc.courses.id) ? 'Editar tu opinión' : 'Deja tu opinión'}
                     </Link>
                   </div>
                 </div>

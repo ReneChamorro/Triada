@@ -80,6 +80,40 @@ export const registerSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>
 
+// === Feedback & reviews ===
+
+export const feedbackCategorySchema = z.enum(['sugerencia', 'problema', 'contenido', 'otro'])
+
+export const feedbackSchema = z.object({
+  category: feedbackCategorySchema,
+  rating: z.number().int().min(1).max(5).nullable().optional(),
+  message: z
+    .string()
+    .trim()
+    .min(10, 'Cuéntanos un poco más (mínimo 10 caracteres)')
+    .max(2000, 'El mensaje es muy largo'),
+  pagePath: z.string().max(300).regex(/^\/[\w\-/]*$/).nullable().optional(),
+})
+
+export type FeedbackInput = z.infer<typeof feedbackSchema>
+
+export const feedbackStatusSchema = z.object({
+  status: z.enum(['nuevo', 'leido', 'resuelto']),
+  adminNote: z.string().trim().max(2000).nullable().optional(),
+})
+
+export const reviewSchema = z.object({
+  rating: z.number().int().min(1, 'Elige una calificación').max(5),
+  comment: z.string().trim().max(1500, 'El comentario es muy largo').nullable().optional(),
+})
+
+export type ReviewInput = z.infer<typeof reviewSchema>
+
+export const reviewModerationSchema = z.object({
+  status: z.enum(['approved', 'rejected']),
+  moderationNote: z.string().trim().max(500).nullable().optional(),
+})
+
 // === Helpers ===
 
 export function formatZodErrors(error: z.ZodError): string {

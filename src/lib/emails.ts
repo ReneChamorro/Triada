@@ -64,6 +64,63 @@ Triada — Plataforma de Aprendizaje en Línea
   })
 }
 
+const FEEDBACK_CATEGORY_LABELS: Record<string, string> = {
+  sugerencia: 'Sugerencia',
+  problema: 'Problema o error',
+  contenido: 'Contenido',
+  otro: 'Otro',
+}
+
+export async function sendFeedbackNotification(params: {
+  category: string
+  rating: number | null
+  message: string
+  userName: string
+  userEmail: string | null
+}) {
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'triadaglobal2026@gmail.com').split(',').map(e => e.trim()).filter(Boolean)
+  const label = FEEDBACK_CATEGORY_LABELS[params.category] ?? 'Otro'
+  const rating = params.rating ? `${params.rating} de 5` : 'Sin calificación'
+
+  await resend.emails.send({
+    from: FROM,
+    to: ADMIN_EMAILS,
+    ...(params.userEmail ? { replyTo: params.userEmail } : {}),
+    subject: `Nuevo comentario sobre la plataforma: ${label}`,
+    text: `
+NUEVO COMENTARIO SOBRE LA PLATAFORMA
+
+De: ${params.userName}${params.userEmail ? ` (${params.userEmail})` : ''}
+Categoría: ${label}
+Calificación: ${rating}
+
+${params.message}
+
+Revisar en el panel:
+${process.env.NEXT_PUBLIC_APP_URL}/admin/feedback
+    `.trim(),
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+        <div style="background:#1a5744;color:white;padding:20px;border-radius:8px 8px 0 0">
+          <h1 style="margin:0;font-size:20px">Nuevo comentario sobre la plataforma</h1>
+        </div>
+        <div style="background:#f9f9f9;padding:20px;border:1px solid #ddd">
+          <p><strong>De:</strong> ${escapeHtml(params.userName)}${params.userEmail ? ` (${escapeHtml(params.userEmail)})` : ''}</p>
+          <p><strong>Categoría:</strong> ${escapeHtml(label)}</p>
+          <p><strong>Calificación:</strong> ${escapeHtml(rating)}</p>
+          <div style="background:#fff;padding:15px;margin:15px 0;border-left:4px solid #a4c639;white-space:pre-wrap">${escapeHtml(params.message)}</div>
+          <p style="margin-top:20px">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/feedback"
+               style="background:#1a5744;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;display:inline-block;font-weight:bold">
+              Ver en el panel
+            </a>
+          </p>
+        </div>
+      </div>
+    `.trim(),
+  })
+}
+
 export async function sendRejectionEmail(
   to: string,
   studentName: string,

@@ -30,6 +30,10 @@ export const RATE_LIMITS = {
   accountDelete:  { limit: 3,   windowSeconds: 24 * 60 * 60 } as RateLimitConfig,
   signout:        { limit: 20,  windowSeconds: 60 * 60 } as RateLimitConfig,
   admin:          { limit: 100, windowSeconds: 60 * 60 } as RateLimitConfig,
+  quizRead:       { limit: 120, windowSeconds: 60 * 60 } as RateLimitConfig,
+  quizSubmit:     { limit: 10,  windowSeconds: 60 * 60 } as RateLimitConfig,
+  feedback:       { limit: 5,   windowSeconds: 60 * 60 } as RateLimitConfig,
+  review:         { limit: 10,  windowSeconds: 60 * 60 } as RateLimitConfig,
 } as const
 
 interface RateLimitResult {

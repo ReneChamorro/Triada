@@ -17,6 +17,7 @@ const cols = [
       { label: 'Inicio', href: '/' },
       { label: 'Nosotros', href: '/#about' },
       { label: 'Contacto', href: 'mailto:info@triadaglobal.com' },
+      { label: 'Enviar comentarios', href: '/feedback' },
     ],
   },
   {

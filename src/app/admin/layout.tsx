@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Users, Settings, LogOut, DollarSign, Shield, Menu, X } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Users, Settings, LogOut, DollarSign, Shield, Menu, X, ClipboardCheck, MessageSquare } from 'lucide-react'
 
 export default function AdminLayout({
   children,
@@ -19,6 +19,8 @@ export default function AdminLayout({
     { name: 'Cursos', href: '/admin/courses', icon: BookOpen },
     { name: 'Pagos', href: '/admin/purchases', icon: DollarSign },
     { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
+    { name: 'Cuestionarios', href: '/admin/quizzes', icon: ClipboardCheck },
+    { name: 'Comentarios', href: '/admin/feedback', icon: MessageSquare },
     { name: 'Auditoría', href: '/admin/audit-log', icon: Shield },
     { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
   ]

@@ -16,10 +16,13 @@ import {
   PlayCircle,
   FileText,
   Download,
-  ArrowLeft
+  ArrowLeft,
+  ClipboardList,
+  Star
 } from 'lucide-react';
 import Link from 'next/link';
 import VideoPlayer from '@/components/VideoPlayer';
+import QuizPlayer from '@/components/quiz/QuizPlayer';
 
 interface Module {
   id: string;
@@ -34,7 +37,7 @@ interface Lesson {
   module_id: string;
   title: string;
   description: string;
-  content_type: 'video' | 'pdf' | 'text';
+  content_type: 'video' | 'pdf' | 'text' | 'quiz';
   video_url: string | null;
   youtube_video_id: string | null;
   mux_playback_id: string | null;
@@ -220,8 +223,9 @@ export default function LearnCoursePage() {
       setSidebarOpen(false);
     }
 
-    // Track last accessed lesson
-    if (user) {
+    // Track last accessed lesson. Quiz lessons are tracked server-side: a
+    // student cannot write progress for them (it would mark them complete).
+    if (user && lesson.content_type !== 'quiz') {
       await supabase
         .from('lesson_progress')
         .upsert({
@@ -235,7 +239,8 @@ export default function LearnCoursePage() {
   };
 
   const markAsCompleted = async () => {
-    if (!currentLesson || !user) return;
+    // Quiz lessons are completed by passing the quiz (server-side).
+    if (!currentLesson || !user || currentLesson.content_type === 'quiz') return;
     
     const newCompleted = new Set(completedLessons);
     newCompleted.add(currentLesson.id);
@@ -302,7 +307,7 @@ export default function LearnCoursePage() {
       }
     }
 
-    if (found && !completedLessons.has(currentLesson.id)) {
+    if (found && !completedLessons.has(currentLesson.id) && currentLesson.content_type !== 'quiz') {
       markAsCompleted();
     }
   };
@@ -399,6 +404,13 @@ export default function LearnCoursePage() {
           </div>
           <h2 className="text-white font-bold text-sm line-clamp-2 mb-3">{course?.title}</h2>
           <CourseProgressBar percentage={calculateProgress()} variant="dark" />
+          {calculateProgress() === 100 && (
+            <Link href={`/courses/${courseId}/resena`}
+              className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-[#a4c639] hover:text-white transition-colors">
+              <Star className="w-3.5 h-3.5" />
+              Deja tu opinión sobre el curso
+            </Link>
+          )}
         </div>
 
         {/* Module List */}
@@ -436,6 +448,7 @@ export default function LearnCoursePage() {
                       </div>
                       {lesson.content_type === 'video' && <PlayCircle className="w-3.5 h-3.5 shrink-0 text-white/30" />}
                       {lesson.content_type === 'pdf' && <FileText className="w-3.5 h-3.5 shrink-0 text-white/30" />}
+                      {lesson.content_type === 'quiz' && <ClipboardList className="w-3.5 h-3.5 shrink-0 text-white/30" />}
                     </button>
                   );
                 })}
@@ -512,8 +525,20 @@ export default function LearnCoursePage() {
                 </div>
               )}
 
+              {/* Quiz Content */}
+              {currentLesson.content_type === 'quiz' && (
+                <QuizPlayer
+                  key={currentLesson.id}
+                  lessonId={currentLesson.id}
+                  onPassed={() => {
+                    const lessonId = currentLesson.id;
+                    setCompletedLessons(prev => prev.has(lessonId) ? prev : new Set(prev).add(lessonId));
+                  }}
+                />
+              )}
+
               {/* Lesson Description */}
-              {currentLesson.description && currentLesson.content_type !== 'text' && (
+              {currentLesson.description && currentLesson.content_type !== 'text' && currentLesson.content_type !== 'quiz' && (
                 <div className="p-3 sm:p-6 lg:p-8 pt-0">
                   <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
@@ -548,6 +573,23 @@ export default function LearnCoursePage() {
                 <span className="hidden sm:inline">Anterior</span>
               </button>
 
+              {currentLesson.content_type === 'quiz' ? (
+                <span className={`px-3 sm:px-5 py-2 sm:py-2.5 text-sm font-semibold text-center ${
+                  completedLessons.has(currentLesson.id) ? 'text-[#2d7a5f]' : 'text-gray-500'
+                }`}>
+                  {completedLessons.has(currentLesson.id) ? (
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Completada</span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline">Aprueba el cuestionario para completar esta lección</span>
+                      <span className="sm:hidden">Pendiente</span>
+                    </>
+                  )}
+                </span>
+              ) : (
               <button onClick={markAsCompleted}
                 className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all font-semibold text-sm ${
                   completedLessons.has(currentLesson.id)
@@ -567,6 +609,7 @@ export default function LearnCoursePage() {
                   </span>
                 )}
               </button>
+              )}
 
               <button onClick={goToNextLesson} disabled={!canGoNext()}
                 className="flex items-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 bg-[#1a5744] hover:bg-[#2d7a5f] text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm">

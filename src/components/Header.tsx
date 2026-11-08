@@ -9,7 +9,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 
 interface HeaderProps {
-  currentPage?: 'home' | 'courses'
+  currentPage?: 'home' | 'courses' | null
 }
 
 // Drawer curve (iOS-like, from Ionic): fast start, soft landing.

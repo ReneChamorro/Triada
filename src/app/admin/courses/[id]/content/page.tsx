@@ -17,7 +17,8 @@ import {
   GripVertical,
   Save,
   X,
-  Upload
+  Upload,
+  ClipboardList
 } from 'lucide-react';
 
 interface Module {
@@ -34,7 +35,7 @@ interface Lesson {
   module_id: string;
   title: string;
   description: string;
-  content_type: 'video' | 'pdf' | 'text';
+  content_type: 'video' | 'pdf' | 'text' | 'quiz';
   video_url: string | null;
   pdf_url: string | null;
   text_content: string | null;
@@ -214,6 +215,7 @@ export default function CourseContentPage() {
       case 'video': return <Video className="w-4 h-4" />;
       case 'pdf': return <File className="w-4 h-4" />;
       case 'text': return <FileText className="w-4 h-4" />;
+      case 'quiz': return <ClipboardList className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -324,7 +326,7 @@ export default function CourseContentPage() {
                             {lessonIndex + 1}. {lesson.title}
                           </p>
                           <div className="flex items-center space-x-3 text-xs text-gray-500">
-                            <span className="capitalize">{lesson.content_type}</span>
+                            <span className="capitalize">{lesson.content_type === 'quiz' ? 'Cuestionario' : lesson.content_type}</span>
                             {lesson.duration_minutes > 0 && (
                               <span>• {lesson.duration_minutes} min</span>
                             )}

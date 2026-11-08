@@ -11,11 +11,14 @@ import {
   Upload,
   Save,
 } from 'lucide-react';
+import QuizEditor, { emptyQuiz, toEditorQuiz, toQuizDefinition, type EditorQuiz } from '@/components/admin/QuizEditor';
+import { quizDefinitionSchema } from '@/lib/quiz/schemas';
+import { formatZodErrors } from '@/lib/validations';
 
 interface LessonForm {
   title: string;
   description: string;
-  content_type: 'video' | 'pdf' | 'text';
+  content_type: 'video' | 'pdf' | 'text' | 'quiz';
   video_url: string;
   mux_playback_id: string;
   pdf_url: string;
@@ -59,6 +62,8 @@ export default function LessonEditorPage() {
   const [muxUploadProgress, setMuxUploadProgress] = useState(0);
   const [muxUploadStatus, setMuxUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'ready' | 'error'>('idle');
   const [muxAbortController, setMuxAbortController] = useState<AbortController | null>(null);
+  const [quiz, setQuiz] = useState<EditorQuiz>(emptyQuiz());
+  const [quizAttemptCount, setQuizAttemptCount] = useState(0);
 
   useEffect(() => {
     const init = async () => {
@@ -88,6 +93,14 @@ export default function LessonEditorPage() {
             duration_minutes: lesson.duration_minutes || 0,
             is_free_preview: lesson.is_free_preview,
           });
+          if (lesson.content_type === 'quiz') {
+            const res = await fetch(`/api/admin/quizzes/${lessonId}`);
+            if (res.ok) {
+              const { definition, attemptCount } = await res.json();
+              setQuiz(toEditorQuiz(definition));
+              setQuizAttemptCount(attemptCount ?? 0);
+            }
+          }
         }
         setLoading(false);
       }
@@ -204,6 +217,16 @@ export default function LessonEditorPage() {
   };
 
   const handleSave = async () => {
+    const isQuiz = lessonForm.content_type === 'quiz';
+    const quizDefinition = isQuiz ? toQuizDefinition(quiz) : null;
+    if (quizDefinition) {
+      const check = quizDefinitionSchema.safeParse(quizDefinition);
+      if (!check.success) {
+        alert(formatZodErrors(check.error));
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       let youtubeVideoId: string | null = null;
@@ -231,6 +254,7 @@ export default function LessonEditorPage() {
         is_free_preview: lessonForm.is_free_preview,
       };
 
+      let savedLessonId = lessonId;
       if (isNew) {
         // Get max position in module
         const { data: existingLessons } = await supabase
@@ -241,13 +265,34 @@ export default function LessonEditorPage() {
           .limit(1);
         const maxPosition = existingLessons?.[0]?.position ?? -1;
 
-        await supabase.from('course_lessons').insert({
-          ...lessonData,
-          module_id: moduleId,
-          position: maxPosition + 1,
-        });
+        const { data: inserted, error: insertError } = await supabase
+          .from('course_lessons')
+          .insert({
+            ...lessonData,
+            module_id: moduleId,
+            position: maxPosition + 1,
+          })
+          .select('id')
+          .single();
+        if (insertError || !inserted) throw insertError ?? new Error('No se creó la lección');
+        savedLessonId = inserted.id;
       } else {
-        await supabase.from('course_lessons').update(lessonData).eq('id', lessonId);
+        const { error: updateError } = await supabase.from('course_lessons').update(lessonData).eq('id', lessonId);
+        if (updateError) throw updateError;
+      }
+
+      if (quizDefinition) {
+        const res = await fetch(`/api/admin/quizzes/${savedLessonId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(quizDefinition),
+        });
+        if (!res.ok) {
+          const { error } = await res.json().catch(() => ({ error: null }));
+          alert(`La lección se guardó, pero el cuestionario no: ${error ?? 'error desconocido'}`);
+          if (isNew) router.replace(`/admin/courses/${courseId}/lessons/${savedLessonId}`);
+          return;
+        }
       }
 
       router.push(`/admin/courses/${courseId}/content`);
@@ -324,6 +369,7 @@ export default function LessonEditorPage() {
               <option value="video">Video</option>
               <option value="pdf">PDF</option>
               <option value="text">Texto</option>
+              <option value="quiz">Cuestionario</option>
             </select>
           </div>
           <div>
@@ -504,6 +550,11 @@ export default function LessonEditorPage() {
               placeholder="Escribe el contenido de la lección..."
             />
           </div>
+        )}
+
+        {/* Quiz Fields */}
+        {lessonForm.content_type === 'quiz' && (
+          <QuizEditor value={quiz} onChange={setQuiz} attemptCount={quizAttemptCount} />
         )}
 
         {/* Free preview */}

@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Clock, BookOpen, CheckCircle } from 'lucide-react'
+import { Clock, BookOpen, CheckCircle, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import CourseReviews, { type PublicReview } from '@/components/reviews/CourseReviews'
 
 const primaryBtn =
   'w-full bg-[#1a5744] hover:bg-[#2d7a5f] text-white px-6 min-h-12 flex items-center justify-center rounded-xl font-semibold text-center active:scale-[0.98] [transition:transform_150ms_var(--ease-out),background-color_300ms_var(--ease-brand)]'
@@ -44,6 +45,27 @@ export default async function CourseDetailPage({
     hasAccess = !!userCourse
   }
 
+  // Approved reviews only, via SECURITY DEFINER functions (the table itself is not public).
+  const [{ data: summaryRows }, { data: reviewRows }] = await Promise.all([
+    supabase.rpc('get_course_rating_summary', { p_course_id: id }),
+    supabase.rpc('get_course_reviews', { p_course_id: id, p_limit: 10, p_offset: 0 }),
+  ])
+  const summary = Array.isArray(summaryRows) ? summaryRows[0] ?? null : null
+  const reviews: PublicReview[] = Array.isArray(reviewRows) ? reviewRows : []
+  const reviewCount = summary?.review_count ?? 0
+  const averageRating = Number(summary?.average_rating ?? 0)
+
+  let hasOwnReview = false
+  if (user && hasAccess) {
+    const { data: ownReview } = await supabase
+      .from('course_reviews')
+      .select('id')
+      .eq('course_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    hasOwnReview = !!ownReview
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f3e8]">
       <Header currentPage="courses" />
@@ -64,12 +86,23 @@ export default async function CourseDetailPage({
               {course.short_description && (
                 <p className="text-base md:text-lg text-[#e8e4d0]/90 mb-4 md:mb-6">{course.short_description}</p>
               )}
-              {course.duration_minutes && (
-                <div className="flex items-center text-[#e8e4d0]/90 text-sm">
-                  <Clock className="h-4 w-4 mr-2" aria-hidden="true" />
-                  <span>{course.duration_minutes} minutos de contenido</span>
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[#e8e4d0]/90 text-sm">
+                {course.duration_minutes && (
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-2" aria-hidden="true" />
+                    <span>{course.duration_minutes} minutos de contenido</span>
+                  </div>
+                )}
+                {reviewCount > 0 && (
+                  <a href="#reviews-heading" className="flex items-center hover:text-white transition-colors">
+                    <Star className="h-4 w-4 mr-2 text-[#a4c639] fill-[#a4c639]" aria-hidden="true" />
+                    <span>
+                      {averageRating.toLocaleString('es', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                      {' '}({reviewCount} {reviewCount === 1 ? 'opinión' : 'opiniones'})
+                    </span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -95,6 +128,8 @@ export default async function CourseDetailPage({
                   </p>
                 )}
               </div>
+
+              <CourseReviews summary={summary} reviews={reviews} />
             </div>
 
             {/* Purchase card */}
@@ -118,9 +153,17 @@ export default async function CourseDetailPage({
                 </div>
 
                 {hasAccess ? (
-                  <Link href={`/courses/${course.id}/learn`} className={`${primaryBtn} mb-4`}>
-                    Ir al Curso
-                  </Link>
+                  <div className="space-y-3 mb-4">
+                    <Link href={`/courses/${course.id}/learn`} className={primaryBtn}>
+                      Ir al Curso
+                    </Link>
+                    <Link
+                      href={`/courses/${course.id}/resena`}
+                      className="w-full bg-white text-[#1a5744] border-2 border-[#1a5744]/30 hover:border-[#1a5744]/60 hover:bg-[#1a5744]/5 px-6 min-h-12 flex items-center justify-center rounded-xl font-semibold text-center active:scale-[0.98] [transition:transform_150ms_var(--ease-out),border-color_300ms_var(--ease-brand),background-color_300ms_var(--ease-brand)]"
+                    >
+                      {hasOwnReview ? 'Editar tu opinión' : 'Deja tu opinión'}
+                    </Link>
+                  </div>
                 ) : user ? (
                   <Link href={`/courses/${course.id}/checkout`} className={`${primaryBtn} mb-4`}>
                     Comprar Ahora
