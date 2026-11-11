@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ClipboardCheck, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ClipboardCheck, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { logger } from '@/lib/logger'
 
@@ -39,6 +39,18 @@ export default function AdminQuizzesPage() {
   const [pageSize, setPageSize] = useState(25)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Reached from a course's content page with ?courseId=...
+  const [entryCourseId, setEntryCourseId] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('courseId')
+    if (fromUrl) {
+      setCourseId(fromUrl)
+      setEntryCourseId(fromUrl)
+    }
+    setReady(true)
+  }, [])
 
   useEffect(() => {
     createClient()
@@ -49,6 +61,7 @@ export default function AdminQuizzesPage() {
   }, [])
 
   useEffect(() => {
+    if (!ready) return
     const params = new URLSearchParams({ status, page: String(page) })
     if (courseId) params.set('courseId', courseId)
     setLoading(true)
@@ -66,17 +79,23 @@ export default function AdminQuizzesPage() {
         setError(err.message)
       })
       .finally(() => setLoading(false))
-  }, [status, courseId, page])
+  }, [ready, status, courseId, page])
 
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Cuestionarios</h1>
+        {entryCourseId && (
+          <Link href={`/admin/courses/${entryCourseId}/content`}
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-[#1a5744] mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Volver al contenido del curso</span>
+          </Link>
+        )}
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">Resultados de cuestionarios</h1>
         <p className="text-gray-500 mt-1">
-          Revisa las respuestas de desarrollo y consulta los resultados. Los cuestionarios se crean
-          desde el contenido de cada curso, como una lección de tipo Cuestionario.
+          Corrige las respuestas de desarrollo y consulta las notas de los estudiantes.
         </p>
       </div>
 

@@ -66,9 +66,17 @@ export default function CourseContentPage() {
     title: '',
     description: '',
   });
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [quizModuleId, setQuizModuleId] = useState('');
+  const [pendingReviews, setPendingReviews] = useState(0);
 
   useEffect(() => {
     loadData();
+    // Essay answers waiting for the instructor (only quizzes with "Desarrollo").
+    fetch(`/api/admin/quiz-attempts?status=pending_review&courseId=${courseId}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body) => setPendingReviews(body?.total ?? 0))
+      .catch(() => setPendingReviews(0));
   }, [courseId]);
 
   async function loadData() {
@@ -143,6 +151,23 @@ export default function CourseContentPage() {
     } else {
       router.push(`/admin/courses/${courseId}/lessons/new?moduleId=${moduleId}`);
     }
+  };
+
+  const openNewQuiz = (moduleId: string) => {
+    router.push(`/admin/courses/${courseId}/lessons/new?moduleId=${moduleId}&type=quiz`);
+  };
+
+  const startAddQuiz = () => {
+    if (modules.length === 0) {
+      alert('Primero crea un módulo: el cuestionario se ubica dentro de un módulo del curso.');
+      return;
+    }
+    if (modules.length === 1) {
+      openNewQuiz(modules[0].id);
+      return;
+    }
+    setQuizModuleId(modules[modules.length - 1].id);
+    setShowQuizModal(true);
   };
 
   const saveModule = async () => {
@@ -243,14 +268,60 @@ export default function CourseContentPage() {
         <p className="text-gray-600 mt-2">{course?.title}</p>
       </div>
 
-      {/* Add Module Button */}
-      <button
-        onClick={() => openModuleModal()}
-        className="flex items-center space-x-2 bg-[#1a5744] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5f] transition-colors mb-6"
-      >
-        <Plus className="w-5 h-5" />
-        <span>Agregar Módulo</span>
-      </button>
+      {pendingReviews > 0 && (
+        <button
+          onClick={() => router.push(`/admin/quizzes?courseId=${courseId}`)}
+          className="w-full text-left mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-900 hover:bg-yellow-100 transition-colors"
+        >
+          <strong>{pendingReviews} {pendingReviews === 1 ? 'cuestionario tiene' : 'cuestionarios tienen'} respuestas de desarrollo por corregir.</strong>{' '}
+          <span className="underline">Corregir ahora</span>
+        </button>
+      )}
+
+      {/* Add Module / Quiz Buttons */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <button
+          onClick={() => openModuleModal()}
+          className="flex items-center space-x-2 bg-[#1a5744] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5f] transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          <span>Agregar Módulo</span>
+        </button>
+        <button
+          onClick={startAddQuiz}
+          className="flex items-center space-x-2 bg-white text-[#1a5744] border-2 border-[#1a5744]/30 px-6 py-3 rounded-lg hover:border-[#1a5744]/60 hover:bg-[#1a5744]/5 transition-colors"
+        >
+          <ClipboardList className="w-5 h-5" />
+          <span>Agregar Cuestionario</span>
+        </button>
+      </div>
+
+      {showQuizModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="quiz-module-title">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 id="quiz-module-title" className="text-xl font-bold text-[#1a5744] mb-2">Agregar cuestionario</h2>
+            <p className="text-sm text-gray-600 mb-4">¿En qué módulo va? Aparecerá al final de ese módulo.</p>
+            <select
+              value={quizModuleId}
+              onChange={(e) => setQuizModuleId(e.target.value)}
+              aria-label="Módulo"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent mb-6"
+            >
+              {modules.map((m, i) => (
+                <option key={m.id} value={m.id}>Módulo {i + 1}: {m.title}</option>
+              ))}
+            </select>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowQuizModal(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancelar
+              </button>
+              <button onClick={() => openNewQuiz(quizModuleId)} className="px-4 py-2 bg-[#1a5744] text-white rounded-lg hover:bg-[#2d7a5f]">
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modules List */}
       <div className="space-y-4">
@@ -285,10 +356,17 @@ export default function CourseContentPage() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => openLessonModal(module.id)}
-                  className="p-2 text-[#a4c639] hover:bg-[#e8e4d0] rounded"
-                  title="Agregar lección"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-semibold text-[#2d7a5f] hover:bg-[#e8e4d0] rounded"
                 >
                   <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Lección</span>
+                </button>
+                <button
+                  onClick={() => openNewQuiz(module.id)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-sm font-semibold text-[#2d7a5f] hover:bg-[#e8e4d0] rounded"
+                >
+                  <ClipboardList className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cuestionario</span>
                 </button>
                 <button
                   onClick={() => openModuleModal(module)}
@@ -310,7 +388,7 @@ export default function CourseContentPage() {
               <div className="p-4 space-y-2">
                 {module.lessons.length === 0 ? (
                   <p className="text-gray-500 text-sm py-4 text-center">
-                    No hay lecciones. Haz clic en + para agregar una.
+                    No hay contenido. Agrega una lección o un cuestionario.
                   </p>
                 ) : (
                   module.lessons.map((lesson, lessonIndex) => (

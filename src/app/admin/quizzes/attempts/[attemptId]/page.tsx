@@ -128,7 +128,7 @@ export default function GradeAttemptPage() {
       if (!res.ok) throw new Error(body.error)
       if (finalize) {
         alert(`Calificación final: ${body.scorePercent}% (${body.passed ? 'Aprobado' : 'No aprobado'})`)
-        router.push('/admin/quizzes')
+        router.back()
       } else {
         await load()
       }
@@ -152,10 +152,10 @@ export default function GradeAttemptPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-      <button onClick={() => router.push('/admin/quizzes')}
+      <button onClick={() => router.back()}
         className="flex items-center gap-2 text-gray-500 hover:text-[#1a5744] mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" />
-        <span>Volver a cuestionarios</span>
+        <span>Volver</span>
       </button>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">

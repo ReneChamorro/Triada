@@ -36,6 +36,7 @@ export default function LessonEditorPage() {
   const moduleId = searchParams.get('moduleId') ?? '';
 
   const isNew = lessonId === 'new';
+  const presetQuiz = isNew && searchParams.get('type') === 'quiz';
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,7 +49,7 @@ export default function LessonEditorPage() {
   const [lessonForm, setLessonForm] = useState<LessonForm>({
     title: '',
     description: '',
-    content_type: 'video',
+    content_type: presetQuiz ? 'quiz' : 'video',
     video_url: '',
     mux_playback_id: '',
     pdf_url: '',
@@ -312,6 +313,8 @@ export default function LessonEditorPage() {
     );
   }
 
+  const isQuiz = lessonForm.content_type === 'quiz';
+
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6">
       {/* Header */}
@@ -324,23 +327,30 @@ export default function LessonEditorPage() {
           <span>Volver al contenido del curso</span>
         </button>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1a5744]">
-          {isNew ? 'Nueva Lección' : 'Editar Lección'}
+          {isQuiz
+            ? (isNew ? 'Nuevo Cuestionario' : 'Editar Cuestionario')
+            : (isNew ? 'Nueva Lección' : 'Editar Lección')}
         </h1>
         {courseName && <p className="text-gray-500 mt-1">{courseName}</p>}
+        {isQuiz && (
+          <p className="text-sm text-gray-500 mt-2">
+            Las preguntas de opción única, múltiple y completación se corrigen solas. Las de desarrollo las corriges tú.
+          </p>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
         {/* Title */}
         <div>
           <label className="block text-sm font-semibold text-[#1a5744] mb-2">
-            Título de la Lección *
+            {isQuiz ? 'Título del Cuestionario *' : 'Título de la Lección *'}
           </label>
           <input
             type="text"
             value={lessonForm.title}
             onChange={(e) => setLessonForm(prev => ({ ...prev, title: e.target.value }))}
             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#a4c639] focus:border-transparent"
-            placeholder="Ej: Conceptos básicos"
+            placeholder={isQuiz ? 'Ej: Evaluación del módulo 1' : 'Ej: Conceptos básicos'}
           />
         </div>
 
@@ -355,7 +365,8 @@ export default function LessonEditorPage() {
           />
         </div>
 
-        {/* Type + Duration */}
+        {/* Type + Duration (quizzes are created from "Agregar Cuestionario") */}
+        {!isQuiz && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-[#1a5744] mb-2">
@@ -369,7 +380,6 @@ export default function LessonEditorPage() {
               <option value="video">Video</option>
               <option value="pdf">PDF</option>
               <option value="text">Texto</option>
-              <option value="quiz">Cuestionario</option>
             </select>
           </div>
           <div>
@@ -385,6 +395,7 @@ export default function LessonEditorPage() {
             />
           </div>
         </div>
+        )}
 
         {/* Video Fields */}
         {lessonForm.content_type === 'video' && (
@@ -557,7 +568,8 @@ export default function LessonEditorPage() {
           <QuizEditor value={quiz} onChange={setQuiz} attemptCount={quizAttemptCount} />
         )}
 
-        {/* Free preview */}
+        {/* Free preview (not for quizzes: only enrolled students can take them) */}
+        {!isQuiz && (
         <div className="flex items-center gap-2 pt-2">
           <input
             type="checkbox"
@@ -570,6 +582,7 @@ export default function LessonEditorPage() {
             Vista previa gratuita (visible sin comprar el curso)
           </label>
         </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
@@ -589,7 +602,7 @@ export default function LessonEditorPage() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            <span>Guardar Lección</span>
+            <span>{isQuiz ? 'Guardar Cuestionario' : 'Guardar Lección'}</span>
           </button>
         </div>
       </div>
